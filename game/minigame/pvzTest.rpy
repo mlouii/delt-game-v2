@@ -1,12 +1,12 @@
 define THIS_PATH = 'minigame/'
 
 # XXX: using os.path.join here will actually break because Ren'Py somehow doesn't recognize it
-define IMG_DIR = 'images/'
-define PEASHOOTER = THIS_PATH + IMG_DIR + 'ps-transparent.png'
-define IMG_PS = THIS_PATH + IMG_DIR + 'images/'
+define IMG_DIR = THIS_PATH + 'images/'
+define IMG_PS = THIS_PATH + IMG_DIR + 'peashooter/'
 
 init python:
   import pygame
+  import json
   import os
   import itertools
 
@@ -21,15 +21,17 @@ init python:
     def __init__(self):
       self.images = {}
 
-    def load_plants(self):
-      resize_factor = 0.20
-      tile_overlay = im.MatrixColor(im.FactorScale(Image(IMG_PS + "daell4l-91d102e0-ee83-4683-b394-30d70ce60a92-" + "0" + ".png"), resize_factor), im.matrix.opacity(0.5) * im.matrix.contrast(0.5))
-      animation_frames = [im.FactorScale(Image(IMG_PS + "daell4l-91d102e0-ee83-4683-b394-30d70ce60a92-" + str(i) + ".png"), resize_factor) for i in range(0, 59)]
+    def load_plants(self, plant_types):
       self.images["plants"] = {}
-      self.images["plants"]["peashooter"] = {
-        "overlay": tile_overlay,
-        "animation": animation_frames
-      }
+      resize_factor = 0.20
+
+      for plant_name in plant_types:
+        tile_overlay = im.MatrixColor(im.FactorScale(Image(IMG_DIR + plant_name + "/daell4l-91d102e0-ee83-4683-b394-30d70ce60a92-" + "0" + ".png"), resize_factor), im.matrix.opacity(0.5) * im.matrix.contrast(0.5))
+        animation_frames = [im.FactorScale(Image(IMG_DIR + plant_name + "/daell4l-91d102e0-ee83-4683-b394-30d70ce60a92-" + str(i) + ".png"), resize_factor) for i in range(0, 59)]
+        self.images["plants"][plant_name] = {
+          "overlay": tile_overlay,
+          "animation": animation_frames
+        }
 
     def return_overlays(self):
       plants = self.images["plants"].keys()
@@ -80,26 +82,27 @@ init python:
       return ((self.x, self.y), (self.x + self.width, self.y + self.height))
 
   class EnvironmentBuilder():
-    def __init__(self, num_tiles_width, num_tiles_height):
+    def __init__(self, level_config):
 
-      self.env_width = config.screen_width * 0.7
-      self.env_height = config.screen_height * 0.7
+      self.env_width = config.screen_width * level_config["width_multiplier"]
+      self.env_height = config.screen_height * level_config["height_multiplier"]
 
-      self.start_x = config.screen_width * 0.15
-      self.start_y = config.screen_height * 0.15
+      self.start_x = config.screen_width * level_config["start_x"]
+      self.start_y = config.screen_height * level_config["start_y"]
 
       self.tiles = []
-      self.tile_width = round(self.env_width / num_tiles_width)
-      self.tile_height = round(self.env_height / num_tiles_height)
+      self.tile_width = round(self.env_width / level_config["num_cols"])
+      self.tile_height = round(self.env_height / level_config["num_rows"])
 
-      self.lighter_color = (48, 176, 77)
-      self.dark_color = (48, 143, 69)
-      self.variance = (0, 7, 4)
+      self.lighter_color = level_config["lighter_color"]
+      self.dark_color = level_config["dark_color"]
+      self.variance = level_config["variance"]
+
       def rand_color(color):
         return tuple([color[i] + renpy.random.randint(-self.variance[i], self.variance[i]) for i in range(len(color))])
 
-      for i in range(num_tiles_width):
-        for j in range(num_tiles_height):
+      for i in range(level_config["num_cols"]):
+        for j in range(level_config["num_rows"]):
 
           color = None
           if i % 2 == 0:
@@ -141,6 +144,7 @@ init python:
     def __init__(self, tile, plant_type):
       self.tile = tile
       self.plant_type = plant_type
+      self.is_dead = False
 
       self.health = 100
       self.frames = all_images.images["plants"][self.plant_type]["animation"]
@@ -151,6 +155,9 @@ init python:
       return render
 
     def update(self):
+      if self.health <= 0:
+        self.is_dead = True
+
       self.frame = (self.frame + 1) % len(self.frames)
 
   class PlantsController():
@@ -161,6 +168,8 @@ init python:
       self.plants.append(Plant(tile, plant_type))
 
     def update(self):
+      self.plants = [plant for plant in self.plants if not plant.is_dead]
+
       for plant in self.plants:
         plant.update()
 
@@ -171,16 +180,22 @@ init python:
 
 
   class PvzGameDisplayable(renpy.Displayable):
-    def __init__(self):
+    def __init__(self, level):
+
+      self.level_config = None
+      file_handle = renpy.file("minigame/levels/level" + str(level) + ".json")
+      file_contents = file_handle.read()
+      file_handle.close()
+      self.level_config = json.loads(file_contents)
 
       self.mouseX = 0
       self.mouseY = 0
       self.plant_selected = "peashooter"
 
       super(PvzGameDisplayable, self).__init__()
-      all_images.load_plants()
+      all_images.load_plants(["peashooter"])
 
-      self.environment = EnvironmentBuilder(9, 5)
+      self.environment = EnvironmentBuilder(self.level_config)
       self.plants = PlantsController()
 
     def visit(self):
@@ -239,7 +254,7 @@ screen game_menu():
       label "Lets give it a shot" xalign 0.5
       text "This is a test of the elements of the game menu screen."
 
-  $ game = PvzGameDisplayable()
+  $ game = PvzGameDisplayable(1)
   add game
 
 label test_game_entry_label:
