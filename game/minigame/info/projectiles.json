@@ -1,0 +1,9 @@
+{
+  "pea": {
+    "damage": 10,
+    "speed": 10,
+    "range": 10,
+    "pierce": 1,
+    "effects": "none"
+  }
+}

@@ -1,0 +1,10 @@
+﻿I'm sorry, but errors were detected in your script. Please correct the
+errors listed below, and try again.
+
+
+File "game/minigame/pvzTest.rpy", line 5: expected statement.
+    deine JSON_DIR = THIS_PATH + 'info/'
+                   ^
+
+Ren'Py Version: Ren'Py 8.0.3.22090809
+Sun Apr  9 01:32:38 2023

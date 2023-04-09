@@ -1,0 +1,54 @@
+{
+  "image_data": {
+    "default": {
+      "arms": {
+        "width": 41,
+        "height": 141,
+        "joint_x": 17,
+        "joint_y": 10
+      },
+      "torso": {
+        "width": 80,
+        "height": 148,
+        "head_joint": {
+          "x": 41,
+          "y": 2
+        },
+        "left_arm_joint": {
+          "x": 18,
+          "y": 33
+        },
+        "right_arm_joint": {
+          "x": 62,
+          "y": 23
+        },
+        "left_leg_joint": {
+          "x": 14,
+          "y": 138
+        },
+        "right_leg_joint": {
+          "x": 44,
+          "y": 135
+        }
+      },
+      "legs": {
+        "width": 51,
+        "height": 194,
+        "joint_x": 17,
+        "joint_y": 9
+      },
+      "head": {
+        "width": 36,
+        "height": 43,
+        "joint_x": 22,
+        "joint_y": 42
+      }
+    }
+  },
+
+  "basic": {
+    "health": 100,
+    "attack": 10,
+    "speed": 10
+  }
+}
