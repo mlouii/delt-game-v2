@@ -277,12 +277,7 @@ init python:
       self.direction = None
       self.motion_type = None
       self.angle = None
-
-      if self.motion_config["type"] == "rotate":
-        self.limit = self.motion_config["limit"]
-        self.direction = self.motion_config["start_direction"]
-        self.motion_type = self.motion_config["type"]
-        self.angle = self.motion_config["start_angle"]
+      self.update_motion_params()
 
       self.image = all_images.images["zombies"][self.zombie.zombie_type][self.part_type]
       self.joint_location_x = 0
@@ -343,9 +338,10 @@ init python:
     def update(self):
       if self.status == "attached":
         if self.motion_type == "rotate":
-          self.angle += (self.direction * self.motion_config["speed"])
-          if self.angle > self.limit[1] or self.angle < self.limit[0]:
+          self.angle += (self.direction * self.motion_config["speed"][str(self.direction)])
+          if (self.angle > self.limit[1] or self.angle < self.limit[0]):
             self.direction *= -1
+
       elif self.status == "detached":
         if self.zombie_x_timestamp == None:
           self.zombie_x_timestamp = self.zombie.x
@@ -354,7 +350,7 @@ init python:
         self.distance_fallen += self.velocity_y
         self.velocity_y += 0.3
 
-        if self.distance_fallen > (100 - self.target_location_y):
+        if self.distance_fallen > (self.zombie_image_config["fall_height"] - self.target_location_y):
           self.velocity_y = 0
           self.velocity_x = 0
           self.status = "fading"
@@ -363,6 +359,17 @@ init python:
           self.fade_start_time = time.time()
         if time.time() - self.fade_start_time > 1:
           self.status = "gone"
+
+    def update_motion_params(self):
+      self.motion_config = config_data.get_zombie_motion_config(self.zombie.motion_type)[self.part_name]
+      if self.motion_config["type"] == "rotate":
+        self.limit = self.motion_config["limit"]
+        self.direction = self.motion_config["start_direction"]
+        self.motion_type = self.motion_config["type"]
+        self.angle = self.motion_config["start_angle"]
+      else:
+        self.motion_type = None
+
       
 
   class Zombie():
@@ -372,6 +379,8 @@ init python:
       self.zombie_type = zombie_type
       self.animation_type = config_data.get_zombie_config(zombie_type)["animation_type"]
       self.motion_type = renpy.random.choice(config_data.get_zombie_config(zombie_type)["motions"])
+      self.motion_config = config_data.get_zombie_motion_config(self.motion_type)
+      self.status = "moving"
       self.is_dead = False
 
       self.health = zombie_config[self.zombie_type]["health"]
@@ -391,8 +400,16 @@ init python:
         render = body_part.render(render)
       return render
 
+    def update_motion(self):
+      self.motion_config = config_data.get_zombie_motion_config(self.motion_type)
+      for body_part in self.body_parts:
+        body_part.update_motion_params()
+
+
     def update(self):
-      self.x -= self.speed/10
+      if self.motion_config["moving"]:
+        self.x -= self.speed/10
+
       self.body_parts = [part for part in self.body_parts if part.status != "gone"]
       for body_part in self.body_parts:
         body_part.update()
@@ -425,10 +442,17 @@ init python:
       self.zombies.append(Zombie(900, 700, "dog"))
 
       new_z = Zombie(1200, 300, "basic")
-      new_z.body_parts[0].status = "detached"
-      new_z.body_parts[-2].status = "detached"
+      # new_z.body_parts[0].status = "detached"
+      # new_z.body_parts[-2].status = "detached"
+      # new_z.motion_type = "attack"
+      # new_z.update_motion()
 
 
+      self.zombies.append(new_z)
+
+      new_z = Zombie(1200, 800, "basic")
+      # new_z.motion_type = "attack"
+      # new_z.update_motion()
       self.zombies.append(new_z)
 
     def visit(self):
@@ -443,6 +467,15 @@ init python:
 
     def process_click(self):
       current_state = self.make_state()
+
+      for z in self.zombies:
+        z.motion_type = "attack"
+        z.update_motion()
+
+        choice = (renpy.random.choice(z.body_parts))
+        if choice.part_name != "torso":
+          choice.status = "detached"
+
       if self.plant_selected is not None:
         tile = self.environment.pos_to_tile(self.mouseX, self.mouseY)
         if tile is not None and tile.plantable():
