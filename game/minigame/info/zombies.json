@@ -1,6 +1,87 @@
 {
+  "motion_data": {
+    "walk": {
+      "head": {
+        "type": "none"
+      },
+      "left_arm": {
+        "type": "rotate",
+        "limit": [-40, 40],
+        "start_angle": 0,
+        "speed": 1,
+        "start_direction": 1
+      },
+      "right_arm": {
+        "type": "rotate",
+        "limit": [-40, 40],
+        "start_angle": 0,
+        "speed": 1,
+        "start_direction": -1
+      },
+      "left_leg": {
+        "type": "rotate",
+        "limit": [-40, 40],
+        "start_angle": 0,
+        "speed": 1,
+        "start_direction": 1
+      },
+      "right_leg": {
+        "type": "rotate",
+        "limit": [-40, 40],
+        "start_angle": 0,
+        "speed": 1,
+        "start_direction": -1
+      },
+      "torso": {
+        "type": "none"
+      }
+    },
+    "dog": {
+      "head": {
+        "type": "rotate",
+        "limit": [-40, 40],
+        "start_angle": 0,
+        "speed": 1,
+        "start_direction": 1
+      },
+      "left_arm": {
+        "type": "rotate",
+        "limit": [-60, 60],
+        "start_angle": 50,
+        "speed": 3,
+        "start_direction": 1
+      },
+      "right_arm": {
+        "type": "rotate",
+        "limit": [-60, 60],
+        "start_angle": -50,
+        "speed": 3,
+        "start_direction": -1
+      },
+      "left_leg": {
+        "type": "rotate",
+        "limit": [40, 60],
+        "start_angle": 50,
+        "speed": 1,
+        "start_direction": 1
+      },
+      "right_leg": {
+        "type": "rotate",
+        "limit": [40, 60],
+        "start_angle": 55,
+        "speed": 1,
+        "start_direction": -1
+      },
+      "torso": {
+        "type": "none"
+      }
+    }
+  },
   "image_data": {
     "default": {
+      "class": "zombie",
+      "resize_factor": 0.5,
+      "parts": ["head", "torso", "arms", "legs"],
       "arms": {
         "width": 41,
         "height": 141,
@@ -43,10 +124,67 @@
         "joint_x": 22,
         "joint_y": 42
       }
+    }, 
+    "dog": {
+      "class": "zombie",
+      "resize_factor": 0.5,
+      "parts": ["head", "torso", "arms", "legs"],
+      "arms": {
+        "width": 41,
+        "height": 141,
+        "joint_x": 17,
+        "joint_y": 10
+      },
+      "torso": {
+        "width": 148,
+        "height": 40,
+        "head_joint": {
+          "x": 1,
+          "y": 38
+        },
+        "left_arm_joint": {
+          "x": 33,
+          "y": 18
+        },
+        "right_arm_joint": {
+          "x": 23,
+          "y": 63
+        },
+        "left_leg_joint": {
+          "x": 138,
+          "y": 14
+        },
+        "right_leg_joint": {
+          "x": 135,
+          "y": 10
+        }
+      },
+      "legs": {
+        "width": 51,
+        "height": 194,
+        "joint_x": 17,
+        "joint_y": 9
+      },
+      "head": {
+        "width": 36,
+        "height": 43,
+        "joint_x": 22,
+        "joint_y": 42
+      }
     }
   },
 
   "basic": {
+    "animation_type": "default",
+    "motions": ["walk"],
+    "health": 100,
+    "attack": 10,
+    "speed": 10
+  },
+
+  "dog": {
+    "animation_type": "dog",
+    "motions": ["dog"],
     "health": 100,
     "attack": 10,
     "speed": 10
