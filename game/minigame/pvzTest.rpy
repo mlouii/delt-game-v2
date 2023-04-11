@@ -10,6 +10,7 @@ init python:
   import os
   import itertools
   import math
+  import time
 
 
   
@@ -48,9 +49,7 @@ init python:
     def modify_zombie_image_size(self, animation_type, resize_factor):
         image_config = self.get_zombie_image_config(animation_type)
         if image_config["class"] == "zombie":
-            send_to_file("logz.txt","\nResizing zombie image")
             for part_type in image_config["parts"]:
-              send_to_file("logz.txt","\n Actually running" + part_type)
               image_config[part_type]["height"] = image_config[part_type]["height"] * resize_factor
               image_config[part_type]["width"] = image_config[part_type]["width"] * resize_factor
               
@@ -65,7 +64,7 @@ init python:
                           image_config[part_type][item]["y"] = image_config[part_type][item]["y"] * resize_factor
 
         self.zombies["image_data"][animation_type] = image_config
-        send_to_file("logz.txt",json.dumps(obj=image_config, indent=4))
+        
         
 
 
@@ -88,7 +87,6 @@ init python:
         }
 
     def load_zombies(self, zombie_types):
-      send_to_file("logz.txt","Running load_zombies")
       self.images["zombies"] = {}
       for zombie_name in zombie_types:
         zombie_location = IMG_DIR + "zombies/" + zombie_name
@@ -261,6 +259,11 @@ init python:
       self.part_type = part_name
 
       self.status = "attached"
+      self.velocity_y = -4
+      self.velocity_x = 1
+      self.zombie_x_timestamp = None
+      self.distance_fallen = 0
+      self.fade_start_time = None
 
       if self.part_name in ["left_arm", "right_arm"]:
         self.part_type = "arms"
@@ -297,36 +300,69 @@ init python:
 
 
     def render(self, render):
-      if self.motion_type == None:
-        transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
-        # Calculate the position of the transformed image
-        x_location = self.zombie.x + self.target_location_x - self.joint_location_x
-        y_location = self.zombie.y + self.target_location_y - self.joint_location_y
+      if self.status == "attached":
+        if self.motion_type == None:
+          transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
+          # Calculate the position of the transformed image
+          x_location = self.zombie.x + self.target_location_x - self.joint_location_x
+          y_location = self.zombie.y + self.target_location_y - self.joint_location_y
 
-        render.place(transformed_image, x=x_location, y=y_location)
-      elif(self.motion_type == "rotate"):
-        transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
-        # Calculate the offset of the joint after rotation
-        dx = self.joint_location_x
-        dy = self.joint_location_y
-        current_angle = math.atan2(dy, dx)
-        new_angle = current_angle + math.radians(self.angle)
+          render.place(transformed_image, x=x_location, y=y_location)
+        elif(self.motion_type == "rotate"):
+          transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
+          # Calculate the offset of the joint after rotation
+          dx = self.joint_location_x
+          dy = self.joint_location_y
+          current_angle = math.atan2(dy, dx)
+          new_angle = current_angle + math.radians(self.angle)
 
-        new_dx = dx * math.cos(math.radians(self.angle)) - dy * math.sin(math.radians(self.angle))
-        new_dy = dx * math.sin(math.radians(self.angle)) + dy * math.cos(math.radians(self.angle))
+          new_dx = dx * math.cos(math.radians(self.angle)) - dy * math.sin(math.radians(self.angle))
+          new_dy = dx * math.sin(math.radians(self.angle)) + dy * math.cos(math.radians(self.angle))
 
-        # Calculate the position of the transformed image
-        x_location = self.zombie.x + self.target_location_x - new_dx
-        y_location = self.zombie.y + self.target_location_y - new_dy
+          # Calculate the position of the transformed image
+          x_location = self.zombie.x + self.target_location_x - new_dx
+          y_location = self.zombie.y + self.target_location_y - new_dy
 
+          render.place(transformed_image, x=x_location, y=y_location)
+      elif self.status == "detached":
+        if self.zombie_x_timestamp == None:
+          self.zombie_x_timestamp = self.zombie.x
+        x_location = self.zombie_x_timestamp + self.target_location_x - self.joint_location_x
+        y_location = self.zombie.y + self.target_location_y - self.joint_location_y + self.distance_fallen
+        render.place(self.image, x=x_location, y=y_location)
+      elif self.status == "fading":
+        if self.fade_start_time == None:
+          self.fade_start_time = time.time()
+        elapsed = min((time.time() - self.fade_start_time), 1)
+        x_location = self.zombie_x_timestamp + self.target_location_x - self.joint_location_x
+        y_location = self.zombie.y + self.target_location_y - self.joint_location_y + self.distance_fallen
+        transformed_image = im.MatrixColor(self.image, im.matrix.opacity(1-elapsed))
         render.place(transformed_image, x=x_location, y=y_location)
       return render
 
     def update(self):
-      if self.motion_type == "rotate":
-        self.angle += (self.direction * self.motion_config["speed"])
-        if self.angle > self.limit[1] or self.angle < self.limit[0]:
-          self.direction *= -1
+      if self.status == "attached":
+        if self.motion_type == "rotate":
+          self.angle += (self.direction * self.motion_config["speed"])
+          if self.angle > self.limit[1] or self.angle < self.limit[0]:
+            self.direction *= -1
+      elif self.status == "detached":
+        if self.zombie_x_timestamp == None:
+          self.zombie_x_timestamp = self.zombie.x
+
+        self.target_location_x += self.velocity_x
+        self.distance_fallen += self.velocity_y
+        self.velocity_y += 0.3
+
+        if self.distance_fallen > (100 - self.target_location_y):
+          self.velocity_y = 0
+          self.velocity_x = 0
+          self.status = "fading"
+      elif self.status == "fading":
+        if self.fade_start_time == None:
+          self.fade_start_time = time.time()
+        if time.time() - self.fade_start_time > 1:
+          self.status = "gone"
       
 
   class Zombie():
@@ -357,6 +393,7 @@ init python:
 
     def update(self):
       self.x -= self.speed/10
+      self.body_parts = [part for part in self.body_parts if part.status != "gone"]
       for body_part in self.body_parts:
         body_part.update()
 
@@ -386,7 +423,13 @@ init python:
       self.zombies = []
       self.zombies.append(Zombie(900, 400, "basic"))
       self.zombies.append(Zombie(900, 700, "dog"))
-      self.zombies.append(Zombie(1200, 300, "basic"))
+
+      new_z = Zombie(1200, 300, "basic")
+      new_z.body_parts[0].status = "detached"
+      new_z.body_parts[-2].status = "detached"
+
+
+      self.zombies.append(new_z)
 
     def visit(self):
       return self.environment.visit()
