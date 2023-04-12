@@ -1,3 +1,4 @@
+
 define THIS_PATH = 'minigame/'
 
 # XXX: using os.path.join here will actually break because Ren'Py somehow doesn't recognize it
@@ -113,9 +114,15 @@ init python:
   config_data = ConfigLoader()
 
   class Tile():
-    def __init__(self, x, y, width, height, color):
+    def __init__(self, x, y, row_id, lane_id, width, height, color):
       self.x = x
       self.y = y
+      self.lane_id = lane_id
+      self.row_id = row_id
+
+      self.target_location_x = int(width/2)
+      self.target_location_y = int(0.8 * height)
+
       self.width = width
       self.height = height
       self.color = color
@@ -154,7 +161,10 @@ init python:
       return ((self.x, self.y), (self.x + self.width, self.y + self.height))
 
   class EnvironmentBuilder():
-    def __init__(self, level_config):
+    def __init__(self, level_config, game: PvzGameDisplayable):
+
+      self.game = game
+      self.num_rows = level_config["num_rows"]
 
       self.env_width = config.screen_width * level_config["width_multiplier"]
       self.env_height = config.screen_height * level_config["height_multiplier"]
@@ -165,6 +175,9 @@ init python:
       self.tiles = []
       self.tile_width = round(self.env_width / level_config["num_cols"])
       self.tile_height = round(self.env_height / level_config["num_rows"])
+
+      # This will eventually be updated to be the Lanes class
+      self.lanes = [[] for i in range(level_config["num_rows"])]
 
       self.lighter_color = level_config["lighter_color"]
       self.dark_color = level_config["dark_color"]
@@ -186,28 +199,43 @@ init python:
 
           if j % 2 == 0:
             color = lighten(color)
-          self.tiles.append(Tile(i * self.tile_width + self.start_x, j * self.tile_height + self.start_y, self.tile_width, self.tile_height, color))
 
-    def render(self, render):
-      for tile in self.tiles:
-        render = tile.render(render)
-      return render
+          new_tile =Tile(i * self.tile_width + self.start_x, j * self.tile_height + self.start_y, i, j ,self.tile_width, self.tile_height, color)
+          self.tiles.append(new_tile)
+          self.lanes[j].append(new_tile)
 
-    def pos_to_tile(self, x, y):
-      for tile in self.tiles:
-        ((x1, y1), (x2, y2)) = tile.coordinates()
-        if x1 <= x <= x2 and y1 <= y <= y2:
-          return tile
-      return None
-
+    def gen_lanes(self):
+      lanes = Lanes(len(self.lanes))
+      for j in range(self.num_rows):
+        lanes.assign_tiles(j, self.lanes[j])
+      self.lanes = lanes
+      return lanes
+    
     def update(self, state):
       x, y = state["mouseX"], state["mouseY"]
-      tile = self.pos_to_tile(x, y)
+      tile = self.lanes.pos_to_tile(x, y)
       if tile is not None:
         for t in self.tiles:
           t.is_hovered = False
         tile.is_hovered = True
         tile.plant_selected = state["plant_selected"]
+
+    def process_click(self):
+      # current_state = self.game.make_state()
+
+      for z in self.zombies:
+        z.motion_type = "attack"
+        z.update_motion()
+
+        choice = (renpy.random.choice(z.body_parts))
+        if choice.part_name != "torso":
+          choice.status = "detached"
+
+      if self.plant_selected is not None:
+        tile = self.environment.pos_to_tile(self.mouseX, self.mouseY)
+        if tile is not None and tile.plantable():
+          tile.is_planted = True
+          self.lanes.add_plant(tile, self.plant_selected)
 
     def visit(self):
       return list(itertools.chain(*[tile.visit() for tile in self.tiles]))
@@ -231,24 +259,6 @@ init python:
         self.is_dead = True
 
       self.frame = (self.frame + 1) % len(self.frames)
-
-  class PlantsController():
-    def __init__(self):
-      self.plants = []
-
-    def add_plant(self, tile, plant_type):
-      self.plants.append(Plant(tile, plant_type))
-
-    def update(self):
-      self.plants = [plant for plant in self.plants if not plant.is_dead]
-
-      for plant in self.plants:
-        plant.update()
-
-    def render(self, render):
-      for plant in self.plants:
-        render = plant.render(render)
-      return render
 
   class Body_Part():
     def __init__(self, zombie, part_name):
@@ -293,6 +303,21 @@ init python:
         self.target_location_x = self.zombie_image_config["torso"][self.part_name + "_joint"]["x"]
         self.target_location_y = self.zombie_image_config["torso"][self.part_name + "_joint"]["y"]
 
+    def process_rotation(self):
+      transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
+      # Calculate the offset of the joint after rotation
+      dx = self.joint_location_x
+      dy = self.joint_location_y
+      current_angle = math.atan2(dy, dx)
+      new_angle = current_angle + math.radians(self.angle)
+
+      new_dx = dx * math.cos(math.radians(self.angle)) - dy * math.sin(math.radians(self.angle))
+      new_dy = dx * math.sin(math.radians(self.angle)) + dy * math.cos(math.radians(self.angle))
+
+      # Calculate the position of the transformed image
+      x_location = self.zombie.x + self.target_location_x - new_dx
+      y_location = self.zombie.y + self.target_location_y - new_dy
+      return transformed_image, x_location, y_location
 
     def render(self, render):
       if self.status == "attached":
@@ -301,38 +326,26 @@ init python:
           # Calculate the position of the transformed image
           x_location = self.zombie.x + self.target_location_x - self.joint_location_x
           y_location = self.zombie.y + self.target_location_y - self.joint_location_y
-
           render.place(transformed_image, x=x_location, y=y_location)
         elif(self.motion_type == "rotate"):
-          transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
-          # Calculate the offset of the joint after rotation
-          dx = self.joint_location_x
-          dy = self.joint_location_y
-          current_angle = math.atan2(dy, dx)
-          new_angle = current_angle + math.radians(self.angle)
-
-          new_dx = dx * math.cos(math.radians(self.angle)) - dy * math.sin(math.radians(self.angle))
-          new_dy = dx * math.sin(math.radians(self.angle)) + dy * math.cos(math.radians(self.angle))
-
-          # Calculate the position of the transformed image
-          x_location = self.zombie.x + self.target_location_x - new_dx
-          y_location = self.zombie.y + self.target_location_y - new_dy
-
+          transformed_image, x_location, y_location = self.process_rotation()
           render.place(transformed_image, x=x_location, y=y_location)
+
       elif self.status == "detached":
         if self.zombie_x_timestamp == None:
           self.zombie_x_timestamp = self.zombie.x
+          
         x_location = self.zombie_x_timestamp + self.target_location_x - self.joint_location_x
         y_location = self.zombie.y + self.target_location_y - self.joint_location_y + self.distance_fallen
         render.place(self.image, x=x_location, y=y_location)
+        
       elif self.status == "fading":
         if self.fade_start_time == None:
           self.fade_start_time = time.time()
         elapsed = min((time.time() - self.fade_start_time), 1)
         x_location = self.zombie_x_timestamp + self.target_location_x - self.joint_location_x
         y_location = self.zombie.y + self.target_location_y - self.joint_location_y + self.distance_fallen
-        transformed_image = im.MatrixColor(self.image, im.matrix.opacity(1-elapsed))
-        render.place(transformed_image, x=x_location, y=y_location)
+        render.place(self.image, x=x_location, y=y_location)
       return render
 
     def update(self):
@@ -357,7 +370,7 @@ init python:
       elif self.status == "fading":
         if self.fade_start_time == None:
           self.fade_start_time = time.time()
-        if time.time() - self.fade_start_time > 1:
+        if time.time() - self.fade_start_time > 0.5:
           self.status = "gone"
 
     def update_motion_params(self):
@@ -410,11 +423,108 @@ init python:
       if self.motion_config["moving"]:
         self.x -= self.speed/10
 
+      if self.head.status == "gone" or self.health <= 0:
+        self.is_dead = True
+
       self.body_parts = [part for part in self.body_parts if part.status != "gone"]
       for body_part in self.body_parts:
         body_part.update()
 
+  class Lane():
+    def __init__(self, id):
+      self.id = id
+      self.y = None
+      self.target_location_y = None
+      self.tiles = []
+      self.plants = []
+      self.zombies = []
 
+    def populate_tiles(self, tiles):
+      self.tiles = tiles
+      self.y = tiles[0].y
+      self.target_location_y = tiles[0].target_location_y
+
+    def add_plant(self, plant):
+      self.plants.append(plant)
+
+    def add_zombie(self, zombie):
+      self.zombies.append(zombie)
+
+    def get_zombies(self):
+      return self.zombies
+
+    def update(self):
+      self.plants = [plant for plant in self.plants if not plant.is_dead]
+      self.zombies = [zombie for zombie in self.zombies if not zombie.is_dead]
+
+      for plant in self.plants:
+        plant.update()
+      for zombie in self.zombies:
+        zombie.update()
+
+    def render(self, render):
+      for tile in self.tiles:
+        render = tile.render(render)
+      for plant in self.plants:
+        render = plant.render(render)
+      for zombie in self.zombies:
+        render = zombie.render(render)
+      return render
+
+  class Lanes:
+    def __init__(self, num_lanes):
+        self.lanes = [Lane(i) for i in range(num_lanes)]
+
+    def add_plant_xy(self, x, y, plant):
+        tile = self.pos_to_tile(x, y)
+        lane_index = tile.lane_id
+        plant = Plant(tile, plant)
+        self.lanes[lane_index].add_plant(plant)
+
+    def add_plant_tile(self, tile, plant):
+        plant = Plant(tile, plant)
+        self.lanes[tile.lane_id].add_plant(plant)
+
+    def remove_plant(self, lane_index, plant):
+        self.lanes[lane_index].remove_plant(plant)
+
+    def add_zombie(self, lane_index, zombie):
+        self.lanes[lane_index].add_zombie(zombie)
+
+    def remove_zombie(self, lane_index, zombie):
+        self.lanes[lane_index].remove_zombie(zombie)
+
+    def get_all_zombies(self):
+      zombies = []
+      for lane in self.lanes:
+          zombies += lane.get_zombies()
+      return zombies
+
+    def assign_tiles(self, lane_index, tiles):
+        self.lanes[lane_index].populate_tiles(tiles)
+
+    def randomly_add_zombie(self, zombie_type):
+        lane_index = renpy.random.randint(0, len(self.lanes) - 1)
+        lane = self.lanes[lane_index]
+        zombie = Zombie(lane.tiles[-1].x + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y, zombie_type)
+        lane.add_zombie(zombie)
+
+
+    def update(self):
+      for lane in self.lanes:
+        lane.update()
+
+    def render(self, render):
+      for lane in self.lanes:
+        render = lane.render(render)
+      return render
+
+    def pos_to_tile(self, x, y):
+      for lane in self.lanes:
+        for tile in lane.tiles:
+          if tile.x <= x <= tile.x + tile.width and tile.y <= y <= tile.y + tile.height:
+              return tile
+      return None
 
 
   class PvzGameDisplayable(renpy.Displayable):
@@ -434,26 +544,10 @@ init python:
       all_images.load_plants(["peashooter"])
       all_images.load_zombies(["basic", "dog"])
 
-      self.environment = EnvironmentBuilder(self.level_config)
-      self.plants = PlantsController()
-
-      self.zombies = []
-      self.zombies.append(Zombie(900, 400, "basic"))
-      self.zombies.append(Zombie(900, 700, "dog"))
-
-      new_z = Zombie(1200, 300, "basic")
-      # new_z.body_parts[0].status = "detached"
-      # new_z.body_parts[-2].status = "detached"
-      # new_z.motion_type = "attack"
-      # new_z.update_motion()
-
-
-      self.zombies.append(new_z)
-
-      new_z = Zombie(1200, 800, "basic")
-      # new_z.motion_type = "attack"
-      # new_z.update_motion()
-      self.zombies.append(new_z)
+      self.environment = EnvironmentBuilder(self.level_config, self)
+      self.lanes = self.environment.gen_lanes()
+      for _ in range(95):
+        self.lanes.randomly_add_zombie("basic")
 
     def visit(self):
       return self.environment.visit()
@@ -468,7 +562,7 @@ init python:
     def process_click(self):
       current_state = self.make_state()
 
-      for z in self.zombies:
+      for z in self.lanes.get_all_zombies():
         z.motion_type = "attack"
         z.update_motion()
 
@@ -477,24 +571,21 @@ init python:
           choice.status = "detached"
 
       if self.plant_selected is not None:
-        tile = self.environment.pos_to_tile(self.mouseX, self.mouseY)
+        tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
         if tile is not None and tile.plantable():
           tile.is_planted = True
-          self.plants.add_plant(tile, self.plant_selected)
+          self.lanes.add_plant_tile(tile, self.plant_selected)
         
 
     def render(self, width, height, st, at):
 
       current_state = self.make_state()
       self.environment.update(current_state)
-      self.plants.update()
+      self.lanes.update()
 
       r = renpy.Render(width, height)
-      r = self.environment.render(r)
-      r = self.plants.render(r)
-      for zombie in self.zombies:
-        zombie.update()
-        r = zombie.render(r)
+      # r = self.environment.render(r)
+      r = self.lanes.render(r)
       renpy.redraw(self, 0)
       return r
 
@@ -528,7 +619,3 @@ screen game_menu():
 
 label test_game_entry_label:
   $ renpy.call_screen(_screen_name='game_menu')
-
-
-
-

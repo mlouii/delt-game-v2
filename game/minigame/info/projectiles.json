@@ -1,5 +1,6 @@
 {
-  "pea": {
+  "baseball": {
+    "resize_factor": 0.5,
     "damage": 10,
     "speed": 10,
     "range": 10,
