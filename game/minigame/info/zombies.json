@@ -147,6 +147,11 @@
       "resize_factor": 0.5,
       "fall_height": 150,
       "parts": ["head", "torso", "arms", "legs"],
+      "part_name_order": ["left_leg", "left_arm", "torso", "right_leg", "head", "right_arm"],
+      "damage_fall_order": {
+        "head": 0,
+        "right_arm": 0.5
+      },
       "arms": {
         "width": 41,
         "height": 141,
@@ -195,6 +200,11 @@
       "resize_factor": 0.5,
       "fall_height": 50,
       "parts": ["head", "torso", "arms", "legs"],
+      "part_name_order": ["left_leg", "left_arm", "torso", "right_leg", "head", "right_arm"],
+      "damage_fall_order": {
+        "head": 0,
+        "right_arm": 0.5
+      },
       "arms": {
         "width": 41,
         "height": 141,
@@ -245,6 +255,7 @@
     "motions": ["walk"],
     "health": 100,
     "attack": 10,
+    "hitbox_distance": 100,
     "speed": 10
   },
 
@@ -253,6 +264,7 @@
     "motions": ["dog"],
     "health": 100,
     "attack": 10,
-    "speed": 10
+    "hitbox_distance": 100,
+    "speed": 20
   }
 }

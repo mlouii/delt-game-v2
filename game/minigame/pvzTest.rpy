@@ -47,6 +47,21 @@ init python:
     def get_zombie_motion_config(self, motion_type):
       return self.zombies["motion_data"][motion_type]
 
+    def get_plant_config(self, plant_type):
+      return self.plants[plant_type]
+    
+    def get_plant_image_config(self, animation_type):
+      return self.plants["image_data"][animation_type]
+
+
+    def modify_plant_image_size(self, animation_type, resize_factor):
+      image_config = self.get_plant_image_config(animation_type)
+      image_config["height"] = image_config["height"] * resize_factor
+      image_config["width"] = image_config["width"] * resize_factor
+      image_config["joint_x"] = image_config["joint_x"] * resize_factor
+      image_config["joint_y"] = image_config["joint_y"] * resize_factor
+      self.plants["image_data"][animation_type] = image_config
+      
     def modify_zombie_image_size(self, animation_type, resize_factor):
         image_config = self.get_zombie_image_config(animation_type)
         if image_config["class"] == "zombie":
@@ -67,8 +82,6 @@ init python:
         self.zombies["image_data"][animation_type] = image_config
         
         
-
-
   class ImageLoader():
     def __init__(self):
       self.images = {}
@@ -79,9 +92,15 @@ init python:
 
       for plant_name in plant_types:
         plant_location = IMG_DIR + "plants/" + plant_name
+        animation_type = config_data.get_plant_config(plant_name)["animation_type"]
+        resize_factor = config_data.get_plant_image_config(animation_type)["resize_factor"]
+        image_prefix = config_data.get_plant_image_config(plant_name)["image_prefix"]
+        num_frames = config_data.get_plant_image_config(plant_name)["num_frames"]
 
-        tile_overlay = im.MatrixColor(im.FactorScale(Image(plant_location + "/daell4l-91d102e0-ee83-4683-b394-30d70ce60a92-" + "0" + ".png"), resize_factor), im.matrix.opacity(0.5) * im.matrix.contrast(0.5))
-        animation_frames = [im.FactorScale(Image(plant_location + "/daell4l-91d102e0-ee83-4683-b394-30d70ce60a92-" + str(i) + ".png"), resize_factor) for i in range(0, 59)]
+        config_data.modify_plant_image_size(animation_type, resize_factor=resize_factor)
+
+        tile_overlay = im.MatrixColor(im.FactorScale(Image(plant_location + "/" + image_prefix + "-0" + ".png"), resize_factor), im.matrix.opacity(0.5) * im.matrix.contrast(0.5))
+        animation_frames = [im.FactorScale(Image(plant_location + "/" + image_prefix + "-" + str(i) + ".png"), resize_factor) for i in range(num_frames)]
         self.images["plants"][plant_name] = {
           "overlay": tile_overlay,
           "animation": animation_frames
@@ -120,8 +139,8 @@ init python:
       self.lane_id = lane_id
       self.row_id = row_id
 
-      self.target_location_x = int(width/2)
-      self.target_location_y = int(0.8 * height)
+      self.target_location_x = x + int(width/2)
+      self.target_location_y = y + int(0.8 * height)
 
       self.width = width
       self.height = height
@@ -147,7 +166,10 @@ init python:
       render.place(drawables["ground"], x = self.x, y = self.y)
 
       if drawables["overlay"] is not None:
-        render.place(drawables["overlay"], x = self.x, y = self.y)
+        plant_image_config = config_data.get_plant_image_config(self.plant_selected)
+        x_location = self.target_location_x - plant_image_config["joint_x"]
+        y_location = self.target_location_y - plant_image_config["joint_y"]
+        render.place(drawables["overlay"], x = x_location, y = y_location)
 
       return render
 
@@ -241,22 +263,46 @@ init python:
       return list(itertools.chain(*[tile.visit() for tile in self.tiles]))
 
   class Plant():
-    def __init__(self, tile, plant_type):
+    def __init__(self, tile, lane, plant_type):
       self.tile = tile
+      self.lane = lane
       self.plant_type = plant_type
       self.is_dead = False
 
-      self.health = 100
+      self.plant_config = config_data.get_plant_config(self.plant_type)
+      self.health = self.plant_config["health"]
+      self.hitbox_distance = self.plant_config["hitbox_distance"]
+
       self.frames = all_images.images["plants"][self.plant_type]["animation"]
+      self.plant_image_config = config_data.get_plant_image_config(self.plant_type)
       self.frame = 0
 
+      self.x_location = self.tile.target_location_x - self.plant_image_config["joint_x"]
+      self.y_location = self.tile.target_location_y - self.plant_image_config["joint_y"]
+
     def render(self, render):
-      render.place(self.frames[self.frame], x = self.tile.x, y = self.tile.y)
+      render.place(self.frames[self.frame], x = self.x_location, y = self.y_location)
       return render
+
+    def die(self):
+      self.tile.is_planted = False
+      self.is_dead = True
+
+    def damage(self, damage):
+      self.health -= damage
+      if self.health <= 0:
+        self.die()
+
+    def check_collision(self, zombie):
+      if zombie.lane is self.lane:
+        if abs(zombie.x - zombie.hitbox_distance - self.x_location) <= self.hitbox_distance:
+          return True
+      else: 
+        return False
 
     def update(self):
       if self.health <= 0:
-        self.is_dead = True
+        self.die()
 
       self.frame = (self.frame + 1) % len(self.frames)
 
@@ -386,27 +432,29 @@ init python:
       
 
   class Zombie():
-    def __init__(self, x, y, zombie_type):
+    def __init__(self, x, y, zombie_type, lane):
       self.x = x
       self.y = y
+      self.lane = lane
       self.zombie_type = zombie_type
       self.animation_type = config_data.get_zombie_config(zombie_type)["animation_type"]
+      self.image_config = config_data.get_zombie_image_config(self.animation_type)
+
       self.motion_type = renpy.random.choice(config_data.get_zombie_config(zombie_type)["motions"])
       self.motion_config = config_data.get_zombie_motion_config(self.motion_type)
       self.status = "moving"
+
       self.is_dead = False
+      self.should_delete = False
 
       self.health = zombie_config[self.zombie_type]["health"]
       self.speed = zombie_config[self.zombie_type]["speed"]
       self.attack = zombie_config[self.zombie_type]["attack"]
+      self.hitbox_distance = zombie_config[self.zombie_type]["hitbox_distance"]
 
-      self.left_arm = Body_Part(self, "left_arm")
-      self.right_arm = Body_Part(self, "right_arm")
-      self.left_leg = Body_Part(self, "left_leg")
-      self.right_leg = Body_Part(self, "right_leg")
-      self.torso = Body_Part(self, "torso")
-      self.head = Body_Part(self, "head")
-      self.body_parts = [self.left_arm, self.left_leg, self.torso,self.right_leg, self.head, self.right_arm]
+      self.body_parts = [Body_Part(self, part_name) for part_name in self.image_config["part_name_order"]]
+
+      self.target_plant = None
 
     def render(self, render):
       for body_part in self.body_parts:
@@ -418,13 +466,41 @@ init python:
       for body_part in self.body_parts:
         body_part.update_motion_params()
 
+    def check_damage_limb_detach(self):
+      info = self.image_config["damage_fall_order"]
+      for part_name in info.keys():
+        if self.health <= (info[part_name] * zombie_config[self.zombie_type]["health"]):
+          part = [part for part in self.body_parts if part.part_name == part_name]
+          if len(part) > 0:
+            part[0].status = "detached"
+
+    def damage(self, damage):
+      self.health -= damage
+      self.check_damage_limb_detach()
+
+    def start_eating(self, plant):
+      self.target_plant = plant
+      self.motion_type = "attack"
+      self.update_motion()
 
     def update(self):
       if self.motion_config["moving"]:
         self.x -= self.speed/10
 
-      if self.head.status == "gone" or self.health <= 0:
+      if hasattr(self, "target_plant") and self.target_plant is not None: # check if target_plant still exists
+        self.target_plant.damage(self.attack/10)
+
+        if self.target_plant.is_dead:
+          self.target_plant = None
+          self.motion_type = renpy.random.choice(config_data.get_zombie_config(self.zombie_type)["motions"])
+          self.update_motion()
+
+      if self.health <= 0:
         self.is_dead = True
+
+      head = [part for part in self.body_parts if part.part_name == "head"]
+      if not head or head[0].status == "gone":
+        self.should_delete = True
 
       self.body_parts = [part for part in self.body_parts if part.status != "gone"]
       for body_part in self.body_parts:
@@ -453,9 +529,16 @@ init python:
     def get_zombies(self):
       return self.zombies
 
+    def check_collisions(self):
+      for zombie in self.zombies:
+        for plant in self.plants:
+          if plant.check_collision(zombie) and not zombie.target_plant:
+            zombie.start_eating(plant)
+
     def update(self):
       self.plants = [plant for plant in self.plants if not plant.is_dead]
-      self.zombies = [zombie for zombie in self.zombies if not zombie.is_dead]
+      self.zombies = [zombie for zombie in self.zombies if not zombie.should_delete]
+      self.check_collisions()
 
       for plant in self.plants:
         plant.update()
@@ -465,10 +548,10 @@ init python:
     def render(self, render):
       for tile in self.tiles:
         render = tile.render(render)
-      for plant in self.plants:
-        render = plant.render(render)
       for zombie in self.zombies:
         render = zombie.render(render)
+      for plant in self.plants:
+        render = plant.render(render)
       return render
 
   class Lanes:
@@ -478,11 +561,11 @@ init python:
     def add_plant_xy(self, x, y, plant):
         tile = self.pos_to_tile(x, y)
         lane_index = tile.lane_id
-        plant = Plant(tile, plant)
+        plant = Plant(tile, self.lane_id_to_lane(tile.lane_id), plant)
         self.lanes[lane_index].add_plant(plant)
 
     def add_plant_tile(self, tile, plant):
-        plant = Plant(tile, plant)
+        plant = Plant(tile, self.lane_id_to_lane(tile.lane_id), plant)
         self.lanes[tile.lane_id].add_plant(plant)
 
     def remove_plant(self, lane_index, plant):
@@ -506,7 +589,7 @@ init python:
     def randomly_add_zombie(self, zombie_type):
         lane_index = renpy.random.randint(0, len(self.lanes) - 1)
         lane = self.lanes[lane_index]
-        zombie = Zombie(lane.tiles[-1].x + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y, zombie_type)
+        zombie = Zombie(lane.tiles[-1].x + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y, zombie_type, lane)
         lane.add_zombie(zombie)
 
 
@@ -525,6 +608,9 @@ init python:
           if tile.x <= x <= tile.x + tile.width and tile.y <= y <= tile.y + tile.height:
               return tile
       return None
+
+    def lane_id_to_lane(self, lane_id):
+      return self.lanes[lane_id]
 
 
   class PvzGameDisplayable(renpy.Displayable):
@@ -546,7 +632,7 @@ init python:
 
       self.environment = EnvironmentBuilder(self.level_config, self)
       self.lanes = self.environment.gen_lanes()
-      for _ in range(95):
+      for _ in range(12):
         self.lanes.randomly_add_zombie("basic")
 
     def visit(self):
@@ -562,13 +648,11 @@ init python:
     def process_click(self):
       current_state = self.make_state()
 
-      for z in self.lanes.get_all_zombies():
-        z.motion_type = "attack"
-        z.update_motion()
+      # for z in self.lanes.get_all_zombies():
+      #   z.motion_type = "attack"
+      #   z.update_motion()
 
-        choice = (renpy.random.choice(z.body_parts))
-        if choice.part_name != "torso":
-          choice.status = "detached"
+      #   z.damage(55)
 
       if self.plant_selected is not None:
         tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
