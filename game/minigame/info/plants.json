@@ -7,7 +7,9 @@
       "height": 508,
       "num_frames": 60,
       "joint_x": 230,
-      "joint_y": 440
+      "joint_y": 440,
+      "projectile_spawn_x": 440,
+      "projectile_spawn_y": 154
     }
   },
 
@@ -15,7 +17,8 @@
     "animation_type": "peashooter",
     "health": 300,
     "ROF": 10,
-    "projectile": "baseball",
+    "spawn_projectile": true,
+    "projectile_type": "baseball",
     "hitbox_distance": 10
   }
 }

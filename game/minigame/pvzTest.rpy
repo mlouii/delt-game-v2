@@ -56,14 +56,26 @@ init python:
     def get_plant_image_config(self, animation_type):
       return self.plants["image_data"][animation_type]
 
-
+    def get_projectile_config(self, projectile_type):
+      return self.projectiles[projectile_type]
+      
     def modify_plant_image_size(self, animation_type, resize_factor):
       image_config = self.get_plant_image_config(animation_type)
       image_config["height"] = image_config["height"] * resize_factor
       image_config["width"] = image_config["width"] * resize_factor
       image_config["joint_x"] = image_config["joint_x"] * resize_factor
       image_config["joint_y"] = image_config["joint_y"] * resize_factor
+      image_config["projectile_spawn_x"] = image_config["projectile_spawn_x"] * resize_factor
+      image_config["projectile_spawn_y"] = image_config["projectile_spawn_y"] * resize_factor
       self.plants["image_data"][animation_type] = image_config
+
+    def modify_projectile_image_size(self, projectile_name, resize_factor):
+      image_config = self.get_projectile_config(projectile_name)
+      image_config["height"] = image_config["height"] * resize_factor
+      image_config["width"] = image_config["width"] * resize_factor
+      image_config["center_x"] = image_config["center_x"] * resize_factor
+      image_config["center_y"] = image_config["center_y"] * resize_factor
+      self.projectiles[projectile_name] = image_config
       
     def modify_zombie_image_size(self, animation_type, resize_factor):
         image_config = self.get_zombie_image_config(animation_type)
@@ -123,6 +135,16 @@ init python:
           "legs": im.FactorScale(Image(zombie_location + "/legs.png"), resize_factor),
           "arms": im.FactorScale(Image(zombie_location + "/arms.png"), resize_factor)
         }
+
+    def load_projectiles(self, projectile_types):
+      self.images["projectiles"] = {}
+      for projectile_name in projectile_types:
+        projectile_location = IMG_DIR + "projectiles/" + projectile_name + ".png"
+        resize_factor = config_data.get_projectile_config(projectile_name)["resize_factor"]
+        config_data.modify_projectile_image_size(projectile_name, resize_factor=resize_factor)
+        self.images["projectiles"][projectile_name] = {
+          "image": im.FactorScale(Image(projectile_location), resize_factor)
+        }
       
       
 
@@ -137,14 +159,14 @@ init python:
   config_data = ConfigLoader()
 
   class Tile():
-    def __init__(self, x, y, row_id, lane_id, width, height, color):
-      self.x = x
-      self.y = y
+    def __init__(self, x_location, y_location, row_id, lane_id, width, height, color):
+      self.x_location = x_location
+      self.y_location = y_location
       self.lane_id = lane_id
       self.row_id = row_id
 
-      self.target_location_x = x + int(width/2)
-      self.target_location_y = y + int(0.8 * height)
+      self.target_location_x = x_location + int(width/2)
+      self.target_location_y = y_location + int(0.8 * height)
 
       self.width = width
       self.height = height
@@ -167,7 +189,7 @@ init python:
         if self.plantable():
           drawables["overlay"] = self.overlays[self.plant_selected]
 
-      render.place(drawables["ground"], x = self.x, y = self.y)
+      render.place(drawables["ground"], x = self.x_location, y = self.y_location)
 
       if drawables["overlay"] is not None:
         plant_image_config = config_data.get_plant_image_config(self.plant_selected)
@@ -184,7 +206,7 @@ init python:
       return [value for value in self.drawables.values() if value is not None]
 
     def coordinates(self):
-      return ((self.x, self.y), (self.x + self.width, self.y + self.height))
+      return ((self.x_location, self.y_location), (self.x_location + self.width, self.y_location + self.height))
 
   class EnvironmentBuilder():
     def __init__(self, level_config, game: PvzGameDisplayable):
@@ -266,6 +288,59 @@ init python:
     def visit(self):
       return list(itertools.chain(*[tile.visit() for tile in self.tiles]))
 
+  class Projectile():
+    def __init__(self, plant, projectile_type):
+      self.plant = plant
+      self.projectile_type = projectile_type
+      self.lane = plant.lane
+
+      self.projectile_config = config_data.get_projectile_config(self.projectile_type)
+      self.damage = self.projectile_config["damage"]
+      self.speed = self.projectile_config["speed"]
+      self.pierce = self.projectile_config["pierce"]
+      self.center_x = self.projectile_config["center_x"]
+      self.center_y = self.projectile_config["center_y"]
+
+      self.image = all_images.images["projectiles"][self.projectile_type]["image"]
+      self.projectile_config = config_data.get_projectile_config(self.projectile_type)
+
+      self.plant_spawn_x = self.plant.x_location + self.plant.plant_image_config["projectile_spawn_x"]
+      self.plant_spawn_y = self.plant.y_location + self.plant.plant_image_config["projectile_spawn_y"]
+
+      self.x_location = self.plant_spawn_x - self.center_x
+      self.y_location = self.plant_spawn_y - self.center_y
+
+      self.active = True
+      self.damaged_zombies = []
+
+    def render(self, render):
+      render.place(self.image, x = self.x_location, y= self.y_location)
+      return render
+
+    def update(self):
+      if self.active:
+        self.x_location += self.speed * delta_multiplier * delta_time
+      
+      if self.x_location > config.screen_width:
+        self.active = False
+
+    def check_reference_in_list(self, ref_obj, obj_list):
+        for obj in obj_list:
+            if ref_obj is obj:
+                return True
+        return False
+
+    def check_collision(self, zombie):
+      if self.active:
+        if self.lane is zombie.lane:
+          if abs(self.x_location - zombie.x_location) < (zombie.hitbox_distance/5) and zombie.is_dead is False:
+            if self.check_reference_in_list(zombie, self.damaged_zombies) is False:
+              zombie.damage(self.damage)
+              self.damaged_zombies.append(zombie)
+              if len(self.damaged_zombies) >= self.pierce:
+                self.active = False
+
+
   class Plant():
     def __init__(self, tile, lane, plant_type):
       self.tile = tile
@@ -275,7 +350,13 @@ init python:
 
       self.plant_config = config_data.get_plant_config(self.plant_type)
       self.health = self.plant_config["health"]
+      self.animation_type = self.plant_config["animation_type"]
       self.hitbox_distance = self.plant_config["hitbox_distance"]
+
+      self.does_spawn_projectile = self.plant_config["spawn_projectile"]
+      self.projectile_type = None
+      if self.does_spawn_projectile:
+        self.projectile_type = self.plant_config["projectile_type"]
 
       self.frames = all_images.images["plants"][self.plant_type]["animation"]
       self.plant_image_config = config_data.get_plant_image_config(self.plant_type)
@@ -297,9 +378,15 @@ init python:
       if self.health <= 0:
         self.die()
 
+    def attack(self):
+      if self.does_spawn_projectile:
+        self.lane.add_projectile(Projectile(self, self.projectile_type))
+      else:
+        return None
+
     def check_collision(self, zombie):
       if zombie.lane is self.lane:
-        if abs(zombie.x - zombie.hitbox_distance - self.x_location) <= self.hitbox_distance:
+        if abs(zombie.x_location - zombie.hitbox_distance - self.x_location) <= self.hitbox_distance:
           return True
       else: 
         return False
@@ -365,8 +452,8 @@ init python:
       new_dy = dx * math.sin(math.radians(self.angle)) + dy * math.cos(math.radians(self.angle))
 
       # Calculate the position of the transformed image
-      x_location = self.zombie.x + self.target_location_x - new_dx
-      y_location = self.zombie.y + self.target_location_y - new_dy
+      x_location = self.zombie.x_location + self.target_location_x - new_dx
+      y_location = self.zombie.y_location + self.target_location_y - new_dy
       return transformed_image, x_location, y_location
 
     def render(self, render):
@@ -374,8 +461,8 @@ init python:
         if self.motion_type == None:
           transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
           # Calculate the position of the transformed image
-          x_location = self.zombie.x + self.target_location_x - self.joint_location_x
-          y_location = self.zombie.y + self.target_location_y - self.joint_location_y
+          x_location = self.zombie.x_location + self.target_location_x - self.joint_location_x
+          y_location = self.zombie.y_location + self.target_location_y - self.joint_location_y
           render.place(transformed_image, x=x_location, y=y_location)
         elif(self.motion_type == "rotate"):
           transformed_image, x_location, y_location = self.process_rotation()
@@ -383,10 +470,10 @@ init python:
 
       elif self.status == "detached":
         if self.zombie_x_timestamp == None:
-          self.zombie_x_timestamp = self.zombie.x
+          self.zombie_x_timestamp = self.zombie.x_location
           
         x_location = self.zombie_x_timestamp + self.target_location_x - self.joint_location_x
-        y_location = self.zombie.y + self.target_location_y - self.joint_location_y + self.distance_fallen
+        y_location = self.zombie.y_location + self.target_location_y - self.joint_location_y + self.distance_fallen
         render.place(self.image, x=x_location, y=y_location)
         
       elif self.status == "fading":
@@ -394,7 +481,7 @@ init python:
           self.fade_start_time = time.time()
         elapsed = min((time.time() - self.fade_start_time), 1)
         x_location = self.zombie_x_timestamp + self.target_location_x - self.joint_location_x
-        y_location = self.zombie.y + self.target_location_y - self.joint_location_y + self.distance_fallen
+        y_location = self.zombie.y_location + self.target_location_y - self.joint_location_y + self.distance_fallen
         render.place(self.image, x=x_location, y=y_location)
       return render
 
@@ -409,7 +496,7 @@ init python:
 
       elif self.status == "detached":
         if self.zombie_x_timestamp == None:
-          self.zombie_x_timestamp = self.zombie.x
+          self.zombie_x_timestamp = self.zombie.x_location
 
         self.target_location_x += self.velocity_x * delta_time * delta_multiplier
         self.distance_fallen += self.velocity_y * delta_time * delta_multiplier
@@ -422,7 +509,7 @@ init python:
       elif self.status == "fading":
         if self.fade_start_time == None:
           self.fade_start_time = time.time()
-        if time.time() - self.fade_start_time > 0.5:
+        if time.time() - self.fade_start_time > 0.2:
           self.status = "gone"
 
     def update_motion_params(self):
@@ -438,9 +525,9 @@ init python:
       
 
   class Zombie():
-    def __init__(self, x, y, zombie_type, lane):
-      self.x = x
-      self.y = y
+    def __init__(self, x_location, y_location, zombie_type, lane):
+      self.x_location = x_location
+      self.y_location = y_location
       self.lane = lane
       self.zombie_type = zombie_type
       self.animation_type = config_data.get_zombie_config(zombie_type)["animation_type"]
@@ -491,7 +578,7 @@ init python:
 
     def update(self):
       if self.motion_config["moving"]:
-        self.x -= (self.speed * delta_time * delta_multiplier)
+        self.x_location -= (self.speed * delta_time * delta_multiplier)
 
       if hasattr(self, "target_plant") and self.target_plant is not None: # check if target_plant still exists
         self.target_plant.damage(self.attack/10)
@@ -502,6 +589,11 @@ init python:
           self.update_motion()
 
       if self.health <= 0:
+        self.speed = 0
+        self.is_dead = True
+
+      if self.x_location < -10:
+        self.should_delete = True
         self.is_dead = True
 
       head = [part for part in self.body_parts if part.part_name == "head"]
@@ -515,15 +607,16 @@ init python:
   class Lane():
     def __init__(self, id):
       self.id = id
-      self.y = None
+      self.y_location = None
       self.target_location_y = None
       self.tiles = []
       self.plants = []
       self.zombies = []
+      self.projectiles = []
 
     def populate_tiles(self, tiles):
       self.tiles = tiles
-      self.y = tiles[0].y
+      self.y_location = tiles[0].y_location
       self.target_location_y = tiles[0].target_location_y
 
     def add_plant(self, plant):
@@ -531,6 +624,9 @@ init python:
 
     def add_zombie(self, zombie):
       self.zombies.append(zombie)
+
+    def add_projectile(self, projectile):
+      self.projectiles.append(projectile)
 
     def get_zombies(self):
       return self.zombies
@@ -540,16 +636,21 @@ init python:
         for plant in self.plants:
           if plant.check_collision(zombie) and not zombie.target_plant:
             zombie.start_eating(plant)
+        for projectile in self.projectiles:
+          projectile.check_collision(zombie)
 
     def update(self):
       self.plants = [plant for plant in self.plants if not plant.is_dead]
       self.zombies = [zombie for zombie in self.zombies if not zombie.should_delete]
+      self.projectiles = [projectile for projectile in self.projectiles if projectile.active]
       self.check_collisions()
 
       for plant in self.plants:
         plant.update()
       for zombie in self.zombies:
         zombie.update()
+      for projectile in self.projectiles:
+        projectile.update()
 
     def render(self, render):
       for tile in self.tiles:
@@ -558,6 +659,8 @@ init python:
         render = zombie.render(render)
       for plant in self.plants:
         render = plant.render(render)
+      for projectile in self.projectiles:
+        render = projectile.render(render)
       return render
 
   class Lanes:
@@ -589,13 +692,19 @@ init python:
           zombies += lane.get_zombies()
       return zombies
 
+    def get_all_plants(self):
+      plants = []
+      for lane in self.lanes:
+          plants += lane.plants
+      return plants
+
     def assign_tiles(self, lane_index, tiles):
         self.lanes[lane_index].populate_tiles(tiles)
 
     def randomly_add_zombie(self, zombie_type):
         lane_index = renpy.random.randint(0, len(self.lanes) - 1)
         lane = self.lanes[lane_index]
-        zombie = Zombie(lane.tiles[-1].x + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y, zombie_type, lane)
+        zombie = Zombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location, zombie_type, lane)
         lane.add_zombie(zombie)
 
 
@@ -611,7 +720,7 @@ init python:
     def pos_to_tile(self, x, y):
       for lane in self.lanes:
         for tile in lane.tiles:
-          if tile.x <= x <= tile.x + tile.width and tile.y <= y <= tile.y + tile.height:
+          if tile.x_location <= x <= tile.x_location + tile.width and tile.y_location <= y <= tile.y_location + tile.height:
               return tile
       return None
 
@@ -636,10 +745,11 @@ init python:
       super(PvzGameDisplayable, self).__init__()
       all_images.load_plants(["peashooter"])
       all_images.load_zombies(["basic", "dog"])
+      all_images.load_projectiles(["baseball"])
 
       self.environment = EnvironmentBuilder(self.level_config, self)
       self.lanes = self.environment.gen_lanes()
-      for _ in range(20):
+      for _ in range(50):
         self.lanes.randomly_add_zombie("basic")
 
     def visit(self):
@@ -654,12 +764,8 @@ init python:
 
     def process_click(self):
       current_state = self.make_state()
-
-      # for z in self.lanes.get_all_zombies():
-      #   z.motion_type = "attack"
-      #   z.update_motion()
-
-      #   z.damage(55)
+      for plant in self.lanes.get_all_plants():
+        plant.attack()
 
       if self.plant_selected is not None:
         tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
