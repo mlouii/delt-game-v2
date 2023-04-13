@@ -13,7 +13,7 @@
 
   "peashooter": {
     "animation_type": "peashooter",
-    "health": 100,
+    "health": 300,
     "ROF": 10,
     "projectile": "baseball",
     "hitbox_distance": 10

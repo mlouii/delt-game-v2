@@ -25,6 +25,9 @@ init python:
   plant_config = load_json_from_file(path=JSON_DIR + "plants.json")
   projectile_config = load_json_from_file(path=JSON_DIR + "projectiles.json")
 
+  delta_time = 0.0
+  delta_multiplier = 70
+
   def send_to_file(filename, text):
     with open(config.gamedir + "/" + filename, "a") as f:
         f.write(text)
@@ -129,6 +132,7 @@ init python:
       overlays = {plant:self.images["plants"][plant]["overlay"] for plant in plants}
       return overlays
 
+  # These are the global variables
   all_images = ImageLoader()
   config_data = ConfigLoader()
 
@@ -397,16 +401,18 @@ init python:
     def update(self):
       if self.status == "attached":
         if self.motion_type == "rotate":
-          self.angle += (self.direction * self.motion_config["speed"][str(self.direction)])
-          if (self.angle > self.limit[1] or self.angle < self.limit[0]):
-            self.direction *= -1
+          self.angle += (self.direction * self.motion_config["speed"][str(self.direction)] * delta_time * delta_multiplier)
+          if (self.angle < self.limit[0]):
+            self.direction = 1
+          if (self.angle > self.limit[1]):
+            self.direction = -1
 
       elif self.status == "detached":
         if self.zombie_x_timestamp == None:
           self.zombie_x_timestamp = self.zombie.x
 
-        self.target_location_x += self.velocity_x
-        self.distance_fallen += self.velocity_y
+        self.target_location_x += self.velocity_x * delta_time * delta_multiplier
+        self.distance_fallen += self.velocity_y * delta_time * delta_multiplier
         self.velocity_y += 0.3
 
         if self.distance_fallen > (self.zombie_image_config["fall_height"] - self.target_location_y):
@@ -485,7 +491,7 @@ init python:
 
     def update(self):
       if self.motion_config["moving"]:
-        self.x -= self.speed/10
+        self.x -= (self.speed * delta_time * delta_multiplier)
 
       if hasattr(self, "target_plant") and self.target_plant is not None: # check if target_plant still exists
         self.target_plant.damage(self.attack/10)
@@ -615,7 +621,6 @@ init python:
 
   class PvzGameDisplayable(renpy.Displayable):
     def __init__(self, level):
-
       self.level_config = None
       file_handle = renpy.file(JSON_DIR + "level" + str(level) + ".json")
       file_contents = file_handle.read()
@@ -626,13 +631,15 @@ init python:
       self.mouseY = 0
       self.plant_selected = "peashooter"
 
+      self.last_time = time.time()
+
       super(PvzGameDisplayable, self).__init__()
       all_images.load_plants(["peashooter"])
       all_images.load_zombies(["basic", "dog"])
 
       self.environment = EnvironmentBuilder(self.level_config, self)
       self.lanes = self.environment.gen_lanes()
-      for _ in range(12):
+      for _ in range(20):
         self.lanes.randomly_add_zombie("basic")
 
     def visit(self):
@@ -662,6 +669,10 @@ init python:
         
 
     def render(self, width, height, st, at):
+      global delta_time
+      current_time = time.time()
+      delta_time = (current_time - self.last_time)
+      self.last_time = current_time
 
       current_state = self.make_state()
       self.environment.update(current_state)
