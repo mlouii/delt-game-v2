@@ -4,6 +4,7 @@ define THIS_PATH = 'minigame/'
 # XXX: using os.path.join here will actually break because Ren'Py somehow doesn't recognize it
 define IMG_DIR = THIS_PATH + 'images/'
 define JSON_DIR = THIS_PATH + 'info/'
+define GRAVITY_CONSTANT = 0.3
 
 init python:
   import pygame
@@ -100,7 +101,65 @@ init python:
                           image_config[part_type][item]["y"] = image_config[part_type][item]["y"] * resize_factor
 
         self.zombies["image_data"][animation_type] = image_config
-        
+
+  class Particle():
+    def __init__(self, x, y, color, size, speed, direction, life, gravity_affected):
+      self.x = x
+      self.y = y
+      self.color = color
+      self.size = size
+      self.speed = speed
+      self.direction = direction
+      self.life = life
+      self.age = 0
+      self.gravity_affected = gravity_affected
+
+      self.x_velocity = self.speed * delta_time * math.cos(self.direction) * delta_multiplier
+      self.y_velocity = self.speed * delta_time * math.sin(self.direction) * delta_multiplier
+
+    def update(self):
+      self.x += self.x_velocity
+      self.y += self.y_velocity
+      if self.gravity_affected:
+        self.y_velocity += GRAVITY_CONSTANT
+      self.age += delta_time
+      if self.age >= self.life:
+        return True
+      return False
+
+    def render(self, render):
+      image = Solid(self.color, xsize=self.size, ysize=self.size)
+      render.place(image, x=self.x, y=self.y)
+      return render
+
+  class ParticleSystem():
+    def __init__(self):
+      self.particles = []
+
+    def trail(self, x, y, color, life):
+      for i in range(1):
+        size = renpy.random.randint(3, 5)
+        speed = 1
+        direction = renpy.random.uniform(0.7 * math.pi, 1.3 * math.pi)
+        self.particles.append(Particle(x + 10, y, color, size, speed, direction, life, False))
+
+    def splash(self, x, y, color, life):
+      for i in range(5):
+        size = renpy.random.randint(3, 5)
+        speed = renpy.random.randint(1, 4)
+        direction = renpy.random.uniform(0, 2 * math.pi)
+        self.particles.append(Particle(x, y, color, size, speed, direction, life, True))
+
+    def update(self):
+      for particle in self.particles:
+        if particle.update():
+          self.particles.remove(particle)
+
+    def render(self, render):
+      for particle in self.particles:
+        render = particle.render(render)
+      return render
+
         
   class ImageLoader():
     def __init__(self):
@@ -200,6 +259,7 @@ init python:
   # These are the global variables
   all_images = ImageLoader()
   config_data = ConfigLoader()
+  particleSystem = ParticleSystem()
 
   class Tile():
     def __init__(self, x_location, y_location, row_id, lane_id, width, height, color):
@@ -346,7 +406,14 @@ init python:
 
       self.image = all_images.images["projectiles"][self.projectile_type]["image"]
       self.effects = self.projectile_config["effects"]
+      self.does_spawn_particle = self.projectile_config["spawn_particles"]
 
+      self.trail_time = time.time()
+      self.leave_trail = False
+      self.particle_color = None
+      if self.does_spawn_particle:
+        self.particle_color = (self.projectile_config["particle_color"][0], self.projectile_config["particle_color"][1], self.projectile_config["particle_color"][2])
+        self.leave_trail = self.projectile_config["leave_trail"]
 
       self.plant_spawn_x = self.plant.x_location + self.plant.plant_image_config["projectile_spawn_x"]
       self.plant_spawn_y = self.plant.y_location + self.plant.plant_image_config["projectile_spawn_y"]
@@ -368,11 +435,27 @@ init python:
       if self.x_location > config.screen_width:
         self.active = False
 
+      if self.leave_trail and time.time() - self.trail_time > 0.2:
+        self.trail_time = time.time()
+        self.trail_effect()
+
     def check_reference_in_list(self, ref_obj, obj_list):
         for obj in obj_list:
             if ref_obj is obj:
                 return True
         return False
+
+    def trail_effect(self):
+      if self.does_spawn_particle:
+        spawn_x = self.x_location + self.center_x
+        spawn_y = self.y_location + self.center_y
+        particleSystem.trail(spawn_x, spawn_y, self.particle_color, 0.2)
+
+    def splash_effect(self):
+      if self.does_spawn_particle:
+        spawn_x = self.x_location + self.center_x
+        spawn_y = self.y_location + self.center_y
+        particleSystem.splash(spawn_x, spawn_y, self.particle_color, 0.2)
 
     def check_collision(self, zombie):
       if self.active:
@@ -385,6 +468,7 @@ init python:
               self.damaged_zombies.append(zombie)
               if len(self.damaged_zombies) >= self.pierce:
                 self.active = False
+                self.splash_effect()
 
 
   class Plant():
@@ -519,7 +603,7 @@ init python:
     def render(self, render):
       self.image = all_images.images["zombies"][self.zombie.zombie_type][self.zombie.costume][self.part_type]
       if self.status == "attached":
-        if self.motion_type == None:
+        if self.motion_type != "rotate":
           transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
           # Calculate the position of the transformed image
           x_location = self.zombie.x_location + self.target_location_x - self.joint_location_x
@@ -565,13 +649,16 @@ init python:
           if (self.angle > self.limit[1]):
             self.direction = -1
 
+        if self.motion_type == "fall":
+          if self.part_name == "torso":
+            self.zombie.y_location += self.motion_config["speed"] * delta_time * delta_multiplier
       elif self.status == "detached":
         if self.zombie_x_timestamp == None:
           self.zombie_x_timestamp = self.zombie.x_location
 
         self.target_location_x += self.velocity_x * delta_time * delta_multiplier
         self.distance_fallen += self.velocity_y * delta_time * delta_multiplier
-        self.velocity_y += 0.3
+        self.velocity_y += GRAVITY_CONSTANT
 
         if self.distance_fallen > (self.zombie_image_config["fall_height"] - self.target_location_y):
           self.velocity_y = 0
@@ -587,9 +674,14 @@ init python:
       self.motion_config = config_data.get_zombie_motion_config(self.zombie.motion_type)[self.part_name]
       if self.motion_config["type"] == "rotate":
         self.limit = self.motion_config["limit"]
-        self.direction = self.motion_config["start_direction"]
         self.motion_type = self.motion_config["type"]
-        self.angle = self.motion_config["start_angle"]
+
+        if self.motion_config["start_angle"] != "none":
+          self.angle = self.motion_config["start_angle"] + renpy.random.randint(-self.motion_config["start_angle_variance"], self.motion_config["start_angle_variance"])
+        if self.motion_config["start_direction"] != "none":
+          self.direction = self.motion_config["start_direction"]
+      elif self.motion_config["type"] == "fall":
+        self.motion_type = self.motion_config["type"]
       else:
         self.motion_type = None
 
@@ -597,12 +689,13 @@ init python:
 
   class Zombie():
     def __init__(self, x_location, y_location, zombie_type, lane):
-      self.x_location = x_location
-      self.y_location = y_location
       self.lane = lane
       self.zombie_type = zombie_type
       self.animation_type = config_data.get_zombie_config(zombie_type)["animation_type"]
       self.image_config = config_data.get_zombie_image_config(self.animation_type)
+
+      self.x_location = x_location
+      self.y_location = self.lane.tiles[0].target_location_y - self.image_config["fall_height"]
 
       self.costume = "default"
       self.damaged_timer = None
@@ -621,6 +714,9 @@ init python:
       self.speed = zombie_config[self.zombie_type]["speed"]
       self.attack = zombie_config[self.zombie_type]["attack"]
       self.hitbox_distance = zombie_config[self.zombie_type]["hitbox_distance"]
+
+      self.attack_motions = zombie_config[self.zombie_type]["attack_motions"]
+      self.death_motions = zombie_config[self.zombie_type]["death_motions"]
 
       self.body_parts = [Body_Part(self, part_name) for part_name in self.image_config["part_name_order"]]
 
@@ -658,7 +754,7 @@ init python:
 
     def start_eating(self, plant):
       self.target_plant = plant
-      self.motion_type = "attack"
+      self.motion_type = renpy.random.choice(self.attack_motions)
       self.update_motion()
 
     def update(self):
@@ -688,6 +784,8 @@ init python:
       if self.health <= 0:
         self.speed = 0
         self.is_dead = True
+        self.motion_type = renpy.random.choice(self.death_motions)
+        self.update_motion()
 
       if self.x_location < -10:
         self.should_delete = True
@@ -742,22 +840,17 @@ init python:
       self.projectiles = [projectile for projectile in self.projectiles if projectile.active]
       self.check_collisions()
 
-      for plant in self.plants:
-        plant.update()
-      for zombie in self.zombies:
-        zombie.update()
-      for projectile in self.projectiles:
-        projectile.update()
+      order = [self.plants, self.zombies, self.projectiles]
+      for update_target in order:
+        for target in update_target:
+          target.update()
+
 
     def render(self, render):
-      for tile in self.tiles:
-        render = tile.render(render)
-      for zombie in self.zombies:
-        render = zombie.render(render)
-      for plant in self.plants:
-        render = plant.render(render)
-      for projectile in self.projectiles:
-        render = projectile.render(render)
+      order = [self.tiles, self.plants, self.zombies, self.projectiles]
+      for render_target in order:
+        for target in render_target:
+          render = target.render(render)
       return render
 
   class Lanes:
@@ -808,10 +901,12 @@ init python:
     def update(self):
       for lane in self.lanes:
         lane.update()
+      particleSystem.update()
 
     def render(self, render):
       for lane in self.lanes:
         render = lane.render(render)
+      render = particleSystem.render(render)
       return render
 
     def pos_to_tile(self, x, y):
@@ -851,6 +946,7 @@ init python:
       self.environment = EnvironmentBuilder(self.level_config, self)
       self.lanes = self.environment.gen_lanes()
       for _ in range(10):
+        self.lanes.randomly_add_zombie("dog")
         self.lanes.randomly_add_zombie("basic")
 
     def visit(self):
