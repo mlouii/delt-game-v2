@@ -103,16 +103,19 @@ init python:
         self.zombies["image_data"][animation_type] = image_config
 
   class Particle():
-    def __init__(self, x, y, color, size, speed, direction, life, gravity_affected):
+    def __init__(self, x, y, color, x_size, y_size, speed, direction, life, gravity_affected):
       self.x = x
       self.y = y
       self.color = color
-      self.size = size
+      self.x_size = x_size
+      self.y_size = y_size
       self.speed = speed
       self.direction = direction
       self.life = life
       self.age = 0
       self.gravity_affected = gravity_affected
+
+      self.image = Solid(self.color, xsize=self.x_size, ysize=self.y_size)
 
       self.x_velocity = self.speed * delta_time * math.cos(self.direction) * delta_multiplier
       self.y_velocity = self.speed * delta_time * math.sin(self.direction) * delta_multiplier
@@ -128,27 +131,54 @@ init python:
       return False
 
     def render(self, render):
-      image = Solid(self.color, xsize=self.size, ysize=self.size)
+      image = self.image
       render.place(image, x=self.x, y=self.y)
       return render
+
+  class Electric_Particle(Particle):
+    def __init__(self, x, y, x_variance):
+      color = (255, 102, 255, 150)
+      y_size = renpy.random.randint(8, 15)
+      speed = renpy.random.randint(3, 5)
+      direction = 1.5 * math.pi
+      x = x + renpy.random.randint(-x_variance, x_variance)
+      super().__init__(x, y, color, 2, y_size, speed, direction, 0.5, False)
+
+    def update(self):
+      should_remove = super().update()
+      self.x += renpy.random.randint(-2, 2)
+      return should_remove
+
+    def render(self, render):
+      return super().render(render)
+
 
   class ParticleSystem():
     def __init__(self):
       self.particles = []
+
+    def electricity(self, x, y, x_variance):
+      for i in range(1):
+        # color = (255, 102, 255, 150)
+        # y_size = renpy.random.randint(8, 15)
+        # speed = renpy.random.randint(1, 3)
+        # direction = 1.5 * math.pi
+        # x = x + renpy.random.randint(-x_variance, x_variance)
+        self.particles.append(Electric_Particle(x, y, x_variance))
 
     def trail(self, x, y, color, life):
       for i in range(1):
         size = renpy.random.randint(3, 5)
         speed = 1
         direction = renpy.random.uniform(0.7 * math.pi, 1.3 * math.pi)
-        self.particles.append(Particle(x + 10, y, color, size, speed, direction, life, False))
+        self.particles.append(Particle(x + 10, y, color, size, size, speed, direction, life, False))
 
     def splash(self, x, y, color, life):
       for i in range(5):
         size = renpy.random.randint(3, 5)
         speed = renpy.random.randint(1, 4)
         direction = renpy.random.uniform(0, 2 * math.pi)
-        self.particles.append(Particle(x, y, color, size, speed, direction, life, True))
+        self.particles.append(Particle(x, y, color, size, size, speed, direction, life, True))
 
     def update(self):
       for particle in self.particles:
@@ -759,6 +789,12 @@ init python:
 
     def update(self):
 
+      if self.zombie_type == "kinetic":
+        legs = [part for part in self.body_parts if part.part_type == "legs"]
+        for leg in legs:
+          if leg.angle and abs(leg.angle) < 3:
+            particleSystem.electricity(self.x_location, self.y_location + self.image_config["fall_height"], 30) 
+
       walk_speed = self.speed
       if self.is_iced:
         walk_speed = walk_speed * 0.5
@@ -941,13 +977,14 @@ init python:
 
       super(PvzGameDisplayable, self).__init__()
       all_images.load_plants(["peashooter"])
-      all_images.load_zombies(["basic", "dog"])
+      all_images.load_zombies(["basic", "dog", "kinetic"])
 
       self.environment = EnvironmentBuilder(self.level_config, self)
       self.lanes = self.environment.gen_lanes()
-      for _ in range(10):
+      for _ in range(5):
         self.lanes.randomly_add_zombie("dog")
         self.lanes.randomly_add_zombie("basic")
+        self.lanes.randomly_add_zombie("kinetic")
 
     def visit(self):
       return self.environment.visit()
