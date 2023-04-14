@@ -9,6 +9,6 @@
     "speed": 8,
     "range": 10,
     "pierce": 1,
-    "effects": "none"
+    "effects": "ice"
   }
 }

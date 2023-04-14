@@ -1,0 +1,14 @@
+{
+  "level1" : {
+    "lighter_color" : [48, 176, 77],
+    "dark_color": [48, 143, 69],
+    "variance": [0, 7, 4],
+    "num_rows": 5,
+    "num_cols": 9,
+    "height_multiplier": 0.7,
+    "width_multiplier": 0.7,
+    "start_x": 0.15,
+    "start_y": 0.25,
+    "zombies": ["basic", "dog"]
+  }
+}

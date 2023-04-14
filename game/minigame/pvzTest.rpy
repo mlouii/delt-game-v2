@@ -21,6 +21,7 @@ init python:
     file_handle.close()
     return json.loads(file_contents)
 
+  level_config = load_json_from_file(path=JSON_DIR + "levels.json")
   zombie_config = load_json_from_file(path=JSON_DIR + "zombies.json")
   plant_config = load_json_from_file(path=JSON_DIR + "plants.json")
   projectile_config = load_json_from_file(path=JSON_DIR + "projectiles.json")
@@ -37,9 +38,13 @@ init python:
 
   class ConfigLoader():
     def __init__(self):
+      self.levels = level_config
       self.plants = plant_config
       self.zombies = zombie_config
       self.projectiles = projectile_config
+
+    def get_level_config(self, level_name):
+      return self.levels[level_name]
 
     def get_zombie_config(self, zombie_type):
       return self.zombies[zombie_type]
@@ -100,6 +105,7 @@ init python:
   class ImageLoader():
     def __init__(self):
       self.images = {}
+      self.brightness_factor = 0.3
 
     def load_plants(self, plant_types):
       self.images["plants"] = {}
@@ -118,22 +124,50 @@ init python:
         animation_frames = [im.FactorScale(Image(plant_location + "/" + image_prefix + "-" + str(i) + ".png"), resize_factor) for i in range(num_frames)]
         self.images["plants"][plant_name] = {
           "overlay": tile_overlay,
-          "animation": animation_frames
+          "animation": {
+            "default": animation_frames,
+            "damaged_default": [im.MatrixColor(frame, im.matrix.brightness(self.brightness_factor)) for frame in animation_frames]
+          }
         }
+      projectiles_to_load = self.determine_projectiles_to_load(plant_names=plant_types)
+      self.load_projectiles(projectiles_to_load)
+
 
     def load_zombies(self, zombie_types):
       self.images["zombies"] = {}
       for zombie_name in zombie_types:
+        self.images["zombies"][zombie_name] = {}
         zombie_location = IMG_DIR + "zombies/" + zombie_name
         animation_type = config_data.get_zombie_config(zombie_name)["animation_type"]
         resize_factor = config_data.get_zombie_image_config(animation_type)["resize_factor"]
 
         config_data.modify_zombie_image_size(animation_type, resize_factor=resize_factor)
-        self.images["zombies"][zombie_name] = {
+        self.images["zombies"][zombie_name]["default"] = {
           "torso": im.FactorScale(Image(zombie_location + "/torso.png"), resize_factor),
           "head": im.FactorScale(Image(zombie_location + "/head.png"), resize_factor),
           "legs": im.FactorScale(Image(zombie_location + "/legs.png"), resize_factor),
           "arms": im.FactorScale(Image(zombie_location + "/arms.png"), resize_factor)
+        }
+        
+        self.images["zombies"][zombie_name]["damaged_default"] = {
+          "torso": im.MatrixColor(im.FactorScale(Image(zombie_location + "/torso.png"), resize_factor), im.matrix.brightness(self.brightness_factor)),
+          "head": im.MatrixColor(im.FactorScale(Image(zombie_location + "/head.png"), resize_factor), im.matrix.brightness(self.brightness_factor)),
+          "legs": im.MatrixColor(im.FactorScale(Image(zombie_location + "/legs.png"), resize_factor), im.matrix.brightness(self.brightness_factor)),
+          "arms": im.MatrixColor(im.FactorScale(Image(zombie_location + "/arms.png"), resize_factor), im.matrix.brightness(self.brightness_factor))
+        }
+
+        self.images["zombies"][zombie_name]["iced"] = {
+          "torso": im.FactorScale(Image(zombie_location + "/torso-iced.png"), resize_factor),
+          "head": im.FactorScale(Image(zombie_location + "/head-iced.png"), resize_factor),
+          "legs": im.FactorScale(Image(zombie_location + "/legs-iced.png"), resize_factor),
+          "arms": im.FactorScale(Image(zombie_location + "/arms-iced.png"), resize_factor)
+        }
+        
+        self.images["zombies"][zombie_name]["damaged_iced"] = {
+          "torso": im.MatrixColor(im.FactorScale(Image(zombie_location + "/torso-iced.png"), resize_factor), im.matrix.brightness(self.brightness_factor)),
+          "head": im.MatrixColor(im.FactorScale(Image(zombie_location + "/head-iced.png"), resize_factor), im.matrix.brightness(self.brightness_factor)),
+          "legs": im.MatrixColor(im.FactorScale(Image(zombie_location + "/legs-iced.png"), resize_factor), im.matrix.brightness(self.brightness_factor)),
+          "arms": im.MatrixColor(im.FactorScale(Image(zombie_location + "/arms-iced.png"), resize_factor), im.matrix.brightness(self.brightness_factor))
         }
 
     def load_projectiles(self, projectile_types):
@@ -145,6 +179,15 @@ init python:
         self.images["projectiles"][projectile_name] = {
           "image": im.FactorScale(Image(projectile_location), resize_factor)
         }
+
+    def determine_projectiles_to_load(self, plant_names):
+      projectiles = []
+      for plant_name in plant_names:
+        if config_data.get_plant_config(plant_name)["spawn_projectile"]:
+          projectile_name = config_data.get_plant_config(plant_name)["projectile_type"]
+          if projectile_name not in projectiles:
+            projectiles.append(projectile_name)
+      return projectiles
       
       
 
@@ -302,7 +345,8 @@ init python:
       self.center_y = self.projectile_config["center_y"]
 
       self.image = all_images.images["projectiles"][self.projectile_type]["image"]
-      self.projectile_config = config_data.get_projectile_config(self.projectile_type)
+      self.effects = self.projectile_config["effects"]
+
 
       self.plant_spawn_x = self.plant.x_location + self.plant.plant_image_config["projectile_spawn_x"]
       self.plant_spawn_y = self.plant.y_location + self.plant.plant_image_config["projectile_spawn_y"]
@@ -335,6 +379,8 @@ init python:
         if self.lane is zombie.lane:
           if abs(self.x_location - zombie.x_location) < (zombie.hitbox_distance/5) and zombie.is_dead is False:
             if self.check_reference_in_list(zombie, self.damaged_zombies) is False:
+              if self.effects == "ice":
+                zombie.get_iced()
               zombie.damage(self.damage)
               self.damaged_zombies.append(zombie)
               if len(self.damaged_zombies) >= self.pierce:
@@ -358,7 +404,10 @@ init python:
       if self.does_spawn_projectile:
         self.projectile_type = self.plant_config["projectile_type"]
 
-      self.frames = all_images.images["plants"][self.plant_type]["animation"]
+      self.costume = "default"
+      self.frames = all_images.images["plants"][self.plant_type]["animation"][self.costume]
+      self.damaged_timer = None
+
       self.plant_image_config = config_data.get_plant_image_config(self.plant_type)
       self.frame = 0
 
@@ -366,6 +415,7 @@ init python:
       self.y_location = self.tile.target_location_y - self.plant_image_config["joint_y"]
 
     def render(self, render):
+      self.frames = all_images.images["plants"][self.plant_type]["animation"][self.costume]
       render.place(self.frames[self.frame], x = self.x_location, y = self.y_location)
       return render
 
@@ -377,6 +427,11 @@ init python:
       self.health -= damage
       if self.health <= 0:
         self.die()
+      
+      if not self.costume.startswith("damaged_"):
+        self.costume = "damaged_" + self.costume
+        self.damaged_timer = time.time()
+
 
     def attack(self):
       if self.does_spawn_projectile:
@@ -394,6 +449,11 @@ init python:
     def update(self):
       if self.health <= 0:
         self.die()
+
+      if self.damaged_timer is not None:
+        if time.time() - self.damaged_timer > 0.05:
+          self.costume = self.costume.replace("damaged_", "")
+          self.damaged_timer = None
 
       self.frame = (self.frame + 1) % len(self.frames)
 
@@ -426,7 +486,7 @@ init python:
       self.angle = None
       self.update_motion_params()
 
-      self.image = all_images.images["zombies"][self.zombie.zombie_type][self.part_type]
+      self.image = all_images.images["zombies"][self.zombie.zombie_type][self.zombie.costume][self.part_type]
       self.joint_location_x = 0
       self.joint_location_y = 0
       self.target_location_x = 0
@@ -457,6 +517,7 @@ init python:
       return transformed_image, x_location, y_location
 
     def render(self, render):
+      self.image = all_images.images["zombies"][self.zombie.zombie_type][self.zombie.costume][self.part_type]
       if self.status == "attached":
         if self.motion_type == None:
           transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
@@ -469,6 +530,12 @@ init python:
           render.place(transformed_image, x=x_location, y=y_location)
 
       elif self.status == "detached":
+
+        costume_name = self.zombie.costume
+        if costume_name.startswith("damaged_"):
+          costume_name = costume_name.replace("damaged_", "")
+
+        self.image = all_images.images["zombies"][self.zombie.zombie_type][costume_name][self.part_type]
         if self.zombie_x_timestamp == None:
           self.zombie_x_timestamp = self.zombie.x_location
           
@@ -488,7 +555,11 @@ init python:
     def update(self):
       if self.status == "attached":
         if self.motion_type == "rotate":
-          self.angle += (self.direction * self.motion_config["speed"][str(self.direction)] * delta_time * delta_multiplier)
+          rotate_speed = self.motion_config["speed"][str(self.direction)]
+          if self.zombie.is_iced:
+            rotate_speed = rotate_speed * 0.5
+
+          self.angle += (self.direction * rotate_speed * delta_time * delta_multiplier)
           if (self.angle < self.limit[0]):
             self.direction = 1
           if (self.angle > self.limit[1]):
@@ -533,6 +604,12 @@ init python:
       self.animation_type = config_data.get_zombie_config(zombie_type)["animation_type"]
       self.image_config = config_data.get_zombie_image_config(self.animation_type)
 
+      self.costume = "default"
+      self.damaged_timer = None
+
+      self.is_iced = False
+      self.ice_timer = None
+
       self.motion_type = renpy.random.choice(config_data.get_zombie_config(zombie_type)["motions"])
       self.motion_config = config_data.get_zombie_motion_config(self.motion_type)
       self.status = "moving"
@@ -559,6 +636,11 @@ init python:
       for body_part in self.body_parts:
         body_part.update_motion_params()
 
+    def get_iced(self):
+      self.is_iced = True
+      self.ice_timer = time.time()
+      self.costume = "iced"
+
     def check_damage_limb_detach(self):
       info = self.image_config["damage_fall_order"]
       for part_name in info.keys():
@@ -570,6 +652,9 @@ init python:
     def damage(self, damage):
       self.health -= damage
       self.check_damage_limb_detach()
+      if not self.costume.startswith("damaged_"):
+        self.costume = "damaged_" + self.costume
+        self.damaged_timer = time.time()
 
     def start_eating(self, plant):
       self.target_plant = plant
@@ -577,8 +662,20 @@ init python:
       self.update_motion()
 
     def update(self):
+
+      walk_speed = self.speed
+      if self.is_iced:
+        walk_speed = walk_speed * 0.5
+
       if self.motion_config["moving"]:
-        self.x_location -= (self.speed * delta_time * delta_multiplier)
+        self.x_location -= (walk_speed * delta_time * delta_multiplier)
+
+      if self.is_iced and time.time() - self.ice_timer > 5:
+        self.is_iced = False
+        self.costume = "default"
+
+      if self.costume.startswith("damaged_") and time.time() - self.damaged_timer > 0.05:
+        self.costume = self.costume.replace("damaged_", "")
 
       if hasattr(self, "target_plant") and self.target_plant is not None: # check if target_plant still exists
         self.target_plant.damage(self.attack/10)
@@ -730,11 +827,16 @@ init python:
 
   class PvzGameDisplayable(renpy.Displayable):
     def __init__(self, level):
+
+      # for some reason, removing this block of code causes the render to fuck up
       self.level_config = None
-      file_handle = renpy.file(JSON_DIR + "level" + str(level) + ".json")
+      file_handle = renpy.file(JSON_DIR + "levels" + ".json")
       file_contents = file_handle.read()
       file_handle.close()
-      self.level_config = json.loads(file_contents)
+      self.level_config = json.loads(file_contents)["level1"]
+      # end block of code
+
+      self.level_config = config_data.get_level_config("level1")
 
       self.mouseX = 0
       self.mouseY = 0
@@ -745,11 +847,10 @@ init python:
       super(PvzGameDisplayable, self).__init__()
       all_images.load_plants(["peashooter"])
       all_images.load_zombies(["basic", "dog"])
-      all_images.load_projectiles(["baseball"])
 
       self.environment = EnvironmentBuilder(self.level_config, self)
       self.lanes = self.environment.gen_lanes()
-      for _ in range(50):
+      for _ in range(10):
         self.lanes.randomly_add_zombie("basic")
 
     def visit(self):
