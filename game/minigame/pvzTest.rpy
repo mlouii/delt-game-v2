@@ -85,7 +85,7 @@ init python:
       
     def modify_zombie_image_size(self, animation_type, resize_factor):
         image_config = self.get_zombie_image_config(animation_type)
-        if image_config["class"] == "zombie":
+        if image_config["class"] in ["zombie", "vehicle"]:
             for part_type in image_config["parts"]:
               image_config[part_type]["height"] = image_config[part_type]["height"] * resize_factor
               image_config[part_type]["width"] = image_config[part_type]["width"] * resize_factor
@@ -231,33 +231,31 @@ init python:
         resize_factor = config_data.get_zombie_image_config(animation_type)["resize_factor"]
 
         config_data.modify_zombie_image_size(animation_type, resize_factor=resize_factor)
-        self.images["zombies"][zombie_name]["default"] = {
-          "torso": im.FactorScale(Image(zombie_location + "/torso.png"), resize_factor),
-          "head": im.FactorScale(Image(zombie_location + "/head.png"), resize_factor),
-          "legs": im.FactorScale(Image(zombie_location + "/legs.png"), resize_factor),
-          "arms": im.FactorScale(Image(zombie_location + "/arms.png"), resize_factor)
-        }
-        
-        self.images["zombies"][zombie_name]["damaged_default"] = {
-          "torso": im.MatrixColor(im.FactorScale(Image(zombie_location + "/torso.png"), resize_factor), im.matrix.brightness(self.brightness_factor)),
-          "head": im.MatrixColor(im.FactorScale(Image(zombie_location + "/head.png"), resize_factor), im.matrix.brightness(self.brightness_factor)),
-          "legs": im.MatrixColor(im.FactorScale(Image(zombie_location + "/legs.png"), resize_factor), im.matrix.brightness(self.brightness_factor)),
-          "arms": im.MatrixColor(im.FactorScale(Image(zombie_location + "/arms.png"), resize_factor), im.matrix.brightness(self.brightness_factor))
-        }
 
-        self.images["zombies"][zombie_name]["iced"] = {
-          "torso": im.FactorScale(Image(zombie_location + "/torso-iced.png"), resize_factor),
-          "head": im.FactorScale(Image(zombie_location + "/head-iced.png"), resize_factor),
-          "legs": im.FactorScale(Image(zombie_location + "/legs-iced.png"), resize_factor),
-          "arms": im.FactorScale(Image(zombie_location + "/arms-iced.png"), resize_factor)
-        }
-        
-        self.images["zombies"][zombie_name]["damaged_iced"] = {
-          "torso": im.MatrixColor(im.FactorScale(Image(zombie_location + "/torso-iced.png"), resize_factor), im.matrix.brightness(self.brightness_factor)),
-          "head": im.MatrixColor(im.FactorScale(Image(zombie_location + "/head-iced.png"), resize_factor), im.matrix.brightness(self.brightness_factor)),
-          "legs": im.MatrixColor(im.FactorScale(Image(zombie_location + "/legs-iced.png"), resize_factor), im.matrix.brightness(self.brightness_factor)),
-          "arms": im.MatrixColor(im.FactorScale(Image(zombie_location + "/arms-iced.png"), resize_factor), im.matrix.brightness(self.brightness_factor))
-        }
+        part_types = config_data.get_zombie_image_config(animation_type)["parts"]
+        part_types_with_damage_frames = None
+        has_damage_frames = config_data.get_zombie_config(zombie_name)["has_damage_frames"]
+        if has_damage_frames:
+          part_types_with_damage_frames = config_data.get_zombie_config(zombie_name)["damage_frame_order"].keys()
+        types_to_loop = ["default", "iced"]
+        for type_to_loop in types_to_loop:
+          suffix = ""
+          if type_to_loop == "iced":
+            suffix = "-" + type_to_loop
+          self.images["zombies"][zombie_name][type_to_loop] = {part_type:im.FactorScale(Image(zombie_location + f"/{part_type}{suffix}.png"), resize_factor) for part_type in part_types}
+          self.images["zombies"][zombie_name]["damaged_"+type_to_loop] = {
+            part_type:im.MatrixColor(im.FactorScale(Image(zombie_location + f"/{part_type}{suffix}.png"), resize_factor), im.matrix.brightness(self.brightness_factor)) for part_type in part_types
+          }
+          if has_damage_frames:
+            for part in part_types_with_damage_frames:
+              for damage_frame in config_data.get_zombie_config(zombie_name)["damage_frame_order"][part].keys():
+                self.images["zombies"][zombie_name][damage_frame + suffix] = {
+                  part_type:im.FactorScale(Image(zombie_location + f"/{part_type}-{damage_frame}{suffix}.png"), resize_factor) for part_type in part_types
+                }
+                self.images["zombies"][zombie_name]["damaged_"+ damage_frame + suffix] = {
+                  part_type:im.MatrixColor(im.FactorScale(Image(zombie_location + f"/{part_type}-{damage_frame}{suffix}.png"), resize_factor), im.matrix.brightness(self.brightness_factor)) for part_type in part_types
+                }
+
 
     def load_projectiles(self, projectile_types):
       self.images["projectiles"] = {}
@@ -576,6 +574,12 @@ init python:
       self.zombie = zombie
       self.animation_type = zombie.animation_type
       self.zombie_image_config = config_data.get_zombie_image_config(self.animation_type)
+      self.zombie_config = config_data.get_zombie_config(self.zombie.zombie_type)
+
+      self.has_damage_frames = False
+      if self.zombie_config["has_damage_frames"] and part_name in self.zombie_config["damage_frame_order"].keys():
+        self.has_damage_frames = True
+
       self.part_name = part_name
       self.part_type = part_name
 
@@ -591,6 +595,9 @@ init python:
 
       if self.part_name in ["left_leg", "right_leg"]:
         self.part_type = "legs"
+
+      if self.part_name in ["left_tire", "right_tire"]:
+        self.part_type = "tire"
 
       self.motion_config = config_data.get_zombie_motion_config(self.zombie.motion_type)[self.part_name]
 
@@ -614,6 +621,15 @@ init python:
         self.target_location_x = self.zombie_image_config["torso"][self.part_name + "_joint"]["x"]
         self.target_location_y = self.zombie_image_config["torso"][self.part_name + "_joint"]["y"]
 
+    def determine_damage_frame(self):
+      health = self.zombie.health
+      damage_frames = self.zombie_config["damage_frame_order"][self.part_name]
+      damage_frame = None
+      for frame in damage_frames.keys():
+        if health <= (self.zombie_config["health"] * (1-damage_frames[frame])):
+          damage_frame = frame
+      return damage_frame
+
     def process_rotation(self):
       transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
       # Calculate the offset of the joint after rotation
@@ -631,7 +647,16 @@ init python:
       return transformed_image, x_location, y_location
 
     def render(self, render):
-      self.image = all_images.images["zombies"][self.zombie.zombie_type][self.zombie.costume][self.part_type]
+      if self.has_damage_frames and self.determine_damage_frame() is not None:
+        damage_frame = self.determine_damage_frame()
+        costume = damage_frame
+        if self.zombie.costume.startswith("damaged_"):
+          costume = "damaged_"+costume
+        if self.zombie.costume.endswith("iced"):
+          costume = costume + "iced"
+        self.image = all_images.images["zombies"][self.zombie.zombie_type][costume][self.part_type]
+      else:
+        self.image = all_images.images["zombies"][self.zombie.zombie_type][self.zombie.costume][self.part_type]
       if self.status == "attached":
         if self.motion_type != "rotate":
           transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
@@ -747,6 +772,7 @@ init python:
 
       self.attack_motions = zombie_config[self.zombie_type]["attack_motions"]
       self.death_motions = zombie_config[self.zombie_type]["death_motions"]
+      self.zombie_class = self.image_config["class"]
 
       self.body_parts = [Body_Part(self, part_name) for part_name in self.image_config["part_name_order"]]
 
@@ -820,16 +846,20 @@ init python:
       if self.health <= 0:
         self.speed = 0
         self.is_dead = True
-        self.motion_type = renpy.random.choice(self.death_motions)
-        self.update_motion()
+        if self.zombie_class == "vehicle":
+          self.should_delete = True
+        else:
+          self.motion_type = renpy.random.choice(self.death_motions)
+          self.update_motion()
 
       if self.x_location < -10:
         self.should_delete = True
         self.is_dead = True
 
-      head = [part for part in self.body_parts if part.part_name == "head"]
-      if not head or head[0].status == "gone":
-        self.should_delete = True
+      if self.zombie_class != "vehicle":
+        head = [part for part in self.body_parts if part.part_name == "head"]
+        if not head or head[0].status == "gone":
+          self.should_delete = True
 
       self.body_parts = [part for part in self.body_parts if part.status != "gone"]
       for body_part in self.body_parts:
@@ -977,14 +1007,15 @@ init python:
 
       super(PvzGameDisplayable, self).__init__()
       all_images.load_plants(["peashooter"])
-      all_images.load_zombies(["basic", "dog", "kinetic"])
+      all_images.load_zombies(["basic", "dog", "kinetic", "van"])
 
       self.environment = EnvironmentBuilder(self.level_config, self)
       self.lanes = self.environment.gen_lanes()
-      for _ in range(5):
+      for _ in range(10):
         self.lanes.randomly_add_zombie("dog")
         self.lanes.randomly_add_zombie("basic")
         self.lanes.randomly_add_zombie("kinetic")
+        self.lanes.randomly_add_zombie("van")
 
     def visit(self):
       return self.environment.visit()
