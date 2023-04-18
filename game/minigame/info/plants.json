@@ -17,7 +17,7 @@
     "animation_type": "peashooter",
     "health": 7,
     "attack_delay": 1.5,
-    "num_shots": 4,
+    "num_shots": 2,
     "shot_delay": 0.2,
     "spawn_projectile": true,
     "projectile_type": "baseball",

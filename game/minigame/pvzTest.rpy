@@ -862,7 +862,7 @@ init python:
     def check_damage_limb_detach(self):
       info = self.image_config["damage_fall_order"]
       for part_name in info.keys():
-        if self.health <= (info[part_name] * zombie_config[self.zombie_type]["health"]):
+        if self.health <= ((1-info[part_name]) * zombie_config[self.zombie_type]["health"]):
           part = [part for part in self.body_parts if part.part_name == part_name]
           if len(part) > 0:
             part[0].status = "detached"
@@ -1078,7 +1078,7 @@ init python:
         lane_index = renpy.random.randint(0, len(self.lanes) - 1)
         lane = self.lanes[lane_index]
         zombie = Zombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location, zombie_type, lane)
-        if zombie_type == "basic" or zombie_type == "dog":
+        if zombie_type in  ["basic", "dog", "conehead", "buckethead"] :
           zombie = BasicZombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location, zombie_type, lane)
         if zombie_type == "van":
           zombie = VanZombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location, lane)
@@ -1128,11 +1128,13 @@ init python:
 
       super(PvzGameDisplayable, self).__init__()
       all_images.load_plants(["peashooter"])
-      all_images.load_zombies(["basic", "dog", "kinetic", "van"])
+      all_images.load_zombies(["basic", "dog", "kinetic", "van", "conehead", "buckethead"])
 
       self.environment = EnvironmentBuilder(self.level_config, self)
       self.lanes = self.environment.gen_lanes()
       for _ in range(3):
+        self.lanes.randomly_add_zombie("buckethead")
+        self.lanes.randomly_add_zombie("conehead")
         self.lanes.randomly_add_zombie("dog")
         self.lanes.randomly_add_zombie("basic")
         self.lanes.randomly_add_zombie("kinetic")

@@ -41,6 +41,9 @@
       "torso": {
         "type": "fall",
         "speed": 1
+      },
+      "hat": {
+        "type": "none"
       }
     },
     "attack": {
@@ -77,6 +80,9 @@
         "type": "none"
       },
       "torso": {
+        "type": "none"
+      },
+      "hat": {
         "type": "none"
       }
     },
@@ -130,6 +136,9 @@
         "start_direction": -1
       },
       "torso": {
+        "type": "none"
+      },
+      "hat": {
         "type": "none"
       }
     },
@@ -243,8 +252,8 @@
       "parts": ["head", "torso", "arms", "legs"],
       "part_name_order": ["left_leg", "left_arm", "right_leg","torso", "head", "right_arm"],
       "damage_fall_order": {
-        "head": 0,
-        "right_arm": 0.5
+        "right_arm": 0.5,
+        "head": 1
       },
       "arms": {
         "width": 41,
@@ -289,6 +298,134 @@
         "joint_y": 42
       }
     }, 
+    "conehead": {
+      "class": "zombie",
+      "resize_factor": 0.5,
+      "fall_height": 150,
+      "parts": ["head", "torso", "arms", "legs", "hat"],
+      "part_name_order": ["left_leg", "left_arm", "right_leg","torso", "head", "right_arm", "hat"],
+      "damage_fall_order": {
+        "hat": 0.57,
+        "right_arm": 0.8,
+        "head": 1
+      },
+      "arms": {
+        "width": 41,
+        "height": 141,
+        "joint_x": 17,
+        "joint_y": 10
+      },
+      "torso": {
+        "width": 80,
+        "height": 148,
+        "head_joint": {
+          "x": 41,
+          "y": 2
+        },
+        "left_arm_joint": {
+          "x": 18,
+          "y": 33
+        },
+        "right_arm_joint": {
+          "x": 62,
+          "y": 23
+        },
+        "left_leg_joint": {
+          "x": 14,
+          "y": 138
+        },
+        "right_leg_joint": {
+          "x": 44,
+          "y": 135
+        },
+        "hat_joint": {
+          "x": 36,
+          "y": -36
+        }
+      },
+      "legs": {
+        "width": 51,
+        "height": 194,
+        "joint_x": 17,
+        "joint_y": 9
+      },
+      "head": {
+        "width": 36,
+        "height": 43,
+        "joint_x": 22,
+        "joint_y": 42
+      },
+      "hat": {
+        "width": 48,
+        "height": 50,
+        "joint_x": 25,
+        "joint_y": 39
+      }
+    }, 
+    "buckethead": {
+      "class": "zombie",
+      "resize_factor": 0.5,
+      "fall_height": 150,
+      "parts": ["head", "torso", "arms", "legs", "hat"],
+      "part_name_order": ["left_leg", "left_arm", "right_leg","torso", "head", "right_arm", "hat"],
+      "damage_fall_order": {
+        "hat": 0.84,
+        "right_arm": 0.95,
+        "head": 1
+      },
+      "arms": {
+        "width": 41,
+        "height": 141,
+        "joint_x": 17,
+        "joint_y": 10
+      },
+      "torso": {
+        "width": 80,
+        "height": 148,
+        "head_joint": {
+          "x": 41,
+          "y": 2
+        },
+        "left_arm_joint": {
+          "x": 18,
+          "y": 33
+        },
+        "right_arm_joint": {
+          "x": 62,
+          "y": 23
+        },
+        "left_leg_joint": {
+          "x": 14,
+          "y": 138
+        },
+        "right_leg_joint": {
+          "x": 44,
+          "y": 135
+        },
+        "hat_joint": {
+          "x": 36,
+          "y": -36
+        }
+      },
+      "legs": {
+        "width": 51,
+        "height": 194,
+        "joint_x": 17,
+        "joint_y": 9
+      },
+      "head": {
+        "width": 36,
+        "height": 43,
+        "joint_x": 22,
+        "joint_y": 42
+      },
+      "hat": {
+        "width": 48,
+        "height": 50,
+        "joint_x": 28,
+        "joint_y": 30
+      }
+    }, 
     "dog": {
       "class": "zombie",
       "resize_factor": 0.5,
@@ -296,7 +433,7 @@
       "parts": ["head", "torso", "arms", "legs"],
       "part_name_order": ["left_leg", "left_arm", "torso", "right_leg", "head", "right_arm"],
       "damage_fall_order": {
-        "head": 0,
+        "head": 1,
         "right_arm": 0.5
       },
       "arms": {
@@ -349,7 +486,7 @@
       "parts": ["head", "torso", "arms", "legs"],
       "part_name_order": ["left_leg", "left_arm","right_leg", "torso", "head", "right_arm"],
       "damage_fall_order": {
-        "head": 0,
+        "head": 1,
         "right_arm": 0.5
       },
       "arms": {
@@ -402,7 +539,6 @@
       "parts": ["tire", "torso"],
       "part_name_order": ["torso", "left_tire","right_tire"],
       "damage_fall_order": {
-        "head": 0,
         "right_tire": 0.5
       },
       "tire": {
@@ -433,6 +569,42 @@
     "death_motions": ["basic_death"],
     "has_damage_frames": false,
     "health": 10,
+    "attack": 1,
+    "hitbox_distance": 100,
+    "speed": 0.35
+  },
+
+  "conehead": {
+    "animation_type": "conehead",
+    "motions": ["walk"],
+    "attack_motions": ["attack"],
+    "death_motions": ["basic_death"],
+    "has_damage_frames": true,
+    "damage_frame_order": {
+      "hat": {
+        "damaged-1": 0.20,
+        "damaged-2": 0.4
+      }
+    },
+    "health": 28,
+    "attack": 1,
+    "hitbox_distance": 100,
+    "speed": 0.35
+  },
+
+  "buckethead": {
+    "animation_type": "buckethead",
+    "motions": ["walk"],
+    "attack_motions": ["attack"],
+    "death_motions": ["basic_death"],
+    "has_damage_frames": true,
+    "damage_frame_order": {
+      "hat": {
+        "damaged-1": 0.27,
+        "damaged-2": 0.53
+      }
+    },
+    "health": 65,
     "attack": 1,
     "hitbox_distance": 100,
     "speed": 0.35
