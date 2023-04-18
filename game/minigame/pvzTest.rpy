@@ -15,7 +15,13 @@ init python:
   import time
 
 
-  
+  def plant_name_to_plant(tile, lane, plant_type):
+    if plant_type == "peashooter":
+      return PeaShooter(tile, lane)
+    elif plant_type == "iceshooter":
+      return IceShooter(tile, lane)
+
+
   def load_json_from_file(path):
     file_handle = renpy.file(path)
     file_contents = file_handle.read()
@@ -156,6 +162,16 @@ init python:
   class ParticleSystem():
     def __init__(self):
       self.particles = []
+
+    def summon(self, x, y):
+      for i in range(7):
+        color = (255, 232, 3, 170)
+        x_variance = 30
+        y_size = renpy.random.randint(30, 40)
+        speed = renpy.random.randint(2, 4)
+        direction = 1.5 * math.pi
+        x = x + renpy.random.randint(-x_variance, x_variance)
+        self.particles.append(Particle(x, y, color, 6, y_size, speed, direction, 1, False))
 
     def electricity(self, x, y, x_variance):
       for i in range(1):
@@ -553,7 +569,7 @@ init python:
 
     def check_collision(self, zombie):
       if zombie.lane is self.lane:
-        if abs(zombie.x_location - zombie.hitbox_distance - self.x_location) <= self.hitbox_distance:
+        if abs(zombie.x_location - zombie.hitbox_distance - self.x_location) <= (self.hitbox_distance + renpy.random.randint(0,4)) and zombie.is_dead is False:
           return True
       else: 
         return False
@@ -568,6 +584,55 @@ init python:
           self.damaged_timer = None
 
       self.frame = (self.frame + 1) % len(self.frames)
+
+  class IceShooter(Plant):
+    def __init__(self, tile, lane):
+      super().__init__(tile, lane, "iceshooter")
+      self.attack_timer = time.time()
+      self.attack_delay = self.plant_config["attack_delay"]
+
+    def does_lane_have_hittable_zombies(self):
+      for zombie in self.lane.zombies:
+        if zombie.x_location > (self.x_location + self.hitbox_distance):
+          return True
+      return False
+
+    def update(self):
+      super().update()
+      if self.does_lane_have_hittable_zombies():
+        if time.time() - self.attack_timer > self.attack_delay:
+          self.attack()
+          self.attack_timer = time.time()
+    
+  class PeaShooter(Plant):
+    def __init__(self, tile, lane):
+      super().__init__(tile, lane, "peashooter")
+      self.attack_timer = time.time()
+      self.shot_timer = time.time()
+      self.attack_delay = self.plant_config["attack_delay"]
+      self.shot_delay = self.plant_config["shot_delay"]
+      self.num_shot_already = 0
+
+    def does_lane_have_hittable_zombies(self):
+      for zombie in self.lane.zombies:
+        if zombie.x_location > (self.x_location + self.hitbox_distance):
+          return True
+      return False
+
+    def update(self):
+      super().update()
+      if self.does_lane_have_hittable_zombies():
+        if (time.time() - self.attack_timer > self.attack_delay):
+          if (time.time() - self.shot_timer > self.shot_delay and self.num_shot_already < self.plant_config["num_shots"]):
+            self.lane.add_projectile(Projectile(self, self.projectile_type))
+            self.shot_timer = time.time()
+            self.num_shot_already += 1
+            if self.num_shot_already >= self.plant_config["num_shots"]:
+              self.num_shot_already = 0
+              self.attack_timer = time.time()
+    
+
+      
 
   class Body_Part():
     def __init__(self, zombie, part_name):
@@ -605,7 +670,7 @@ init python:
       self.direction = None
       self.motion_type = None
       self.angle = None
-      self.update_motion_params()
+      self.update_motion_params(reset_angles=True)
 
       self.image = all_images.images["zombies"][self.zombie.zombie_type][self.zombie.costume][self.part_type]
       self.joint_location_x = 0
@@ -653,7 +718,7 @@ init python:
         if self.zombie.costume.startswith("damaged_"):
           costume = "damaged_"+costume
         if self.zombie.costume.endswith("iced"):
-          costume = costume + "iced"
+          costume = costume + "-iced"
         self.image = all_images.images["zombies"][self.zombie.zombie_type][costume][self.part_type]
       else:
         self.image = all_images.images["zombies"][self.zombie.zombie_type][self.zombie.costume][self.part_type]
@@ -725,16 +790,17 @@ init python:
         if time.time() - self.fade_start_time > 0.2:
           self.status = "gone"
 
-    def update_motion_params(self):
+    def update_motion_params(self, reset_angles = False):
       self.motion_config = config_data.get_zombie_motion_config(self.zombie.motion_type)[self.part_name]
       if self.motion_config["type"] == "rotate":
         self.limit = self.motion_config["limit"]
         self.motion_type = self.motion_config["type"]
 
-        if self.motion_config["start_angle"] != "none":
-          self.angle = self.motion_config["start_angle"] + renpy.random.randint(-self.motion_config["start_angle_variance"], self.motion_config["start_angle_variance"])
-        if self.motion_config["start_direction"] != "none":
-          self.direction = self.motion_config["start_direction"]
+        if reset_angles:
+          if self.motion_config["start_angle"] != "none":
+            self.angle = self.motion_config["start_angle"] + renpy.random.randint(-self.motion_config["start_angle_variance"], self.motion_config["start_angle_variance"])
+          if self.motion_config["start_direction"] != "none":
+            self.direction = self.motion_config["start_direction"]
       elif self.motion_config["type"] == "fall":
         self.motion_type = self.motion_config["type"]
       else:
@@ -813,8 +879,22 @@ init python:
       self.motion_type = renpy.random.choice(self.attack_motions)
       self.update_motion()
 
-    def update(self):
+    def check_attack_plant(self):
+      if hasattr(self, "target_plant") and self.target_plant is not None: # check if target_plant still exists
+        self.target_plant.damage(self.attack/10)
 
+        if self.target_plant.is_dead:
+          self.target_plant = None
+          self.motion_type = renpy.random.choice(config_data.get_zombie_config(self.zombie_type)["motions"])
+          self.update_motion()
+
+    def die(self):
+      self.speed = 0
+      self.is_dead = True
+      self.motion_type = renpy.random.choice(self.death_motions)
+      self.update_motion()
+
+    def update(self):
       if self.zombie_type == "kinetic":
         legs = [part for part in self.body_parts if part.part_type == "legs"]
         for leg in legs:
@@ -835,22 +915,10 @@ init python:
       if self.costume.startswith("damaged_") and time.time() - self.damaged_timer > 0.05:
         self.costume = self.costume.replace("damaged_", "")
 
-      if hasattr(self, "target_plant") and self.target_plant is not None: # check if target_plant still exists
-        self.target_plant.damage(self.attack/10)
-
-        if self.target_plant.is_dead:
-          self.target_plant = None
-          self.motion_type = renpy.random.choice(config_data.get_zombie_config(self.zombie_type)["motions"])
-          self.update_motion()
-
+      self.check_attack_plant()
+      
       if self.health <= 0:
-        self.speed = 0
-        self.is_dead = True
-        if self.zombie_class == "vehicle":
-          self.should_delete = True
-        else:
-          self.motion_type = renpy.random.choice(self.death_motions)
-          self.update_motion()
+        self.die()
 
       if self.x_location < -10:
         self.should_delete = True
@@ -864,6 +932,55 @@ init python:
       self.body_parts = [part for part in self.body_parts if part.status != "gone"]
       for body_part in self.body_parts:
         body_part.update()
+
+  # basic zombie covers all zombies that don't have a special class, such as dog
+  class BasicZombie(Zombie):
+    def __init__(self, x_location, y_location, zombie_type, lane):
+      super().__init__(x_location, y_location, zombie_type, lane)
+      self.attack_timer = time.time()
+
+    def check_attack_plant(self):
+      attack_delay = 1
+      if self.is_iced:
+        attack_delay = 2
+
+      if hasattr(self, "target_plant") and self.target_plant is not None: # check if target_plant still exists
+        if (time.time() - self.attack_timer > attack_delay):
+          self.target_plant.damage(self.attack)
+          self.attack_timer = time.time()
+
+        if self.target_plant.is_dead:
+          self.target_plant = None
+          self.motion_type = renpy.random.choice(config_data.get_zombie_config(self.zombie_type)["motions"])
+          self.update_motion()
+
+  class VanZombie(Zombie):
+    def __init__(self, x_location, y_location, lane):
+      super().__init__(x_location, y_location, "van", lane)
+      self.death_time_duration = 1
+      self.death_time = None
+      self.last_shudder_movement = 0
+
+    def die(self):
+      self.speed = 0
+      self.is_dead = True
+      if self.death_time == None:
+        self.death_time = time.time()
+    
+    def update(self):
+      super().update()
+      if self.death_time != None:
+        shudder = renpy.random.randint(-15, 15)
+        self.x_location += (shudder - self.last_shudder_movement)
+        self.last_shudder_movement = shudder
+        if (time.time() - self.death_time) > self.death_time_duration:
+          for i in range(1, 4):
+            self.lane.add_zombie(Zombie(self.x_location + 50*i, self.y_location, "basic", self.lane))
+            particleSystem.summon(self.x_location + 60*i, self.y_location + 150)
+          self.should_delete = True
+
+
+
 
   class Lane():
     def __init__(self, id):
@@ -930,7 +1047,7 @@ init python:
         self.lanes[lane_index].add_plant(plant)
 
     def add_plant_tile(self, tile, plant):
-        plant = Plant(tile, self.lane_id_to_lane(tile.lane_id), plant)
+        plant = plant_name_to_plant(tile, self.lane_id_to_lane(tile.lane_id), plant)
         self.lanes[tile.lane_id].add_plant(plant)
 
     def remove_plant(self, lane_index, plant):
@@ -961,6 +1078,10 @@ init python:
         lane_index = renpy.random.randint(0, len(self.lanes) - 1)
         lane = self.lanes[lane_index]
         zombie = Zombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location, zombie_type, lane)
+        if zombie_type == "basic" or zombie_type == "dog":
+          zombie = BasicZombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location, zombie_type, lane)
+        if zombie_type == "van":
+          zombie = VanZombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location, lane)
         lane.add_zombie(zombie)
 
 
@@ -1011,7 +1132,7 @@ init python:
 
       self.environment = EnvironmentBuilder(self.level_config, self)
       self.lanes = self.environment.gen_lanes()
-      for _ in range(10):
+      for _ in range(3):
         self.lanes.randomly_add_zombie("dog")
         self.lanes.randomly_add_zombie("basic")
         self.lanes.randomly_add_zombie("kinetic")
@@ -1029,9 +1150,6 @@ init python:
 
     def process_click(self):
       current_state = self.make_state()
-      for plant in self.lanes.get_all_plants():
-        plant.attack()
-
       if self.plant_selected is not None:
         tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
         if tile is not None and tile.plantable():

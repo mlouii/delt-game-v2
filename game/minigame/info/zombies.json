@@ -432,10 +432,10 @@
     "attack_motions": ["attack"],
     "death_motions": ["basic_death"],
     "has_damage_frames": false,
-    "health": 100,
-    "attack": 10,
+    "health": 10,
+    "attack": 1,
     "hitbox_distance": 100,
-    "speed": 0.5
+    "speed": 0.35
   },
 
   "dog": {
@@ -444,10 +444,10 @@
     "attack_motions": ["attack"],
     "death_motions": ["basic_death"],
     "has_damage_frames": false,
-    "health": 100,
-    "attack": 10,
+    "health": 10,
+    "attack": 1,
     "hitbox_distance": 100,
-    "speed": 1
+    "speed": 0.8
   },
 
   "kinetic": {
@@ -456,10 +456,10 @@
     "attack_motions": ["attack"],
     "death_motions": ["basic_death"],
     "has_damage_frames": false,
-    "health": 100,
-    "attack": 1000,
+    "health": 28,
+    "attack": 100,
     "hitbox_distance": 100,
-    "speed": 0.5
+    "speed": 0.35
   }, 
 
   "van": {
@@ -475,9 +475,9 @@
         "damaged-3": 0.85
       }
     },
-    "health": 1000,
-    "attack": 1000,
+    "health": 80,
+    "attack": 100,
     "hitbox_distance": 50,
-    "speed": 0.5
+    "speed": 0.35
   }
 }

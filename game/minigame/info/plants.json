@@ -15,10 +15,23 @@
 
   "peashooter": {
     "animation_type": "peashooter",
-    "health": 300,
-    "ROF": 10,
+    "health": 7,
+    "attack_delay": 1.5,
+    "num_shots": 4,
+    "shot_delay": 0.2,
     "spawn_projectile": true,
     "projectile_type": "baseball",
+    "hitbox_distance": 10
+  },
+
+  "iceshooter": {
+    "animation_type": "peashooter",
+    "health": 7,
+    "attack_delay": 2,
+    "num_shots": 1,
+    "shot_delay": 0.2,
+    "spawn_projectile": true,
+    "projectile_type": "icicle",
     "hitbox_distance": 10
   }
 }
