@@ -86,6 +86,30 @@
         "type": "none"
       }
     },
+    "stay_still": {
+      "moving": false,
+      "head": {
+        "type": "none"
+      },
+      "left_arm": {
+        "type": "none"
+      },
+      "right_arm": {
+        "type": "none"
+      },
+      "left_leg": {
+        "type": "none"
+      },
+      "right_leg": {
+        "type": "none"
+      },
+      "torso": {
+        "type": "none"
+      },
+      "hat": {
+        "type": "none"
+      }
+    },
     "walk": {
       "moving": true,
       "head": {
@@ -625,7 +649,7 @@
   "kinetic": {
     "animation_type": "kinetic",
     "motions": ["walk"],
-    "attack_motions": ["attack"],
+    "attack_motions": ["stay_still"],
     "death_motions": ["basic_death"],
     "has_damage_frames": false,
     "health": 28,
