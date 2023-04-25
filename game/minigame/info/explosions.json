@@ -1,0 +1,15 @@
+{
+  "hellfire": {
+    "resize_factor": 1.5,
+    "damage": 120,
+    "splash": 20,
+    "horizontal_spread": 1,
+    "vertical_spread": 1,
+    "image_prefix": "frame_",
+    "num_frames": 16,
+    "width": 312,
+    "height": 344,
+    "joint_x": 159,
+    "joint_y": 342
+  }
+}

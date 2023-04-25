@@ -1,6 +1,6 @@
 {
   "baseball": {
-    "resize_factor": 0.5,
+    "resize_factor": 1,
     "width": 57,
     "height": 126,
     "center_x": 28,

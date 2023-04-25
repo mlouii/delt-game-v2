@@ -21,6 +21,8 @@ init python:
       return PeaShooter(tile, lane)
     elif plant_type == "iceshooter":
       return IceShooter(tile, lane)
+    elif plant_type == "wallnut":
+      return Wallnut(tile, lane)
 
 
   def load_json_from_file(path):
@@ -33,6 +35,7 @@ init python:
   zombie_config = load_json_from_file(path=JSON_DIR + "zombies.json")
   plant_config = load_json_from_file(path=JSON_DIR + "plants.json")
   projectile_config = load_json_from_file(path=JSON_DIR + "projectiles.json")
+  explosion_config = load_json_from_file(path=JSON_DIR + "explosions.json")
 
   delta_time = 0.0
   delta_multiplier = 70
@@ -50,6 +53,10 @@ init python:
       self.plants = plant_config
       self.zombies = zombie_config
       self.projectiles = projectile_config
+      self.explosions = explosion_config
+
+    def get_explosion_config(self, explosion_type):
+      return self.explosions[explosion_type]
 
     def get_level_config(self, level_name):
       return self.levels[level_name]
@@ -71,15 +78,25 @@ init python:
 
     def get_projectile_config(self, projectile_type):
       return self.projectiles[projectile_type]
-      
-    def modify_plant_image_size(self, animation_type, resize_factor):
-      image_config = self.get_plant_image_config(animation_type)
+
+    def modify_explosion_image_size(self, explosion_type, resize_factor):
+      image_config = self.get_explosion_config(explosion_type)
       image_config["height"] = image_config["height"] * resize_factor
       image_config["width"] = image_config["width"] * resize_factor
       image_config["joint_x"] = image_config["joint_x"] * resize_factor
       image_config["joint_y"] = image_config["joint_y"] * resize_factor
-      image_config["projectile_spawn_x"] = image_config["projectile_spawn_x"] * resize_factor
-      image_config["projectile_spawn_y"] = image_config["projectile_spawn_y"] * resize_factor
+      self.explosions[explosion_type] = image_config
+      
+    def modify_plant_image_size(self, animation_type, resize_factor):
+      image_config = self.get_plant_image_config(animation_type)
+      plant_config = self.get_plant_config(animation_type)
+      image_config["height"] = image_config["height"] * resize_factor
+      image_config["width"] = image_config["width"] * resize_factor
+      image_config["joint_x"] = image_config["joint_x"] * resize_factor
+      image_config["joint_y"] = image_config["joint_y"] * resize_factor
+      if plant_config["spawn_projectile"]:
+        image_config["projectile_spawn_x"] = image_config["projectile_spawn_x"] * resize_factor
+        image_config["projectile_spawn_y"] = image_config["projectile_spawn_y"] * resize_factor
       self.plants["image_data"][animation_type] = image_config
 
     def modify_projectile_image_size(self, projectile_name, resize_factor):
@@ -211,7 +228,11 @@ init python:
       self.distance_to_target = int(math.sqrt((self.target_x - self.x)**2 + (self.target_y - self.y)**2)) + 10
       self.angle_to_rotate = math.degrees(math.atan2(self.target_y - self.y, self.target_x - self.x))
     
-    def update(self):
+    def update(self, x, y):
+      self.x = x
+      self.y = y
+      self.distance_to_target = int(math.sqrt((self.target_x - self.x)**2 + (self.target_y - self.y)**2)) + 10
+      self.angle_to_rotate = math.degrees(math.atan2(self.target_y - self.y, self.target_x - self.x))
       self.size_1 = renpy.random.randint(5, 7)
       self.size_2 = renpy.random.randint(10, 15)
 
@@ -236,6 +257,17 @@ init python:
         direction = 1.5 * math.pi
         x = x + renpy.random.randint(-x_variance, x_variance)
         self.particles.append(Particle(x, y, color, 6, y_size, speed, direction, 1, False))
+
+    def explosion(self, x, y):
+      for i in range(20):
+        v = renpy.random.randint(20, 255)
+        color = (255, v, v, 255)
+        x_variance = 15
+        size = renpy.random.randint(4, 6)
+        speed = renpy.random.randint(25, 30)
+        direction = (1.5 + (renpy.random.randint(-25, 25)/100))* math.pi
+        x = x + renpy.random.randint(-x_variance, x_variance)
+        self.particles.append(Particle(x, y, color, size, size, speed, direction, 0.3, True))
 
     def electricity(self, x, y, x_variance):
       for i in range(1):
@@ -275,6 +307,20 @@ init python:
     def __init__(self):
       self.images = {}
       self.brightness_factor = 0.3
+
+    def load_explosions(self):
+      self.images["explosions"] = {}
+      explosion_names = ["hellfire"]
+
+      for explosion_name in explosion_names:
+        explosion_config = config_data.get_explosion_config(explosion_name)
+        explosion_location = IMG_DIR + "explosions/" + explosion_name
+        num_frames = explosion_config["num_frames"]
+        image_prefix = explosion_config["image_prefix"]
+        resize_factor = explosion_config["resize_factor"]
+        animation_frames = [im.FactorScale(Image(explosion_location + "/" + image_prefix + str(i) + ".png"), resize_factor) for i in range(num_frames)]
+        config_data.modify_explosion_image_size(explosion_name, resize_factor=resize_factor)
+        self.images["explosions"][explosion_name] = animation_frames
 
     def load_plants(self, plant_types):
       self.images["plants"] = {}
@@ -699,6 +745,10 @@ init python:
             if self.num_shot_already >= self.plant_config["num_shots"]:
               self.num_shot_already = 0
               self.attack_timer = time.time()
+
+  class Wallnut(Plant):
+    def __init__(self, tile, lane):
+      super().__init__(tile, lane, "wallnut")
     
 
       
@@ -904,6 +954,7 @@ init python:
       self.speed = zombie_config[self.zombie_type]["speed"]
       self.attack = zombie_config[self.zombie_type]["attack"]
       self.hitbox_distance = zombie_config[self.zombie_type]["hitbox_distance"]
+      self.hitbox_width = zombie_config[self.zombie_type]["hitbox_width"]
 
       self.attack_motions = zombie_config[self.zombie_type]["attack_motions"]
       self.death_motions = zombie_config[self.zombie_type]["death_motions"]
@@ -1049,7 +1100,7 @@ init python:
       attack_delay = 2
 
       if hasattr(self, "target_plant") and self.target_plant is not None: # check if target_plant still exists
-        if (time.time() - self.attack_delay_timer > attack_delay):
+        if (time.time() - self.attack_delay_timer > attack_delay and self.is_dead == False):
           eye_x, eye_y = self.find_eye_location()
           if self.eye_effect:
             self.eye_effect.stop_growth = True
@@ -1076,11 +1127,12 @@ init python:
         for leg in legs:
           if leg.angle and abs(leg.angle) < 3 and self.motion_type == "walk":
             particleSystem.electricity(self.x_location, self.y_location + self.image_config["fall_height"], 30) 
-
+      
+      eye_x, eye_y = self.find_eye_location()
       if self.eye_effect:
         self.eye_effect.update()
       if self.laser_effect:
-        self.laser_effect.update()
+        self.laser_effect.update(eye_x, eye_y)
 
       if self.post_kill_timer and time.time() - self.post_kill_timer > 1.5:
         self.motion_type = renpy.random.choice(config_data.get_zombie_config(self.zombie_type)["motions"])
@@ -1116,6 +1168,16 @@ init python:
           renpy.play(AUDIO_DIR + "van-destroyed.mp3", channel = "audio")
           self.should_delete = True
 
+    def check_attack_plant(self):
+      if hasattr(self, "target_plant") and self.target_plant is not None: # check if target_plant still exists
+        self.target_plant.damage(self.attack)
+        renpy.play(AUDIO_DIR + "plant-crushed.mp3", channel = "audio")
+
+        if self.target_plant.is_dead:
+          self.target_plant = None
+          self.motion_type = renpy.random.choice(config_data.get_zombie_config(self.zombie_type)["motions"])
+          self.update_motion()
+
 
 
 
@@ -1142,6 +1204,9 @@ init python:
 
     def add_projectile(self, projectile):
       self.projectiles.append(projectile)
+
+    def return_all_zombies_on_tile(self, tile):
+      return [zombie for zombie in self.zombies if (zombie.x_location + zombie.hitbox_width) > tile.x_location and zombie.x_location < tile.x_location + tile.width]
 
     def get_zombies(self):
       return self.zombies
@@ -1245,6 +1310,102 @@ init python:
     def lane_id_to_lane(self, lane_id):
       return self.lanes[lane_id]
 
+  class Explosion():
+    def __init__(self, x, y, explosion_type):
+      self.x = x
+      self.y = y
+      self.explosion_type = explosion_type
+      self.animation_frames = all_images.images["explosions"][explosion_type]
+      self.animation_index = 0
+      self.animation_timer = time.time()
+      self.animation_delay = 0.02
+      self.is_dead = False
+      
+      renpy.play(AUDIO_DIR + "hellfire-explosion.mp3", channel = "audio")
+
+    def update(self):
+      if time.time() - self.animation_timer > self.animation_delay:
+        self.animation_timer = time.time()
+        self.animation_index += 1
+        if self.animation_index >= len(self.animation_frames):
+          self.is_dead = True
+
+    def render(self, render):
+      render.place(self.animation_frames[self.animation_index], x = self.x, y = self.y)
+      return render
+
+  class Explosion_Controller():
+    def __init__(self, lanes):
+      self.explosions = []
+      self.lanes = lanes
+
+    def damage_zombies(self, x, y, explosion_type):
+      tile = self.lanes.pos_to_tile(x, y)
+      lane_id = tile.lane_id
+      tile_id = tile.row_id
+      explosion_config = config_data.get_explosion_config(explosion_type)
+      horizontal_spread = explosion_config["horizontal_spread"]
+      vertical_spread = explosion_config["vertical_spread"]
+      direct_damage = explosion_config["damage"]
+      splash_damage = explosion_config["splash"]
+
+      lane = self.lanes.lanes[lane_id]
+      tile = lane.tiles[tile_id]
+      direct_hit_zombies = lane.return_all_zombies_on_tile(tile)
+      for zombie in direct_hit_zombies:
+        zombie.damage(direct_damage)
+
+      splash_zombies = []
+
+      for i in range(lane_id-vertical_spread, lane_id+vertical_spread+1):
+        for j in range(tile_id-horizontal_spread, tile_id+horizontal_spread+1):
+          if i < 0 or i >= len(self.lanes.lanes) or j < 0 or j >= len(self.lanes.lanes[i].tiles):
+            continue
+          else:
+            lane = self.lanes.lanes[i]
+            tile = lane.tiles[j]
+            if (i != lane_id or j != tile_id):
+              splash_zombies.extend(lane.return_all_zombies_on_tile(tile))
+              splash_zombies = list(set(splash_zombies))
+
+      for zombie in splash_zombies:
+        zombie.damage(splash_damage)
+
+
+    def add_explosion(self, x, y, explosion_type):
+      explosion_config = config_data.get_explosion_config(explosion_type)
+      
+      image_x = x - explosion_config["joint_x"]
+      image_y = y - explosion_config["joint_y"]
+      explosion = Explosion(image_x, image_y, explosion_type)
+      self.damage_zombies(x, y, explosion_type)
+      self.explosions.append(explosion)
+      particleSystem.explosion(x, y)
+
+    def update(self):
+      for explosion in self.explosions:
+        explosion.update()
+        if explosion.is_dead:
+          self.explosions.remove(explosion)
+
+    def render(self, render):
+      for explosion in self.explosions:
+        render = explosion.render(render)
+      return render
+
+        
+  class Plant_seed_card():
+    def __init__(self, plant_name):
+      self.plant_name = plant_name
+      self.plant_config = config_data.get_plant_config(plant_name)
+      self.image = all_images["plants"][self.plant_name]["animation"]["default"][0]
+      self.recharge_timer = time.time()
+      self.is_recharge_ready = True
+
+    def render(self, render):
+      render.blit(self.image, (0,0))
+      return render
+
 
   class PvzGameDisplayable(renpy.Displayable):
     def __init__(self, level):
@@ -1266,18 +1427,20 @@ init python:
       self.last_time = time.time()
 
       super(PvzGameDisplayable, self).__init__()
-      all_images.load_plants(["peashooter"])
+      all_images.load_plants(["peashooter", "iceshooter", "wallnut"])
       all_images.load_zombies(["basic", "dog", "kinetic", "van", "conehead", "buckethead"])
+      all_images.load_explosions()
 
       self.environment = EnvironmentBuilder(self.level_config, self)
       self.lanes = self.environment.gen_lanes()
-      for _ in range(7):
-        # self.lanes.randomly_add_zombie("buckethead")
-        # self.lanes.randomly_add_zombie("conehead")
-        # self.lanes.randomly_add_zombie("dog")
-        # self.lanes.randomly_add_zombie("basic")
+      self.explosion_controller = Explosion_Controller(self.lanes)
+      for _ in range(5):
+        self.lanes.randomly_add_zombie("buckethead")
+        self.lanes.randomly_add_zombie("conehead")
+        self.lanes.randomly_add_zombie("dog")
+        self.lanes.randomly_add_zombie("basic")
         self.lanes.randomly_add_zombie("kinetic")
-        # self.lanes.randomly_add_zombie("van")
+        self.lanes.randomly_add_zombie("van")
 
     def visit(self):
       return self.environment.visit()
@@ -1291,11 +1454,12 @@ init python:
 
     def process_click(self):
       current_state = self.make_state()
-      if self.plant_selected is not None:
-        tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
-        if tile is not None and tile.plantable():
-          tile.is_planted = True
-          self.lanes.add_plant_tile(tile, self.plant_selected)
+      self.explosion_controller.add_explosion(self.mouseX, self.mouseY, "hellfire")
+      # if self.plant_selected is not None:
+      #   tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
+      #   if tile is not None and tile.plantable():
+      #     tile.is_planted = True
+      #     self.lanes.add_plant_tile(tile, self.plant_selected)
         
 
     def render(self, width, height, st, at):
@@ -1307,10 +1471,12 @@ init python:
       current_state = self.make_state()
       self.environment.update(current_state)
       self.lanes.update()
+      self.explosion_controller.update()
 
       r = renpy.Render(width, height)
       # r = self.environment.render(r)
       r = self.lanes.render(r)
+      r = self.explosion_controller.render(r)
 
       text = Text(current_state["plant_selected"])
       r.place(text, x = current_state["mouseX"], y = current_state["mouseY"])

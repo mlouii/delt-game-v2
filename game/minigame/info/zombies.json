@@ -572,8 +572,8 @@
         "joint_y": 44
       },
       "torso": {
-        "width": 80,
-        "height": 170,
+        "width": 330,
+        "height": 150,
         "left_tire_joint": {
           "x": 126,
           "y": 122
@@ -595,6 +595,7 @@
     "health": 10,
     "attack": 1,
     "hitbox_distance": 100,
+    "hitbox_width": 40,
     "speed": 0.35
   },
 
@@ -613,6 +614,7 @@
     "health": 28,
     "attack": 1,
     "hitbox_distance": 100,
+    "hitbox_width": 40,
     "speed": 0.35
   },
 
@@ -631,6 +633,7 @@
     "health": 65,
     "attack": 1,
     "hitbox_distance": 100,
+    "hitbox_width": 40,
     "speed": 0.35
   },
 
@@ -643,6 +646,7 @@
     "health": 10,
     "attack": 1,
     "hitbox_distance": 100,
+    "hitbox_width": 60,
     "speed": 0.8
   },
 
@@ -655,6 +659,7 @@
     "health": 28,
     "attack": 100,
     "hitbox_distance": 100,
+    "hitbox_width": 40,
     "speed": 0.35
   }, 
 
@@ -674,6 +679,7 @@
     "health": 80,
     "attack": 100,
     "hitbox_distance": 50,
+    "hitbox_width": 300,
     "speed": 0.35
   }
 }

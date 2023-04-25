@@ -5,19 +5,39 @@
       "image_prefix": "daell4l-91d102e0-ee83-4683-b394-30d70ce60a92",
       "width": 600,
       "height": 508,
-      "num_frames": 60,
+      "num_frames": 2,
       "joint_x": 230,
       "joint_y": 440,
       "projectile_spawn_x": 440,
       "projectile_spawn_y": 154
+    },
+    "iceshooter": {
+      "resize_factor": 0.4,
+      "image_prefix": "iceshooter",
+      "width": 240,
+      "height": 320,
+      "num_frames": 1,
+      "joint_x": 125,
+      "joint_y": 300,
+      "projectile_spawn_x": 106,
+      "projectile_spawn_y": 95
+    },
+    "wallnut": {
+      "resize_factor": 0.4,
+      "image_prefix": "wallnut",
+      "width": 240,
+      "height": 320,
+      "num_frames": 1,
+      "joint_x": 125,
+      "joint_y": 300
     }
   },
 
   "peashooter": {
     "animation_type": "peashooter",
     "health": 70,
-    "attack_delay": 91.5,
-    "num_shots": 2,
+    "attack_delay": 1.5,
+    "num_shots": 1,
     "shot_delay": 0.2,
     "spawn_projectile": true,
     "projectile_type": "baseball",
@@ -26,12 +46,23 @@
   },
 
   "iceshooter": {
-    "animation_type": "peashooter",
+    "animation_type": "iceshooter",
     "health": 7,
     "attack_delay": 2,
     "num_shots": 1,
     "shot_delay": 0.2,
     "spawn_projectile": true,
+    "projectile_type": "icicle",
+    "hitbox_distance": 10,
+    "cost": 200
+  }, 
+  "wallnut": {
+    "animation_type": "wallnut",
+    "health": 70,
+    "attack_delay": 2,
+    "num_shots": 1,
+    "shot_delay": 0.2,
+    "spawn_projectile": false,
     "projectile_type": "icicle",
     "hitbox_distance": 10,
     "cost": 200
