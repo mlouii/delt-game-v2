@@ -35,7 +35,7 @@
 
   "peashooter": {
     "animation_type": "peashooter",
-    "health": 70,
+    "health": 7,
     "attack_delay": 1.5,
     "num_shots": 1,
     "shot_delay": 0.2,
@@ -65,6 +65,6 @@
     "spawn_projectile": false,
     "projectile_type": "icicle",
     "hitbox_distance": 10,
-    "cost": 200
+    "cost": 50
   }
 }

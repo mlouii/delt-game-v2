@@ -40,6 +40,8 @@ init python:
   delta_time = 0.0
   delta_multiplier = 70
 
+  has_been_resized = False
+
   def send_to_file(filename, text):
     with open(config.gamedir + "/" + filename, "a") as f:
         f.write(text)
@@ -48,7 +50,7 @@ init python:
         return(color[0], color[1] + 8, color[2] + 4)
 
   class ConfigLoader():
-    def __init__(self):
+    def __init__(self, level_config, zombie_config, plant_config, projectile_config, explosion_config):
       self.levels = level_config
       self.plants = plant_config
       self.zombies = zombie_config
@@ -80,6 +82,8 @@ init python:
       return self.projectiles[projectile_type]
 
     def modify_explosion_image_size(self, explosion_type, resize_factor):
+      if has_been_resized:
+        return
       image_config = self.get_explosion_config(explosion_type)
       image_config["height"] = image_config["height"] * resize_factor
       image_config["width"] = image_config["width"] * resize_factor
@@ -88,6 +92,8 @@ init python:
       self.explosions[explosion_type] = image_config
       
     def modify_plant_image_size(self, animation_type, resize_factor):
+      if has_been_resized:
+        return
       image_config = self.get_plant_image_config(animation_type)
       plant_config = self.get_plant_config(animation_type)
       image_config["height"] = image_config["height"] * resize_factor
@@ -100,6 +106,8 @@ init python:
       self.plants["image_data"][animation_type] = image_config
 
     def modify_projectile_image_size(self, projectile_name, resize_factor):
+      if has_been_resized:
+        return
       image_config = self.get_projectile_config(projectile_name)
       image_config["height"] = image_config["height"] * resize_factor
       image_config["width"] = image_config["width"] * resize_factor
@@ -108,6 +116,8 @@ init python:
       self.projectiles[projectile_name] = image_config
       
     def modify_zombie_image_size(self, animation_type, resize_factor):
+        if has_been_resized:
+          return
         image_config = self.get_zombie_image_config(animation_type)
         if image_config["class"] in ["zombie", "vehicle"]:
             for part_type in image_config["parts"]:
@@ -308,6 +318,12 @@ init python:
       self.images = {}
       self.brightness_factor = 0.3
 
+    def load_gui(self):
+      self.images["gui"] = {}
+      sun_location = IMG_DIR + "gui/sun.png"
+      sun_image = Image(sun_location)
+      self.images["gui"]["sun"] = sun_image
+
     def load_explosions(self):
       self.images["explosions"] = {}
       explosion_names = ["hellfire"]
@@ -412,7 +428,7 @@ init python:
 
   # These are the global variables
   all_images = ImageLoader()
-  config_data = ConfigLoader()
+  config_data = ConfigLoader(level_config, zombie_config, plant_config, projectile_config, explosion_config)
   particleSystem = ParticleSystem()
 
   class Tile():
@@ -1334,7 +1350,7 @@ init python:
       render.place(self.animation_frames[self.animation_index], x = self.x, y = self.y)
       return render
 
-  class Explosion_Controller():
+  class ExplosionController():
     def __init__(self, lanes):
       self.explosions = []
       self.lanes = lanes
@@ -1393,30 +1409,68 @@ init python:
         render = explosion.render(render)
       return render
 
-        
-  class Plant_seed_card():
-    def __init__(self, plant_name):
+  class PlantSeedCard():
+    def __init__(self, plant_name, slot_id):
       self.plant_name = plant_name
       self.plant_config = config_data.get_plant_config(plant_name)
-      self.image = all_images["plants"][self.plant_name]["animation"]["default"][0]
+
+      self.slot_id = slot_id
+      self.width = 130
+      self.height = 170
+      self.x_location = 200 + slot_id * (self.width+20)
+      self.y_location = 30
+
       self.recharge_timer = time.time()
       self.is_recharge_ready = True
 
+      #graphics
+      self.background_solid = Solid((50, 252, 104), xsize=self.width, ysize=self.height)
+      self.image = im.FactorScale(all_images.images["plants"][self.plant_name]["animation"]["default"][0], 0.85)
+      self.sun = im.FactorScale(all_images.images["gui"]["sun"], 0.7)
+      self.cost_text = Text(str(self.plant_config["cost"]), size = 20)
+
     def render(self, render):
-      render.blit(self.image, (0,0))
+      render.place(self.background_solid, x = self.x_location, y = self.y_location)
+      render.place(self.image, x = self.x_location+15, y = self.y_location+10)
+      render.place(self.cost_text, x = self.x_location+40, y = (self.y_location+self.height)-35)
+      render.place(self.sun, x = (self.x_location+self.width)-40, y = (self.y_location+self.height)-35)
       return render
+
+  class PlantSeedCardController():
+    def __init__(self, plant_names):
+      self.plant_seed_cards = []
+      for i in range(len(plant_names)):
+        self.plant_seed_cards.append(PlantSeedCard(plant_names[i], i))
+
+    def render(self, render):
+      for plant_seed_card in self.plant_seed_cards:
+        render = plant_seed_card.render(render)
+      return render
+
+    def process_click(self, state):
+      x = state["mouseX"]
+      y = state["mouseY"]
+      plant_selected = state["plant_selected"]
+      for plant_seed_card in self.plant_seed_cards:
+        if x > plant_seed_card.x_location and x < plant_seed_card.x_location + plant_seed_card.width and y > plant_seed_card.y_location and y < plant_seed_card.y_location + plant_seed_card.height:
+          plant_selected = plant_seed_card.plant_name
+      state["plant_selected"] = plant_selected
+      return state
 
 
   class PvzGameDisplayable(renpy.Displayable):
     def __init__(self, level):
+      super(PvzGameDisplayable, self).__init__()
+      level_config = load_json_from_file(path=JSON_DIR + "levels.json")
+      zombie_config = load_json_from_file(path=JSON_DIR + "zombies.json")
+      plant_config = load_json_from_file(path=JSON_DIR + "plants.json")
+      projectile_config = load_json_from_file(path=JSON_DIR + "projectiles.json")
+      explosion_config = load_json_from_file(path=JSON_DIR + "explosions.json")
 
-      # for some reason, removing this block of code causes the render to fuck up
-      self.level_config = None
-      file_handle = renpy.file(JSON_DIR + "levels" + ".json")
-      file_contents = file_handle.read()
-      file_handle.close()
-      self.level_config = json.loads(file_contents)["level1"]
-      # end block of code
+      global config_data
+      config_data = ConfigLoader(level_config, zombie_config, plant_config, projectile_config, explosion_config)
+
+      self.has_ended = False
 
       self.level_config = config_data.get_level_config("level1")
 
@@ -1426,14 +1480,16 @@ init python:
 
       self.last_time = time.time()
 
-      super(PvzGameDisplayable, self).__init__()
-      all_images.load_plants(["peashooter", "iceshooter", "wallnut"])
       all_images.load_zombies(["basic", "dog", "kinetic", "van", "conehead", "buckethead"])
+      all_images.load_plants(["peashooter", "iceshooter", "wallnut"])
       all_images.load_explosions()
+      all_images.load_gui()
 
       self.environment = EnvironmentBuilder(self.level_config, self)
       self.lanes = self.environment.gen_lanes()
-      self.explosion_controller = Explosion_Controller(self.lanes)
+      self.explosion_controller = ExplosionController(self.lanes)
+
+      self.plant_seed_card_controller = PlantSeedCardController(["peashooter", "iceshooter", "wallnut"])
       for _ in range(5):
         self.lanes.randomly_add_zombie("buckethead")
         self.lanes.randomly_add_zombie("conehead")
@@ -1452,17 +1508,28 @@ init python:
         "plant_selected": self.plant_selected,
       }
 
+    def alter_state(self, state):
+      self.mouseX = state["mouseX"]
+      self.mouseY = state["mouseY"]
+      self.plant_selected = state["plant_selected"]
+
     def process_click(self):
       current_state = self.make_state()
-      self.explosion_controller.add_explosion(self.mouseX, self.mouseY, "hellfire")
-      # if self.plant_selected is not None:
-      #   tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
-      #   if tile is not None and tile.plantable():
-      #     tile.is_planted = True
-      #     self.lanes.add_plant_tile(tile, self.plant_selected)
+      self.has_ended = True
+      # self.explosion_controller.add_explosion(self.mouseX, self.mouseY, "hellfire")
+      current_state = self.plant_seed_card_controller.process_click(current_state)
+      self.alter_state(current_state)
+
+      if self.plant_selected is not None:
+        tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
+        if tile is not None and tile.plantable():
+          tile.is_planted = True
+          self.lanes.add_plant_tile(tile, self.plant_selected)
         
 
     def render(self, width, height, st, at):
+      if self.has_ended:
+        return None
       global delta_time
       current_time = time.time()
       delta_time = (current_time - self.last_time)
@@ -1477,12 +1544,10 @@ init python:
       # r = self.environment.render(r)
       r = self.lanes.render(r)
       r = self.explosion_controller.render(r)
+      r = self.plant_seed_card_controller.render(r)
 
-      text = Text(current_state["plant_selected"])
+      text = Text(current_state["plant_selected"], size = 10, b=True)
       r.place(text, x = current_state["mouseX"], y = current_state["mouseY"])
-
-      # image_2 = Transform(Solid((255,255,255), xsize=170, ysize=3), rotate=95, anchor = (0, 0), transform_anchor = True)
-      # r.place(image_2, x=500, y=500)
 
       renpy.redraw(self, 0)
       return r
@@ -1495,9 +1560,12 @@ init python:
       if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
         self.process_click()
 
+      if self.has_ended:
+        return True
+
       # send_to_file("logz.txt", str(self.mouseX) + " " + str(self.mouseY) + "\n")
     
-screen game_menu():
+screen pvz_game_menu():
   modal True
 
   frame:
@@ -1515,5 +1583,15 @@ screen game_menu():
   $ game = PvzGameDisplayable(1)
   add game
 
+  if game.has_ended:
+    timer 0.1 action Return(True)
+
 label test_game_entry_label:
-  $ renpy.call_screen(_screen_name='game_menu')
+  window hide
+  $ quick_menu = False
+  $ _game_menu_screen = None
+  $ renpy.call_screen(_screen_name='pvz_game_menu')
+  $ quick_menu = True
+
+
+  return

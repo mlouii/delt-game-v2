@@ -15,6 +15,10 @@ label start:
     # images directory to show it.
 
     scene bg room
+    show eileen happy
+    e "lets test this game"
+
+    e "goddamn i love dudes"
 
     call test_game_entry_label
 
@@ -22,7 +26,7 @@ label start:
     # replace it by adding a file named "eileen happy.png" to the images
     # directory.
 
-    show eileen happy
+    
 
     # These display lines of dialogue.
 
