@@ -228,8 +228,8 @@ init python:
       self.y = y
       self.target_x = target_x
       self.target_y = target_y
-      self.size_1 = 5
-      self.size_2 = 7
+      self.size_1 = 7
+      self.size_2 = 10
       self.color = (255, 102, 255, 150)
       self.color_2 = (255, 102, 255, 100)
       self.size = 1
@@ -1436,15 +1436,87 @@ init python:
       render.place(self.sun, x = (self.x_location+self.width)-40, y = (self.y_location+self.height)-35)
       return render
 
-  class PlantSeedCardController():
+  class Sun():
+    def __init__(self, x, y, target_y):
+      self.x = x
+      self.y = y
+      self.target_y = target_y
+      self.speed = 2
+
+      self.reached_target = False
+      self.begin_collecting = False
+      self.is_collected = False
+      self.is_dead = False
+      self.life_timer = time.time()
+      self.image = im.FactorScale(all_images.images["gui"]["sun"], 1.3)
+
+      self.collect_speed = 5
+      self.collect_location_x = 50
+      self.collect_location_y = 50
+
+      self.x_distance = None
+      self.y_distance = None
+
+    def update(self, state):
+      mouse_x = state["mouseX"]
+      mouse_y = state["mouseY"]
+
+      if not self.begin_collecting:
+        if time.time() - self.life_timer > 10:
+          self.is_dead = True
+
+        if self.y < self.target_y:
+          self.y += self.speed
+        else:
+          self.reached_target = True
+
+      if mouse_x > self.x and mouse_x < self.x + 50 and mouse_y > self.y and mouse_y < self.y + 50:
+        if not self.begin_collecting:
+          self.x_distance = self.x - self.collect_location_x
+          self.y_distance = self.y - self.collect_location_y
+          self.begin_collecting = True
+
+      if self.begin_collecting:
+        distance = ((self.x_distance ** 2) + (self.y_distance ** 2)) ** 0.5
+        if distance > 0:
+          angle = math.atan2(self.y_distance, self.x_distance)
+          collect_speed_x = math.cos(angle) * self.collect_speed
+          collect_speed_y = math.sin(angle) * self.collect_speed
+          self.x -= collect_speed_x
+          self.y -= collect_speed_y
+
+        self.collect_speed = 1.1 * self.collect_speed
+        if self.x < self.collect_location_x or self.y < self.collect_location_y:
+          self.is_collected = True
+          self.is_dead = True
+
+    def render(self, render):
+      render.place(self.image, x = self.x, y = self.y)
+      return render
+
+
+
+  class GUIController():
     def __init__(self, plant_names):
       self.plant_seed_cards = []
+      self.last_sun_timer = time.time()
+      self.suns = []
+      self.sun_image = im.FactorScale(all_images.images["gui"]["sun"], 1.6)
+      self.background_solid = Solid((160, 82, 45), xsize=150, ysize=200)
+
       for i in range(len(plant_names)):
         self.plant_seed_cards.append(PlantSeedCard(plant_names[i], i))
 
-    def render(self, render):
+    def render(self, render, state):
       for plant_seed_card in self.plant_seed_cards:
         render = plant_seed_card.render(render)
+      for sun in self.suns:
+        render = sun.render(render)
+
+      cost_text = Text(str(state["sun_amount"]), size = 40)
+      render.place(self.background_solid, x = 15, y = 15)
+      render.place(self.sun_image, x = 50, y = 30)
+      render.place(cost_text, x = 50, y = 100)
       return render
 
     def process_click(self, state):
@@ -1455,6 +1527,20 @@ init python:
         if x > plant_seed_card.x_location and x < plant_seed_card.x_location + plant_seed_card.width and y > plant_seed_card.y_location and y < plant_seed_card.y_location + plant_seed_card.height:
           plant_selected = plant_seed_card.plant_name
       state["plant_selected"] = plant_selected
+      return state
+
+    def update(self, state):
+      if time.time() - self.last_sun_timer > 1:
+        self.last_sun_timer = time.time()
+        self.suns.append(Sun(renpy.random.randint(300, 1300), 150, renpy.random.randint(400, 700)))
+
+      for sun in self.suns:
+        sun.update(state)
+        if sun.is_dead:
+          if sun.is_collected:
+            state["sun_amount"] += 25
+          self.suns.remove(sun)
+
       return state
 
 
@@ -1477,6 +1563,7 @@ init python:
       self.mouseX = 0
       self.mouseY = 0
       self.plant_selected = "peashooter"
+      self.sun_amount = 50
 
       self.last_time = time.time()
 
@@ -1489,14 +1576,14 @@ init python:
       self.lanes = self.environment.gen_lanes()
       self.explosion_controller = ExplosionController(self.lanes)
 
-      self.plant_seed_card_controller = PlantSeedCardController(["peashooter", "iceshooter", "wallnut"])
+      self.gui_controller = GUIController(["peashooter", "iceshooter", "wallnut"])
       for _ in range(5):
-        self.lanes.randomly_add_zombie("buckethead")
-        self.lanes.randomly_add_zombie("conehead")
-        self.lanes.randomly_add_zombie("dog")
-        self.lanes.randomly_add_zombie("basic")
+        # self.lanes.randomly_add_zombie("buckethead")
+        # self.lanes.randomly_add_zombie("conehead")
+        # self.lanes.randomly_add_zombie("dog")
+        # self.lanes.randomly_add_zombie("basic")
         self.lanes.randomly_add_zombie("kinetic")
-        self.lanes.randomly_add_zombie("van")
+        # self.lanes.randomly_add_zombie("van")
 
     def visit(self):
       return self.environment.visit()
@@ -1506,18 +1593,20 @@ init python:
         "mouseX": self.mouseX,
         "mouseY": self.mouseY,
         "plant_selected": self.plant_selected,
+        "sun_amount": self.sun_amount
       }
 
     def alter_state(self, state):
       self.mouseX = state["mouseX"]
       self.mouseY = state["mouseY"]
       self.plant_selected = state["plant_selected"]
+      self.sun_amount = state["sun_amount"]
 
     def process_click(self):
       current_state = self.make_state()
-      self.has_ended = True
+      # self.has_ended = True
       # self.explosion_controller.add_explosion(self.mouseX, self.mouseY, "hellfire")
-      current_state = self.plant_seed_card_controller.process_click(current_state)
+      current_state = self.gui_controller.process_click(current_state)
       self.alter_state(current_state)
 
       if self.plant_selected is not None:
@@ -1539,12 +1628,14 @@ init python:
       self.environment.update(current_state)
       self.lanes.update()
       self.explosion_controller.update()
+      new_state = self.gui_controller.update(state=current_state)
+      self.alter_state(new_state)
 
       r = renpy.Render(width, height)
       # r = self.environment.render(r)
       r = self.lanes.render(r)
       r = self.explosion_controller.render(r)
-      r = self.plant_seed_card_controller.render(r)
+      r = self.gui_controller.render(r, new_state)
 
       text = Text(current_state["plant_selected"], size = 10, b=True)
       r.place(text, x = current_state["mouseX"], y = current_state["mouseY"])
