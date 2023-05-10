@@ -10,8 +10,21 @@
       "has_attack_frame": true,
       "joint_x": 125,
       "joint_y": 300,
-      "projectile_spawn_x": 106,
-      "projectile_spawn_y": 95
+      "projectile_spawn_x": 128,
+      "projectile_spawn_y": 112
+    },
+    "repeater": {
+      "resize_factor": 0.4,
+      "image_prefix": "repeater",
+      "width": 240,
+      "height": 320,
+      "num_frames": 1,
+      "has_damage_frames": false,
+      "has_attack_frame": true,
+      "joint_x": 125,
+      "joint_y": 300,
+      "projectile_spawn_x": 112,
+      "projectile_spawn_y": 117
     },
     "iceshooter": {
       "resize_factor": 0.4,
@@ -36,6 +49,19 @@
       "num_frames": 1,
       "joint_x": 125,
       "joint_y": 300
+    },
+    "sunflower": {
+      "resize_factor": 0.4,
+      "image_prefix": "sunflower",
+      "width": 240,
+      "height": 320,
+      "num_frames": 1,
+      "has_damage_frames": false,
+      "has_attack_frame": false,
+      "joint_x": 125,
+      "joint_y": 300,
+      "sun_spawn_x": 72,
+      "sun_spawn_y": 82
     }
   },
 
@@ -49,6 +75,18 @@
     "projectile_type": "baseball",
     "hitbox_distance": 10,
     "cost": 100,
+    "recharge_time": 5
+  },
+  "repeater": {
+    "animation_type": "repeater",
+    "health": 7,
+    "attack_delay": 1.5,
+    "num_shots": 2,
+    "shot_delay": 0.2,
+    "spawn_projectile": true,
+    "projectile_type": "baseball",
+    "hitbox_distance": 10,
+    "cost": 200,
     "recharge_time": 5
   },
 
@@ -67,11 +105,17 @@
   "wallnut": {
     "animation_type": "wallnut",
     "health": 70,
-    "attack_delay": 2,
-    "num_shots": 1,
-    "shot_delay": 0.2,
     "spawn_projectile": false,
-    "projectile_type": "icicle",
+    "hitbox_distance": 10,
+    "cost": 50,
+    "recharge_time": 5
+  },
+  "sunflower": {
+    "animation_type": "sunflower",
+    "health": 7,
+    "sun_delay": 5,
+    "glow_seconds_before_sun": 1,
+    "spawn_projectile": false,
     "hitbox_distance": 10,
     "cost": 50,
     "recharge_time": 5

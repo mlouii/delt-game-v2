@@ -16,13 +16,17 @@ init python:
   import time
 
 
-  def plant_name_to_plant(tile, lane, plant_type):
+  def plant_name_to_plant(tile, lane, plant_type, gui_controller):
     if plant_type == "peashooter":
-      return PeaShooter(tile, lane)
+      return PeaShooter("peashooter", tile, lane)
+    elif plant_type == "repeater":
+      return PeaShooter("repeater", tile, lane)
     elif plant_type == "iceshooter":
       return IceShooter(tile, lane)
     elif plant_type == "wallnut":
       return Wallnut(tile, lane)
+    elif plant_type == "sunflower":
+      return Sunflower(tile, lane, gui_controller)
 
 
   def load_json_from_file(path):
@@ -103,6 +107,9 @@ init python:
       if plant_config["spawn_projectile"]:
         image_config["projectile_spawn_x"] = image_config["projectile_spawn_x"] * resize_factor
         image_config["projectile_spawn_y"] = image_config["projectile_spawn_y"] * resize_factor
+      if plant_config["animation_type"] == "sunflower":
+        image_config["sun_spawn_x"] = image_config["sun_spawn_x"] * resize_factor
+        image_config["sun_spawn_y"] = image_config["sun_spawn_y"] * resize_factor
       self.plants["image_data"][animation_type] = image_config
 
     def modify_projectile_image_size(self, projectile_name, resize_factor):
@@ -151,12 +158,12 @@ init python:
 
       self.image = Solid(self.color, xsize=self.x_size, ysize=self.y_size)
 
-      self.x_velocity = self.speed * delta_time * math.cos(self.direction) * delta_multiplier
-      self.y_velocity = self.speed * delta_time * math.sin(self.direction) * delta_multiplier
+      self.x_velocity = self.speed * math.cos(self.direction)
+      self.y_velocity = self.speed * math.sin(self.direction)
 
     def update(self):
-      self.x += self.x_velocity
-      self.y += self.y_velocity
+      self.x += self.x_velocity * delta_multiplier * delta_time
+      self.y += self.y_velocity * delta_multiplier * delta_time
       if self.gravity_affected:
         self.y_velocity += GRAVITY_CONSTANT
       self.age += delta_time
@@ -365,6 +372,12 @@ init python:
           attack_frame = im.FactorScale(Image(plant_location + "/" + image_prefix + "-attack" + ".png"), resize_factor)
           self.images["plants"][plant_name]["animation"]["attack"] = attack_frame
           self.images["plants"][plant_name]["animation"]["damaged_attack"] = im.MatrixColor(attack_frame, im.matrix.brightness(self.brightness_factor))
+
+        if plant_name == "sunflower":
+          glowing_frame = im.FactorScale(Image(plant_location + "/" + image_prefix + "-glowing" + ".png"), resize_factor)
+          self.images["plants"][plant_name]["animation"]["glowing"] = glowing_frame
+          self.images["plants"][plant_name]["animation"]["damaged_glowing"] = im.MatrixColor(glowing_frame, im.matrix.brightness(self.brightness_factor))
+
 
       projectiles_to_load = self.determine_projectiles_to_load(plant_names=plant_types)
       self.load_projectiles(projectiles_to_load)
@@ -686,10 +699,10 @@ init python:
       renpy.play(AUDIO_DIR + "plant-planted.mp3", channel = "audio")
 
     def render(self, render):
-      if self.costume == "default":
+      if self.costume in ["default", "damaged_default"]:
         self.frames = all_images.images["plants"][self.plant_type]["animation"][self.costume]
         render.place(self.frames[self.frame], x = self.x_location, y = self.y_location)
-      elif self.costume == "attack":
+      elif self.costume in ["attack", "glowing", "damaged_attack", "damaged_glowing"]:
         image = all_images.images["plants"][self.plant_type]["animation"][self.costume]
         render.place(image, x = self.x_location, y = self.y_location)
       return render
@@ -758,9 +771,10 @@ init python:
           self.attack()
           self.attack_timer = time.time()
     
+  # covers peashooter and repeater
   class PeaShooter(Plant):
-    def __init__(self, tile, lane):
-      super().__init__(tile, lane, "peashooter")
+    def __init__(self, plant_name, tile, lane):
+      super().__init__(tile, lane, plant_name)
       self.attack_timer = time.time()
       self.shot_timer = time.time()
       self.attack_delay = self.plant_config["attack_delay"]
@@ -790,6 +804,27 @@ init python:
   class Wallnut(Plant):
     def __init__(self, tile, lane):
       super().__init__(tile, lane, "wallnut")
+
+  class Sunflower(Plant):
+    def __init__(self, tile, lane, gui_controller):
+      super().__init__(tile, lane, "sunflower")
+      self.sun_timer = time.time()
+      self.sun_delay = self.plant_config["sun_delay"]
+      self.glow_seconds_before_sun = self.plant_config["glow_seconds_before_sun"]
+      self.gui_controller = gui_controller
+
+    def update(self):
+      super().update()
+      if (time.time() - self.sun_timer) + self.glow_seconds_before_sun > self.sun_delay:
+        self.costume = "glowing"
+      else:
+        self.costume = "default"
+
+      if time.time() - self.sun_timer > self.sun_delay:
+        sun_spawn_x = self.plant_image_config["sun_spawn_x"] + self.x_location
+        sun_spawn_y = self.plant_image_config["sun_spawn_y"] + self.y_location
+        self.gui_controller.add_sun(sun_spawn_x, sun_spawn_y, self.tile.target_location_y - 20, False)
+        self.sun_timer = time.time()
     
 
       
@@ -1292,6 +1327,10 @@ init python:
   class Lanes:
     def __init__(self, num_lanes):
         self.lanes = [Lane(i) for i in range(num_lanes)]
+        self.gui_controller = None
+
+    def set_gui_controller(self, gui_controller):
+        self.gui_controller = gui_controller
 
     def add_plant_xy(self, x, y, plant):
         tile = self.pos_to_tile(x, y)
@@ -1300,7 +1339,7 @@ init python:
         self.lanes[lane_index].add_plant(plant)
 
     def add_plant_tile(self, tile, plant):
-        plant = plant_name_to_plant(tile, self.lane_id_to_lane(tile.lane_id), plant)
+        plant = plant_name_to_plant(tile, self.lane_id_to_lane(tile.lane_id), plant, self.gui_controller)
         self.lanes[tile.lane_id].add_plant(plant)
 
     def remove_plant(self, lane_index, plant):
@@ -1503,11 +1542,12 @@ init python:
         self.can_afford = False
 
   class Sun():
-    def __init__(self, x, y, target_y):
+    def __init__(self, x, y, target_y, from_sky = True):
       self.x = x
       self.y = y
       self.target_y = target_y
       self.speed = 1
+      self.from_sky = from_sky
 
       self.reached_target = False
       self.begin_collecting = False
@@ -1523,6 +1563,12 @@ init python:
       self.x_distance = None
       self.y_distance = None
 
+      self.y_velocity = None
+      self.x_velocity = None
+      if not self.from_sky:
+        self.y_velocity = -8
+        self.x_velocity = renpy.random.randint(-1, 1)
+
     def update(self, state):
       mouse_x = state["mouseX"]
       mouse_y = state["mouseY"]
@@ -1531,9 +1577,16 @@ init python:
         if time.time() - self.life_timer > 10:
           self.is_dead = True
 
-        if self.y < self.target_y:
-          self.y += self.speed
+        if self.from_sky:
+          if self.y < self.target_y:
+            self.y += self.speed * delta_multiplier * delta_time
         else:
+          if not self.reached_target:
+            self.y += self.y_velocity * delta_multiplier * delta_time
+            self.x += self.x_velocity * delta_multiplier * delta_time
+            self.y_velocity += GRAVITY_CONSTANT * delta_multiplier * delta_time
+
+        if self.y > self.target_y:
           self.reached_target = True
 
       if mouse_x > self.x and mouse_x < self.x + 50 and mouse_y > self.y and mouse_y < self.y + 50:
@@ -1549,8 +1602,8 @@ init python:
           angle = math.atan2(self.y_distance, self.x_distance)
           collect_speed_x = math.cos(angle) * self.collect_speed
           collect_speed_y = math.sin(angle) * self.collect_speed
-          self.x -= collect_speed_x
-          self.y -= collect_speed_y
+          self.x -= collect_speed_x * delta_multiplier * delta_time
+          self.y -= collect_speed_y * delta_multiplier * delta_time
 
         self.collect_speed = 1.1 * self.collect_speed
         if self.x < self.collect_location_x or self.y < self.collect_location_y:
@@ -1623,10 +1676,13 @@ init python:
       state["plant_selected"] = plant_selected
       return state
 
+    def add_sun(self, x, y, target_y, from_sky):
+      self.suns.append(Sun(x, y, target_y, from_sky))
+
     def update(self, state):
-      if time.time() - self.last_sun_timer > 1:
+      if time.time() - self.last_sun_timer > 100:
         self.last_sun_timer = time.time()
-        self.suns.append(Sun(renpy.random.randint(300, 1300), 150, renpy.random.randint(600, 900)))
+        self.add_sun(renpy.random.randint(300, 1300), 150, renpy.random.randint(600, 900), True)
 
       if self.notification_message != None:
         if time.time() - self.notification_message_timer > 3:
@@ -1669,12 +1725,12 @@ init python:
       self.mouseY = 0
       self.plant_selected = None
       self.plant_seed_slot_selected = None
-      self.sun_amount = 50
+      self.sun_amount = 5000
 
       self.last_time = time.time()
 
       all_images.load_zombies(["basic", "dog", "kinetic", "van", "conehead", "buckethead"])
-      all_images.load_plants(["peashooter", "iceshooter", "wallnut"])
+      all_images.load_plants(["peashooter", "repeater", "iceshooter", "wallnut", "sunflower"])
       all_images.load_explosions()
       all_images.load_gui()
 
@@ -1682,7 +1738,9 @@ init python:
       self.lanes = self.environment.gen_lanes()
       self.explosion_controller = ExplosionController(self.lanes)
 
-      self.gui_controller = GUIController(["peashooter", "iceshooter", "wallnut"])
+      self.gui_controller = GUIController(["peashooter", "repeater", "iceshooter", "wallnut", "sunflower"])
+      self.lanes.set_gui_controller(self.gui_controller)
+
       for _ in range(5):
         # self.lanes.randomly_add_zombie("buckethead")
         # self.lanes.randomly_add_zombie("conehead")
