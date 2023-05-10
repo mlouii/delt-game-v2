@@ -360,6 +360,12 @@ init python:
             "damaged_default": [im.MatrixColor(frame, im.matrix.brightness(self.brightness_factor)) for frame in animation_frames]
           }
         }
+
+        if config_data.get_plant_image_config(animation_type)["has_attack_frame"]:
+          attack_frame = im.FactorScale(Image(plant_location + "/" + image_prefix + "-attack" + ".png"), resize_factor)
+          self.images["plants"][plant_name]["animation"]["attack"] = attack_frame
+          self.images["plants"][plant_name]["animation"]["damaged_attack"] = im.MatrixColor(attack_frame, im.matrix.brightness(self.brightness_factor))
+
       projectiles_to_load = self.determine_projectiles_to_load(plant_names=plant_types)
       self.load_projectiles(projectiles_to_load)
 
@@ -666,6 +672,8 @@ init python:
         self.projectile_type = self.plant_config["projectile_type"]
 
       self.costume = "default"
+      self.attack_costume_timer = time.time()
+
       self.frames = all_images.images["plants"][self.plant_type]["animation"][self.costume]
       self.damaged_timer = None
 
@@ -678,8 +686,12 @@ init python:
       renpy.play(AUDIO_DIR + "plant-planted.mp3", channel = "audio")
 
     def render(self, render):
-      self.frames = all_images.images["plants"][self.plant_type]["animation"][self.costume]
-      render.place(self.frames[self.frame], x = self.x_location, y = self.y_location)
+      if self.costume == "default":
+        self.frames = all_images.images["plants"][self.plant_type]["animation"][self.costume]
+        render.place(self.frames[self.frame], x = self.x_location, y = self.y_location)
+      elif self.costume == "attack":
+        image = all_images.images["plants"][self.plant_type]["animation"][self.costume]
+        render.place(image, x = self.x_location, y = self.y_location)
       return render
 
     def die(self):
@@ -698,6 +710,8 @@ init python:
 
 
     def attack(self):
+      self.costume = "attack"
+      self.attack_costume_timer = time.time()
       if self.does_spawn_projectile:
         self.lane.add_projectile(Projectile(self, self.projectile_type))
       else:
@@ -711,6 +725,10 @@ init python:
         return False
 
     def update(self):
+      if self.costume == "attack":
+        if time.time() - self.attack_costume_timer > 0.3:
+          self.costume = "default"
+
       if self.health <= 0:
         self.die()
 
@@ -760,6 +778,8 @@ init python:
       if self.does_lane_have_hittable_zombies():
         if (time.time() - self.attack_timer > self.attack_delay):
           if (time.time() - self.shot_timer > self.shot_delay and self.num_shot_already < self.plant_config["num_shots"]):
+            self.costume = "attack"
+            self.attack_costume_timer = time.time()
             self.lane.add_projectile(Projectile(self, self.projectile_type))
             self.shot_timer = time.time()
             self.num_shot_already += 1
@@ -1445,6 +1465,7 @@ init python:
 
       self.recharge_timer = time.time()
       self.is_recharge_ready = True
+      self.can_afford = False
 
       #graphics
       self.background_solid = Solid((50, 252, 104), xsize=self.width, ysize=self.height)
@@ -1462,22 +1483,31 @@ init python:
         render.place(self.gray_overlay, x = self.x_location, y = self.y_location)
         progress_overlay = Solid((0, 0, 0, 150), xsize=self.width, ysize=(self.height - int((self.height*(time.time() - self.recharge_timer))/self.plant_config["recharge_time"])))
         render.place(progress_overlay, x = self.x_location, y = self.y_location)
+      else:
+        if not self.can_afford:
+          self.gray_overlay = Solid((0, 0, 0, 100), xsize=self.width, ysize=self.height)
+          render.place(self.gray_overlay, x = self.x_location, y = self.y_location)
       return render
 
     def reset_recharge_timer(self):
       self.recharge_timer = time.time()
       self.is_recharge_ready = False
 
-    def update(self):
+    def update(self, state):
       if time.time() - self.recharge_timer > self.plant_config["recharge_time"]:
         self.is_recharge_ready = True
+
+      if state["sun_amount"] >= self.plant_config["cost"]:
+        self.can_afford = True
+      else:
+        self.can_afford = False
 
   class Sun():
     def __init__(self, x, y, target_y):
       self.x = x
       self.y = y
       self.target_y = target_y
-      self.speed = 1.5
+      self.speed = 1
 
       self.reached_target = False
       self.begin_collecting = False
@@ -1541,8 +1571,22 @@ init python:
       self.sun_image = im.FactorScale(all_images.images["gui"]["sun"], 1.6)
       self.background_solid = Solid((160, 82, 45), xsize=150, ysize=200)
 
+      self.notification_message = None
+      self.notification_message_timer = time.time()
+
+      self.wave_message = None
+      self.wave_message_timer = time.time()
+
       for i in range(len(plant_names)):
         self.plant_seed_cards.append(PlantSeedCard(plant_names[i], i))
+
+    def display_notification(self, message):
+      self.notification_message = message
+      self.notification_message_timer = time.time()
+
+    def dispay_wave_message(self, message):
+      self.wave_message = message
+      self.wave_message_timer = time.time()
 
     def render(self, render, state):
       for plant_seed_card in self.plant_seed_cards:
@@ -1554,6 +1598,12 @@ init python:
       render.place(self.background_solid, x = 15, y = 15)
       render.place(self.sun_image, x = 50, y = 30)
       render.place(cost_text, x = 50, y = 100)
+
+      if self.notification_message:
+        notification_background = Solid((255, 255, 255, 180), xsize=(len(self.notification_message) * 23), ysize=110)
+        render.place(notification_background, x = 680, y = 870)
+        notification_text = Text(self.notification_message, size = 40)
+        render.place(notification_text, x = 700, y = 900)
       return render
 
     def process_click(self, state):
@@ -1562,8 +1612,14 @@ init python:
       plant_selected = state["plant_selected"]
       for plant_seed_card in self.plant_seed_cards:
         if x > plant_seed_card.x_location and x < plant_seed_card.x_location + plant_seed_card.width and y > plant_seed_card.y_location and y < plant_seed_card.y_location + plant_seed_card.height:
-          plant_selected = plant_seed_card.plant_name
-          state["plant_seed_slot_selected"] = plant_seed_card
+          if plant_seed_card.is_recharge_ready:
+            if plant_seed_card.can_afford:
+              plant_selected = plant_seed_card.plant_name
+              state["plant_seed_slot_selected"] = plant_seed_card
+            else:
+              self.display_notification("Not enough Xs off!")
+          else:
+            self.display_notification("Not ready yet!")
       state["plant_selected"] = plant_selected
       return state
 
@@ -1571,6 +1627,14 @@ init python:
       if time.time() - self.last_sun_timer > 1:
         self.last_sun_timer = time.time()
         self.suns.append(Sun(renpy.random.randint(300, 1300), 150, renpy.random.randint(600, 900)))
+
+      if self.notification_message != None:
+        if time.time() - self.notification_message_timer > 3:
+          self.notification_message = None
+
+      if self.wave_message != None:
+        if time.time() - self.wave_message_timer > 3:
+          self.wave_message = None
 
       for sun in self.suns:
         sun.update(state)
@@ -1580,7 +1644,7 @@ init python:
           self.suns.remove(sun)
 
       for plant_seed_card in self.plant_seed_cards:
-        plant_seed_card.update()
+        plant_seed_card.update(state)
 
       return state
 
@@ -1620,12 +1684,12 @@ init python:
 
       self.gui_controller = GUIController(["peashooter", "iceshooter", "wallnut"])
       for _ in range(5):
-        self.lanes.randomly_add_zombie("buckethead")
-        self.lanes.randomly_add_zombie("conehead")
-        self.lanes.randomly_add_zombie("dog")
+        # self.lanes.randomly_add_zombie("buckethead")
+        # self.lanes.randomly_add_zombie("conehead")
+        # self.lanes.randomly_add_zombie("dog")
         self.lanes.randomly_add_zombie("basic")
-        self.lanes.randomly_add_zombie("kinetic")
-        self.lanes.randomly_add_zombie("van")
+        # self.lanes.randomly_add_zombie("kinetic")
+        # self.lanes.randomly_add_zombie("van")
 
     def visit(self):
       return self.environment.visit()
@@ -1649,7 +1713,7 @@ init python:
     def process_click(self):
       current_state = self.make_state()
       # self.has_ended = True
-      self.explosion_controller.add_explosion(self.mouseX, self.mouseY, "hellfire")
+      # self.explosion_controller.add_explosion(self.mouseX, self.mouseY, "hellfire")
       current_state = self.gui_controller.process_click(current_state)
 
       if self.plant_selected is not None and self.plant_seed_slot_selected is not None:
@@ -1661,6 +1725,8 @@ init python:
               self.lanes.add_plant_tile(tile, self.plant_selected)
               self.plant_seed_slot_selected.reset_recharge_timer()
               current_state["sun_amount"] -= self.plant_seed_slot_selected.plant_config["cost"]
+            else:
+              self.gui_controller.display_notification("Can't plant there!")
       self.alter_state(current_state)
 
         
