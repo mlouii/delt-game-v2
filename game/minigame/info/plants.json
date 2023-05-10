@@ -42,7 +42,8 @@
     "spawn_projectile": true,
     "projectile_type": "baseball",
     "hitbox_distance": 10,
-    "cost": 100
+    "cost": 100,
+    "recharge_time": 5
   },
 
   "iceshooter": {
@@ -54,7 +55,8 @@
     "spawn_projectile": true,
     "projectile_type": "icicle",
     "hitbox_distance": 10,
-    "cost": 200
+    "cost": 200,
+    "recharge_time": 5
   }, 
   "wallnut": {
     "animation_type": "wallnut",
@@ -65,6 +67,7 @@
     "spawn_projectile": false,
     "projectile_type": "icicle",
     "hitbox_distance": 10,
-    "cost": 50
+    "cost": 50,
+    "recharge_time": 5
   }
 }

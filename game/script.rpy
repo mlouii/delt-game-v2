@@ -16,9 +16,9 @@ label start:
 
     scene bg room
     show eileen happy
-    # e "lets test this game"
+    e "lets test this game"
 
-    # e "goddamn i love dudes"
+    e "goddamn i love dudes"
 
     call test_game_entry_label
 

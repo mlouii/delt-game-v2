@@ -377,6 +377,11 @@ init python:
         part_types = config_data.get_zombie_image_config(animation_type)["parts"]
         part_types_with_damage_frames = None
         has_damage_frames = config_data.get_zombie_config(zombie_name)["has_damage_frames"]
+        blacken_on_explosion = config_data.get_zombie_config(zombie_name)["blacken_on_explosion"]
+        if blacken_on_explosion:
+          self.images["zombies"][zombie_name]["blackened"] = {
+             part_type:im.MatrixColor(im.FactorScale(Image(zombie_location + f"/{part_type}.png"), resize_factor), im.matrix.brightness(-1)) for part_type in part_types
+          }
         if has_damage_frames:
           part_types_with_damage_frames = config_data.get_zombie_config(zombie_name)["damage_frame_order"].keys()
         types_to_loop = ["default", "iced"]
@@ -857,6 +862,10 @@ init python:
         self.image = all_images.images["zombies"][self.zombie.zombie_type][costume][self.part_type]
       else:
         self.image = all_images.images["zombies"][self.zombie.zombie_type][self.zombie.costume][self.part_type]
+
+      if self.zombie.blackened:
+        self.image = all_images.images["zombies"][self.zombie.zombie_type]["blackened"][self.part_type]
+
       if self.status == "attached":
         if self.motion_type != "rotate":
           transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
@@ -966,17 +975,18 @@ init python:
       self.is_dead = False
       self.should_delete = False
 
-      self.health = zombie_config[self.zombie_type]["health"]
-      self.speed = zombie_config[self.zombie_type]["speed"]
-      self.attack = zombie_config[self.zombie_type]["attack"]
-      self.hitbox_distance = zombie_config[self.zombie_type]["hitbox_distance"]
-      self.hitbox_width = zombie_config[self.zombie_type]["hitbox_width"]
+      self.health = config_data.get_zombie_config(zombie_type)["health"]
+      self.speed = config_data.get_zombie_config(zombie_type)["speed"]
+      self.attack = config_data.get_zombie_config(zombie_type)["attack"]
+      self.hitbox_distance = config_data.get_zombie_config(zombie_type)["hitbox_distance"]
+      self.hitbox_width = config_data.get_zombie_config(zombie_type)["hitbox_width"]
 
-      self.attack_motions = zombie_config[self.zombie_type]["attack_motions"]
-      self.death_motions = zombie_config[self.zombie_type]["death_motions"]
+      self.attack_motions = config_data.get_zombie_config(zombie_type)["attack_motions"]
+      self.death_motions = config_data.get_zombie_config(zombie_type)["death_motions"]
       self.zombie_class = self.image_config["class"]
 
       self.body_parts = [Body_Part(self, part_name) for part_name in self.image_config["part_name_order"]]
+      self.blackened = False
 
       self.target_plant = None
 
@@ -1009,6 +1019,8 @@ init python:
       if not self.costume.startswith("damaged_"):
         self.costume = "damaged_" + self.costume
         self.damaged_timer = time.time()
+      if self.health <= 0:
+        self.die()
 
     def start_eating(self, plant):
       self.target_plant = plant
@@ -1062,6 +1074,9 @@ init python:
       self.body_parts = [part for part in self.body_parts if part.status != "gone"]
       for body_part in self.body_parts:
         body_part.update()
+
+      if self.blackened:
+        self.costume = "blackened"
 
   # basic zombie covers all zombies that don't have a special class, such as dog
   class BasicZombie(Zombie):
@@ -1355,6 +1370,11 @@ init python:
       self.explosions = []
       self.lanes = lanes
 
+    def check_blacken(self, zombie):
+      if zombie.is_dead:
+        if config_data.get_zombie_config(zombie.zombie_type)["blacken_on_explosion"]:
+          zombie.blackened = True
+
     def damage_zombies(self, x, y, explosion_type):
       tile = self.lanes.pos_to_tile(x, y)
       lane_id = tile.lane_id
@@ -1370,6 +1390,7 @@ init python:
       direct_hit_zombies = lane.return_all_zombies_on_tile(tile)
       for zombie in direct_hit_zombies:
         zombie.damage(direct_damage)
+        self.check_blacken(zombie)
 
       splash_zombies = []
 
@@ -1386,6 +1407,8 @@ init python:
 
       for zombie in splash_zombies:
         zombie.damage(splash_damage)
+        self.check_blacken(zombie)
+        
 
 
     def add_explosion(self, x, y, explosion_type):
@@ -1434,14 +1457,27 @@ init python:
       render.place(self.image, x = self.x_location+15, y = self.y_location+10)
       render.place(self.cost_text, x = self.x_location+40, y = (self.y_location+self.height)-35)
       render.place(self.sun, x = (self.x_location+self.width)-40, y = (self.y_location+self.height)-35)
+      if not self.is_recharge_ready:
+        self.gray_overlay = Solid((0, 0, 0, 100), xsize=self.width, ysize=self.height)
+        render.place(self.gray_overlay, x = self.x_location, y = self.y_location)
+        progress_overlay = Solid((0, 0, 0, 150), xsize=self.width, ysize=(self.height - int((self.height*(time.time() - self.recharge_timer))/self.plant_config["recharge_time"])))
+        render.place(progress_overlay, x = self.x_location, y = self.y_location)
       return render
+
+    def reset_recharge_timer(self):
+      self.recharge_timer = time.time()
+      self.is_recharge_ready = False
+
+    def update(self):
+      if time.time() - self.recharge_timer > self.plant_config["recharge_time"]:
+        self.is_recharge_ready = True
 
   class Sun():
     def __init__(self, x, y, target_y):
       self.x = x
       self.y = y
       self.target_y = target_y
-      self.speed = 2
+      self.speed = 1.5
 
       self.reached_target = False
       self.begin_collecting = False
@@ -1475,6 +1511,7 @@ init python:
           self.x_distance = self.x - self.collect_location_x
           self.y_distance = self.y - self.collect_location_y
           self.begin_collecting = True
+          renpy.play(AUDIO_DIR + "sun-collected.mp3", channel = "audio")
 
       if self.begin_collecting:
         distance = ((self.x_distance ** 2) + (self.y_distance ** 2)) ** 0.5
@@ -1526,13 +1563,14 @@ init python:
       for plant_seed_card in self.plant_seed_cards:
         if x > plant_seed_card.x_location and x < plant_seed_card.x_location + plant_seed_card.width and y > plant_seed_card.y_location and y < plant_seed_card.y_location + plant_seed_card.height:
           plant_selected = plant_seed_card.plant_name
+          state["plant_seed_slot_selected"] = plant_seed_card
       state["plant_selected"] = plant_selected
       return state
 
     def update(self, state):
       if time.time() - self.last_sun_timer > 1:
         self.last_sun_timer = time.time()
-        self.suns.append(Sun(renpy.random.randint(300, 1300), 150, renpy.random.randint(400, 700)))
+        self.suns.append(Sun(renpy.random.randint(300, 1300), 150, renpy.random.randint(600, 900)))
 
       for sun in self.suns:
         sun.update(state)
@@ -1540,6 +1578,9 @@ init python:
           if sun.is_collected:
             state["sun_amount"] += 25
           self.suns.remove(sun)
+
+      for plant_seed_card in self.plant_seed_cards:
+        plant_seed_card.update()
 
       return state
 
@@ -1562,7 +1603,8 @@ init python:
 
       self.mouseX = 0
       self.mouseY = 0
-      self.plant_selected = "peashooter"
+      self.plant_selected = None
+      self.plant_seed_slot_selected = None
       self.sun_amount = 50
 
       self.last_time = time.time()
@@ -1578,12 +1620,12 @@ init python:
 
       self.gui_controller = GUIController(["peashooter", "iceshooter", "wallnut"])
       for _ in range(5):
-        # self.lanes.randomly_add_zombie("buckethead")
-        # self.lanes.randomly_add_zombie("conehead")
-        # self.lanes.randomly_add_zombie("dog")
-        # self.lanes.randomly_add_zombie("basic")
+        self.lanes.randomly_add_zombie("buckethead")
+        self.lanes.randomly_add_zombie("conehead")
+        self.lanes.randomly_add_zombie("dog")
+        self.lanes.randomly_add_zombie("basic")
         self.lanes.randomly_add_zombie("kinetic")
-        # self.lanes.randomly_add_zombie("van")
+        self.lanes.randomly_add_zombie("van")
 
     def visit(self):
       return self.environment.visit()
@@ -1593,7 +1635,8 @@ init python:
         "mouseX": self.mouseX,
         "mouseY": self.mouseY,
         "plant_selected": self.plant_selected,
-        "sun_amount": self.sun_amount
+        "sun_amount": self.sun_amount,
+        "plant_seed_slot_selected": self.plant_seed_slot_selected
       }
 
     def alter_state(self, state):
@@ -1601,19 +1644,25 @@ init python:
       self.mouseY = state["mouseY"]
       self.plant_selected = state["plant_selected"]
       self.sun_amount = state["sun_amount"]
+      self.plant_seed_slot_selected = state["plant_seed_slot_selected"]
 
     def process_click(self):
       current_state = self.make_state()
       # self.has_ended = True
-      # self.explosion_controller.add_explosion(self.mouseX, self.mouseY, "hellfire")
+      self.explosion_controller.add_explosion(self.mouseX, self.mouseY, "hellfire")
       current_state = self.gui_controller.process_click(current_state)
+
+      if self.plant_selected is not None and self.plant_seed_slot_selected is not None:
+        tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
+        if tile:
+          if current_state["sun_amount"] >= self.plant_seed_slot_selected.plant_config["cost"] and self.plant_seed_slot_selected.is_recharge_ready:
+            if tile.plantable():
+              tile.is_planted = True
+              self.lanes.add_plant_tile(tile, self.plant_selected)
+              self.plant_seed_slot_selected.reset_recharge_timer()
+              current_state["sun_amount"] -= self.plant_seed_slot_selected.plant_config["cost"]
       self.alter_state(current_state)
 
-      if self.plant_selected is not None:
-        tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
-        if tile is not None and tile.plantable():
-          tile.is_planted = True
-          self.lanes.add_plant_tile(tile, self.plant_selected)
         
 
     def render(self, width, height, st, at):
@@ -1637,8 +1686,7 @@ init python:
       r = self.explosion_controller.render(r)
       r = self.gui_controller.render(r, new_state)
 
-      text = Text(current_state["plant_selected"], size = 10, b=True)
-      r.place(text, x = current_state["mouseX"], y = current_state["mouseY"])
+      # r.place(text, x = current_state["mouseX"], y = current_state["mouseY"])
 
       renpy.redraw(self, 0)
       return r

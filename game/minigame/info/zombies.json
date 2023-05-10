@@ -592,6 +592,7 @@
     "attack_motions": ["attack"],
     "death_motions": ["basic_death"],
     "has_damage_frames": false,
+    "blacken_on_explosion": true,
     "health": 10,
     "attack": 1,
     "hitbox_distance": 100,
@@ -605,6 +606,7 @@
     "attack_motions": ["attack"],
     "death_motions": ["basic_death"],
     "has_damage_frames": true,
+    "blacken_on_explosion": true,
     "damage_frame_order": {
       "hat": {
         "damaged-1": 0.20,
@@ -624,6 +626,7 @@
     "attack_motions": ["attack"],
     "death_motions": ["basic_death"],
     "has_damage_frames": true,
+    "blacken_on_explosion": true,
     "damage_frame_order": {
       "hat": {
         "damaged-1": 0.27,
@@ -643,6 +646,7 @@
     "attack_motions": ["attack"],
     "death_motions": ["basic_death"],
     "has_damage_frames": false,
+    "blacken_on_explosion": true,
     "health": 10,
     "attack": 1,
     "hitbox_distance": 100,
@@ -656,6 +660,7 @@
     "attack_motions": ["stay_still"],
     "death_motions": ["basic_death"],
     "has_damage_frames": false,
+    "blacken_on_explosion": true,
     "health": 28,
     "attack": 100,
     "hitbox_distance": 100,
@@ -669,6 +674,7 @@
     "attack_motions": ["drive"],
     "death_motions": ["explode"],
     "has_damage_frames": true,
+    "blacken_on_explosion": false,
     "damage_frame_order": {
       "torso": {
         "damaged-1": 0.25,
