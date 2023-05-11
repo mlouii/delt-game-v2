@@ -126,7 +126,7 @@ init python:
         if has_been_resized:
           return
         image_config = self.get_zombie_image_config(animation_type)
-        if image_config["class"] in ["zombie", "vehicle"]:
+        if image_config["class"] in ["zombie", "vehicle", "shield"]:
             for part_type in image_config["parts"]:
               image_config[part_type]["height"] = image_config[part_type]["height"] * resize_factor
               image_config[part_type]["width"] = image_config[part_type]["width"] * resize_factor
@@ -403,7 +403,10 @@ init python:
           }
         if has_damage_frames:
           part_types_with_damage_frames = config_data.get_zombie_config(zombie_name)["damage_frame_order"].keys()
+
         types_to_loop = ["default", "iced"]
+        if zombie_name == "shield":
+          types_to_loop = ["default"]
         for type_to_loop in types_to_loop:
           suffix = ""
           if type_to_loop == "iced":
@@ -1056,9 +1059,10 @@ init python:
         body_part.update_motion_params()
 
     def get_iced(self):
-      self.is_iced = True
-      self.ice_timer = time.time()
-      self.costume = "iced"
+      if self.image_config["class"] != "shield":
+        self.is_iced = True
+        self.ice_timer = time.time()
+        self.costume = "iced"
 
     def check_damage_limb_detach(self):
       info = self.image_config["damage_fall_order"]
@@ -1121,7 +1125,7 @@ init python:
         self.should_delete = True
         self.is_dead = True
 
-      if self.zombie_class != "vehicle":
+      if self.zombie_class not in ["vehicle", "shield"]:
         head = [part for part in self.body_parts if part.part_name == "head"]
         if not head or head[0].status == "gone":
           self.should_delete = True
@@ -1132,6 +1136,36 @@ init python:
 
       if self.blackened:
         self.costume = "blackened"
+
+  class Shield(Zombie):
+    def __init__(self, x_location, y_location, lane, bearer):
+      super().__init__(x_location, y_location, "shield", lane)
+      self.bearer = bearer
+
+    def start_eating(self, plant):
+      pass
+
+    def update(self):
+      if self.costume.startswith("damaged_") and time.time() - self.damaged_timer > 0.05:
+        self.costume = self.costume.replace("damaged_", "")
+
+      if not self.bearer.is_dead:
+        true_angle = math.radians(-90 - self.bearer.body_parts[1].angle)
+        hand_location_x = math.cos(true_angle) * self.bearer.body_parts[1].image_height *0.7
+        hand_location_y = math.sin(true_angle) * self.bearer.body_parts[1].image_height * 0.7
+
+        torso_joint_x = self.body_parts[0].image_width / 3
+        torso_joint_y = self.body_parts[0].image_height / 3
+
+        self.x_location = int(self.bearer.x_location + hand_location_x - torso_joint_x)
+        self.y_location = int(self.bearer.y_location - hand_location_y - torso_joint_y)
+
+      #send_to_file("logz.txt", "angle: " + str(true_angle) + ", "+str(self.bearer.x_location) + " , " + str(hand_location_x) + " , " + str(torso_joint_x) + " , final = " + str(self.x_location) + "\n")
+
+      if not self.bearer or self.bearer.is_dead or self.health <= 0:
+        self.die()
+        self.should_delete = True
+
 
   # basic zombie covers all zombies that don't have a special class, such as dog
   class BasicZombie(Zombie):
@@ -1370,8 +1404,12 @@ init python:
         lane_index = renpy.random.randint(0, len(self.lanes) - 1)
         lane = self.lanes[lane_index]
         zombie = Zombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location + renpy.random.randint(-5,5), zombie_type, lane)
-        if zombie_type in  ["basic", "dog", "conehead", "buckethead"] :
+        if zombie_type in  ["basic", "dog", "conehead", "buckethead", "shield_bearer"] :
           zombie = BasicZombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location + renpy.random.randint(-5,5), zombie_type, lane)
+          if zombie_type == "shield_bearer":
+            lane.add_zombie(zombie)
+            shield = Shield(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location + renpy.random.randint(-5,5), lane, zombie)
+            zombie = shield
         if zombie_type == "van":
           zombie = VanZombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location + renpy.random.randint(-5,5), lane)
         if zombie_type == "kinetic":
@@ -1729,7 +1767,7 @@ init python:
 
       self.last_time = time.time()
 
-      all_images.load_zombies(["basic", "dog", "kinetic", "van", "conehead", "buckethead"])
+      all_images.load_zombies(["basic", "dog", "kinetic", "van", "conehead", "buckethead", "shield_bearer", "shield"])
       all_images.load_plants(["peashooter", "repeater", "iceshooter", "wallnut", "sunflower"])
       all_images.load_explosions()
       all_images.load_gui()
@@ -1741,13 +1779,14 @@ init python:
       self.gui_controller = GUIController(["peashooter", "repeater", "iceshooter", "wallnut", "sunflower"])
       self.lanes.set_gui_controller(self.gui_controller)
 
-      for _ in range(5):
-        # self.lanes.randomly_add_zombie("buckethead")
-        # self.lanes.randomly_add_zombie("conehead")
-        # self.lanes.randomly_add_zombie("dog")
+      for _ in range(10):
+        self.lanes.randomly_add_zombie("buckethead")
+        self.lanes.randomly_add_zombie("conehead")
+        self.lanes.randomly_add_zombie("dog")
         self.lanes.randomly_add_zombie("basic")
-        # self.lanes.randomly_add_zombie("kinetic")
-        # self.lanes.randomly_add_zombie("van")
+        self.lanes.randomly_add_zombie("shield_bearer")
+        self.lanes.randomly_add_zombie("kinetic")
+        self.lanes.randomly_add_zombie("van")
 
     def visit(self):
       return self.environment.visit()
