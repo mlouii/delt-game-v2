@@ -44,6 +44,11 @@
       "image_prefix": "wallnut",
       "has_damage_frames": true,
       "has_attack_frame": false,
+      "damage_frame_order": {
+        "damaged-1": 0.35,
+        "damaged-2": 0.5,
+        "damaged-3": 0.85
+      },
       "width": 240,
       "height": 320,
       "num_frames": 1,

@@ -377,6 +377,13 @@ init python:
           self.images["plants"][plant_name]["animation"]["attack"] = attack_frame
           self.images["plants"][plant_name]["animation"]["damaged_attack"] = im.MatrixColor(attack_frame, im.matrix.brightness(self.brightness_factor))
 
+        if config_data.get_plant_image_config(plant_name)["has_damage_frames"]:
+          keys = config_data.get_plant_image_config(plant_name)["damage_frame_order"].keys()
+          for key in keys:
+            frame = im.FactorScale(Image(plant_location + "/" + image_prefix + "-" + key + ".png"), resize_factor)
+            self.images["plants"][plant_name]["animation"][key] = frame
+            self.images["plants"][plant_name]["animation"]["damaged_" + key] = im.MatrixColor(frame, im.matrix.brightness(self.brightness_factor))
+
         if "other_frames" in config_data.get_plant_image_config(animation_type):
           other_frames = config_data.get_plant_image_config(animation_type)["other_frames"]
           for frame_name in other_frames:
@@ -715,7 +722,7 @@ init python:
         self.frames = all_images.images["plants"][self.plant_type]["animation"][self.costume]
         render.place(self.frames[self.frame], x = self.x_location, y = self.y_location)
       else:
-        send_to_file("logz.txt", ",".join(list(all_images.images["plants"][self.plant_type]["animation"].keys())) + "\n")
+        # send_to_file("logz.txt", ",".join(list(all_images.images["plants"][self.plant_type]["animation"].keys())) + "\n")
         image = all_images.images["plants"][self.plant_type]["animation"][self.costume]
         render.place(image, x = self.x_location, y = self.y_location)
       return render
@@ -750,7 +757,17 @@ init python:
       else: 
         return False
 
+    def set_damage_frame_costume(self):
+      damage_frame_order = self.plant_image_config["damage_frame_order"]
+      for key,value in damage_frame_order.items():
+        if self.health <= self.plant_config["health"] * (1-value):
+          self.costume = key
+
     def update(self):
+
+      if self.plant_image_config["has_damage_frames"]:
+        self.set_damage_frame_costume()
+
       if self.costume == "attack":
         if time.time() - self.attack_costume_timer > 0.3:
           self.costume = "default"
@@ -1950,14 +1967,14 @@ init python:
       self.lanes.set_gui_controller(self.gui_controller)
       self.gui_controller.explosion_controller = self.explosion_controller
 
-      for _ in range(1):
+      for _ in range(3):
         self.lanes.randomly_add_zombie("buckethead")
         self.lanes.randomly_add_zombie("conehead")
         self.lanes.randomly_add_zombie("dog")
-        self.lanes.randomly_add_zombie("basic")
-        self.lanes.randomly_add_zombie("shield_bearer")
+        # self.lanes.randomly_add_zombie("basic")
+        # self.lanes.randomly_add_zombie("shield_bearer")
         self.lanes.randomly_add_zombie("kinetic")
-        self.lanes.randomly_add_zombie("van")
+        # self.lanes.randomly_add_zombie("van")
 
     def visit(self):
       return self.environment.visit()
