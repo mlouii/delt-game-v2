@@ -806,7 +806,7 @@
         "damaged-3": 0.85
       }
     },
-    "health": 80,
+    "health": 55,
     "hitbox_distance": 50,
     "hitbox_width": 40,
     "speed": 0,

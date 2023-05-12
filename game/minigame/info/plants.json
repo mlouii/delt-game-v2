@@ -58,10 +58,23 @@
       "num_frames": 1,
       "has_damage_frames": false,
       "has_attack_frame": false,
+      "other_frames": ["glowing"],
       "joint_x": 125,
       "joint_y": 300,
       "sun_spawn_x": 72,
       "sun_spawn_y": 82
+    },
+    "cobcannon": {
+      "resize_factor": 0.4,
+      "image_prefix": "cobcannon",
+      "width": 320,
+      "height": 320,
+      "num_frames": 1,
+      "has_damage_frames": false,
+      "has_attack_frame": false,
+      "other_frames": ["ready", "cooldown"],
+      "joint_x": 180,
+      "joint_y": 300
     }
   },
 
@@ -100,6 +113,16 @@
     "projectile_type": "icicle",
     "hitbox_distance": 10,
     "cost": 200,
+    "recharge_time": 5
+  }, 
+  "cobcannon": {
+    "animation_type": "cobcannon",
+    "health": 7,
+    "attack_delay": 25,
+    "targeting_delay": 3,
+    "spawn_projectile": false,
+    "hitbox_distance": 10,
+    "cost": 700,
     "recharge_time": 5
   }, 
   "wallnut": {

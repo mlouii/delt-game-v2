@@ -27,6 +27,8 @@ init python:
       return Wallnut(tile, lane)
     elif plant_type == "sunflower":
       return Sunflower(tile, lane, gui_controller)
+    elif plant_type == "cobcannon":
+      return CobCannon(tile, lane, gui_controller)
 
 
   def load_json_from_file(path):
@@ -327,9 +329,11 @@ init python:
 
     def load_gui(self):
       self.images["gui"] = {}
-      sun_location = IMG_DIR + "gui/sun.png"
-      sun_image = Image(sun_location)
-      self.images["gui"]["sun"] = sun_image
+      to_load = ["sun", "target", "hellfire"]
+      for image_name in to_load:
+        location = IMG_DIR + "gui/" + image_name + ".png"
+        image = Image(location)
+        self.images["gui"][image_name] = image
 
     def load_explosions(self):
       self.images["explosions"] = {}
@@ -373,11 +377,12 @@ init python:
           self.images["plants"][plant_name]["animation"]["attack"] = attack_frame
           self.images["plants"][plant_name]["animation"]["damaged_attack"] = im.MatrixColor(attack_frame, im.matrix.brightness(self.brightness_factor))
 
-        if plant_name == "sunflower":
-          glowing_frame = im.FactorScale(Image(plant_location + "/" + image_prefix + "-glowing" + ".png"), resize_factor)
-          self.images["plants"][plant_name]["animation"]["glowing"] = glowing_frame
-          self.images["plants"][plant_name]["animation"]["damaged_glowing"] = im.MatrixColor(glowing_frame, im.matrix.brightness(self.brightness_factor))
-
+        if "other_frames" in config_data.get_plant_image_config(animation_type):
+          other_frames = config_data.get_plant_image_config(animation_type)["other_frames"]
+          for frame_name in other_frames:
+            frame = im.FactorScale(Image(plant_location + "/" + image_prefix + "-" + frame_name + ".png"), resize_factor)
+            self.images["plants"][plant_name]["animation"][frame_name] = frame
+            self.images["plants"][plant_name]["animation"]["damaged_" + frame_name] = im.MatrixColor(frame, im.matrix.brightness(self.brightness_factor))
 
       projectiles_to_load = self.determine_projectiles_to_load(plant_names=plant_types)
       self.load_projectiles(projectiles_to_load)
@@ -445,8 +450,6 @@ init python:
             projectiles.append(projectile_name)
       return projectiles
       
-      
-
 
     def return_overlays(self):
       plants = self.images["plants"].keys()
@@ -463,6 +466,7 @@ init python:
       self.x_location = x_location
       self.y_location = y_location
       self.lane_id = lane_id
+      self.lane = None
       self.row_id = row_id
 
       self.target_location_x = x_location + int(width/2)
@@ -498,6 +502,11 @@ init python:
         render.place(drawables["overlay"], x = x_location, y = y_location)
 
       return render
+
+    def get_plant_on_tile(self):
+      for plant in self.lane.plants:
+        if plant.tile == self:
+          return plant
 
     def plantable(self):
       return not self.is_planted and self.plant_selected is not None
@@ -568,22 +577,22 @@ init python:
         tile.is_hovered = True
         tile.plant_selected = state["plant_selected"]
 
-    def process_click(self):
-      # current_state = self.game.make_state()
+    # def process_click(self):
+    #   # current_state = self.game.make_state()
 
-      for z in self.zombies:
-        z.motion_type = "attack"
-        z.update_motion()
+    #   for z in self.zombies:
+    #     z.motion_type = "attack"
+    #     z.update_motion()
 
-        choice = (renpy.random.choice(z.body_parts))
-        if choice.part_name != "torso":
-          choice.status = "detached"
+    #     choice = (renpy.random.choice(z.body_parts))
+    #     if choice.part_name != "torso":
+    #       choice.status = "detached"
 
-      if self.plant_selected is not None:
-        tile = self.environment.pos_to_tile(self.mouseX, self.mouseY)
-        if tile is not None and tile.plantable():
-          tile.is_planted = True
-          self.lanes.add_plant(tile, self.plant_selected)
+    #   if self.plant_selected is not None:
+    #     tile = self.environment.pos_to_tile(self.mouseX, self.mouseY)
+    #     if tile is not None and tile.plantable():
+    #       tile.is_planted = True
+    #       self.lanes.add_plant(tile, self.plant_selected)
 
     def visit(self):
       return list(itertools.chain(*[tile.visit() for tile in self.tiles]))
@@ -705,7 +714,8 @@ init python:
       if self.costume in ["default", "damaged_default"]:
         self.frames = all_images.images["plants"][self.plant_type]["animation"][self.costume]
         render.place(self.frames[self.frame], x = self.x_location, y = self.y_location)
-      elif self.costume in ["attack", "glowing", "damaged_attack", "damaged_glowing"]:
+      else:
+        send_to_file("logz.txt", ",".join(list(all_images.images["plants"][self.plant_type]["animation"].keys())) + "\n")
         image = all_images.images["plants"][self.plant_type]["animation"][self.costume]
         render.place(image, x = self.x_location, y = self.y_location)
       return render
@@ -754,6 +764,79 @@ init python:
           self.damaged_timer = None
 
       self.frame = (self.frame + 1) % len(self.frames)
+
+  class CobCannon(Plant):
+    def __init__(self, tile, lane, gui_controller):
+      super().__init__(tile, lane, "cobcannon")
+      self.gui_controller = gui_controller
+      self.explosion_controller = self.gui_controller.explosion_controller
+      self.attack_timer = None
+      self.attack_delay = self.plant_config["attack_delay"]
+      self.is_ready_to_fire = True
+      self.in_firing_sequence = False
+
+      self.targeting_delay = self.plant_config["targeting_delay"]
+      self.targeting_timer = None
+
+      self.target_coord_x = None
+      self.target_coord_y = None
+
+      self.target_marker = None
+
+    def attack(self):
+      pass
+
+    def missile_exploded(self):
+      pass
+
+    def render(self, render):
+      if not self.is_ready_to_fire:
+        cooldown_height = int(self.plant_image_config["height"] * (time.time() - self.attack_timer) / self.attack_delay)
+        background_solid = Solid((0, 0, 0, 100), xsize=int(self.plant_image_config["width"]), ysize=cooldown_height)
+        render.place(background_solid, x = self.x_location, y = self.y_location + self.plant_image_config["height"] - cooldown_height)
+      return super().render(render)
+
+    def update(self):
+      super().update()
+      if not self.is_ready_to_fire:
+        self.costume = "cooldown"
+        if time.time() - self.attack_timer > self.attack_delay:
+          self.costume = "default"
+          self.is_ready_to_fire = True
+          renpy.play(AUDIO_DIR + "ready-to-fire.mp3", channel = "audio")
+
+      if self.in_firing_sequence:
+        if self.is_ready_to_fire:
+          self.costume = "ready"
+        if self.gui_controller.targeted_location_x:
+          if not self.targeting_timer:
+            self.targeting_timer = time.time()
+            self.gui_controller.is_targeting = False
+            renpy.play(AUDIO_DIR + "call-airstrike.mp3", channel = "audio")
+            self.is_ready_to_fire = False
+            self.attack_timer = time.time()
+            self.target_marker = self.gui_controller.add_target_marker(self.gui_controller.targeted_location_x, self.gui_controller.targeted_location_y)
+            self.target_coord_x = self.gui_controller.targeted_location_x
+            self.target_coord_y = self.gui_controller.targeted_location_y
+            self.gui_controller.targeted_location_x = None
+            self.gui_controller.targeted_location_y = None
+            
+        if self.targeting_timer and time.time() - self.targeting_timer > self.targeting_delay:
+          self.targeting_timer = None
+          self.in_firing_sequence = False
+          self.drop_hellfire()
+            
+    def drop_hellfire(self):
+      self.explosion_controller.add_missile(self.target_coord_x, self.target_coord_y, self, self.target_marker)
+
+    def prepare_missile(self):
+      if not self.in_firing_sequence and not self.gui_controller.is_targeting:
+        self.in_firing_sequence = True
+        renpy.play(AUDIO_DIR + "load-missile.mp3", channel = "audio")
+        self.gui_controller.is_targeting = True
+      else:
+        self.in_firing_sequence = False
+
 
   class IceShooter(Plant):
     def __init__(self, tile, lane):
@@ -910,18 +993,18 @@ init python:
       return transformed_image, x_location, y_location
 
     def render(self, render):
-      if self.has_damage_frames and self.determine_damage_frame() is not None:
-        damage_frame = self.determine_damage_frame()
-        costume = damage_frame
-        if self.zombie.costume.startswith("damaged_"):
-          costume = "damaged_"+costume
-        if self.zombie.costume.endswith("iced"):
-          costume = costume + "-iced"
-        self.image = all_images.images["zombies"][self.zombie.zombie_type][costume][self.part_type]
+      if not self.zombie.blackened:
+        if self.has_damage_frames and self.determine_damage_frame() is not None:
+          damage_frame = self.determine_damage_frame()
+          costume = damage_frame
+          if self.zombie.costume.startswith("damaged_"):
+            costume = "damaged_"+costume
+          if self.zombie.costume.endswith("iced"):
+            costume = costume + "-iced"
+          self.image = all_images.images["zombies"][self.zombie.zombie_type][costume][self.part_type]
+        else:
+          self.image = all_images.images["zombies"][self.zombie.zombie_type][self.zombie.costume][self.part_type]
       else:
-        self.image = all_images.images["zombies"][self.zombie.zombie_type][self.zombie.costume][self.part_type]
-
-      if self.zombie.blackened:
         self.image = all_images.images["zombies"][self.zombie.zombie_type]["blackened"][self.part_type]
 
       if self.status == "attached":
@@ -938,8 +1021,11 @@ init python:
       elif self.status == "detached":
 
         costume_name = self.zombie.costume
-        if costume_name.startswith("damaged_"):
+        if costume_name.startswith("damaged_") and not self.zombie.blackened:
           costume_name = costume_name.replace("damaged_", "")
+
+        if self.zombie.blackened:
+          costume_name = "blackened"
 
         self.image = all_images.images["zombies"][self.zombie.zombie_type][costume_name][self.part_type]
         if self.zombie_x_timestamp == None:
@@ -1398,6 +1484,8 @@ init python:
       return plants
 
     def assign_tiles(self, lane_index, tiles):
+        for tile in tiles:
+          tile.lane = self.lanes[lane_index]
         self.lanes[lane_index].populate_tiles(tiles)
 
     def randomly_add_zombie(self, zombie_type):
@@ -1462,8 +1550,38 @@ init python:
       render.place(self.animation_frames[self.animation_index], x = self.x, y = self.y)
       return render
 
+  class Missile():
+    def __init__(self, target_location_x, target_location_y, explosion_controller, cobcannon, target_marker):
+      self.target_location_x = target_location_x
+      self.target_location_y = target_location_y
+      self.explosion_controller = explosion_controller
+      self.cobcannon = cobcannon
+      self.target_marker = target_marker
+      
+      self.should_delete = False
+      self.current_y = 100
+
+      self.speed = int((target_location_y - 100)/10)
+
+      renpy.play(AUDIO_DIR + "hellfire-flare.mp3", channel = "audio")
+
+    def update(self):
+      self.current_y += self.speed
+      if self.current_y >= self.target_location_y:
+        self.explosion_controller.add_explosion(self.target_location_x, self.target_location_y, "hellfire")
+        self.cobcannon.missile_exploded()
+        self.target_marker.impacted()
+        self.should_delete = True
+
+    def render(self, render):
+      missile_image = all_images.images["gui"]["hellfire"]
+      render.place(missile_image, x = self.target_location_x - 25, y = self.current_y - 100)
+      return render
+
+
   class ExplosionController():
     def __init__(self, lanes):
+      self.missiles = []
       self.explosions = []
       self.lanes = lanes
 
@@ -1506,7 +1624,9 @@ init python:
         zombie.damage(splash_damage)
         self.check_blacken(zombie)
         
-
+    def add_missile(self, x, y, cobcannon, target_marker):
+      missile = Missile(x, y, self, cobcannon, target_marker)
+      self.missiles.append(missile)
 
     def add_explosion(self, x, y, explosion_type):
       explosion_config = config_data.get_explosion_config(explosion_type)
@@ -1524,9 +1644,17 @@ init python:
         if explosion.is_dead:
           self.explosions.remove(explosion)
 
+      for missile in self.missiles:
+        missile.update()
+        if missile.should_delete:
+          self.missiles.remove(missile)
+
     def render(self, render):
       for explosion in self.explosions:
         render = explosion.render(render)
+      
+      for missile in self.missiles:
+        render = missile.render(render)
       return render
 
   class PlantSeedCard():
@@ -1652,15 +1780,34 @@ init python:
       render.place(self.image, x = self.x, y = self.y)
       return render
 
+  class TargetMarker():
+    def __init__(self, x, y):
+      self.x = x
+      self.y = y
+      self.image = all_images.images["gui"]["target"]
+      self.should_delete = False
+    
+    def render(self, render):
+      render.place(self.image, x = self.x - 65, y = self.y - 40)
+      return render
 
+    def impacted(self):
+      self.should_delete = True
 
   class GUIController():
     def __init__(self, plant_names):
       self.plant_seed_cards = []
       self.last_sun_timer = time.time()
       self.suns = []
+      self.target_markers = []
       self.sun_image = im.FactorScale(all_images.images["gui"]["sun"], 1.6)
       self.background_solid = Solid((160, 82, 45), xsize=150, ysize=200)
+      self.explosion_controller = None
+
+      self.targeting_image = im.FactorScale(all_images.images["gui"]["target"], 1)
+      self.is_targeting = False
+      self.targeted_location_x = None
+      self.targeted_location_y = None
 
       self.notification_message = None
       self.notification_message_timer = time.time()
@@ -1679,6 +1826,11 @@ init python:
       self.wave_message = message
       self.wave_message_timer = time.time()
 
+    def add_target_marker(self, x, y):
+      target = TargetMarker(x, y)
+      self.target_markers.append(target)
+      return target
+
     def render(self, render, state):
       for plant_seed_card in self.plant_seed_cards:
         render = plant_seed_card.render(render)
@@ -1695,11 +1847,24 @@ init python:
         render.place(notification_background, x = 680, y = 870)
         notification_text = Text(self.notification_message, size = 40)
         render.place(notification_text, x = 700, y = 900)
+
+      if self.is_targeting and not self.targeted_location_x:
+        render.place(self.targeting_image, x = state["mouseX"] - 65, y = state["mouseY"] - 40)
+      
+      for target_marker in self.target_markers:
+        render = target_marker.render(render)
+        
       return render
 
     def process_click(self, state):
       x = state["mouseX"]
       y = state["mouseY"]
+
+      if self.is_targeting:
+        self.is_targeting = False
+        self.targeted_location_x = x
+        self.targeted_location_y = y
+
       plant_selected = state["plant_selected"]
       for plant_seed_card in self.plant_seed_cards:
         if x > plant_seed_card.x_location and x < plant_seed_card.x_location + plant_seed_card.width and y > plant_seed_card.y_location and y < plant_seed_card.y_location + plant_seed_card.height:
@@ -1740,6 +1905,10 @@ init python:
       for plant_seed_card in self.plant_seed_cards:
         plant_seed_card.update(state)
 
+      for target_marker in self.target_markers:
+        if target_marker.should_delete:
+          self.target_markers.remove(target_marker)
+
       return state
 
 
@@ -1763,12 +1932,13 @@ init python:
       self.mouseY = 0
       self.plant_selected = None
       self.plant_seed_slot_selected = None
+      self.is_targeting = False
       self.sun_amount = 5000
 
       self.last_time = time.time()
 
       all_images.load_zombies(["basic", "dog", "kinetic", "van", "conehead", "buckethead", "shield_bearer", "shield"])
-      all_images.load_plants(["peashooter", "repeater", "iceshooter", "wallnut", "sunflower"])
+      all_images.load_plants(["peashooter", "repeater", "iceshooter", "wallnut", "sunflower", "cobcannon"])
       all_images.load_explosions()
       all_images.load_gui()
 
@@ -1776,10 +1946,11 @@ init python:
       self.lanes = self.environment.gen_lanes()
       self.explosion_controller = ExplosionController(self.lanes)
 
-      self.gui_controller = GUIController(["peashooter", "repeater", "iceshooter", "wallnut", "sunflower"])
+      self.gui_controller = GUIController(["peashooter", "repeater", "iceshooter", "wallnut", "sunflower", "cobcannon"])
       self.lanes.set_gui_controller(self.gui_controller)
+      self.gui_controller.explosion_controller = self.explosion_controller
 
-      for _ in range(10):
+      for _ in range(1):
         self.lanes.randomly_add_zombie("buckethead")
         self.lanes.randomly_add_zombie("conehead")
         self.lanes.randomly_add_zombie("dog")
@@ -1797,7 +1968,8 @@ init python:
         "mouseY": self.mouseY,
         "plant_selected": self.plant_selected,
         "sun_amount": self.sun_amount,
-        "plant_seed_slot_selected": self.plant_seed_slot_selected
+        "plant_seed_slot_selected": self.plant_seed_slot_selected,
+        "is_targeting": self.is_targeting,
       }
 
     def alter_state(self, state):
@@ -1806,12 +1978,29 @@ init python:
       self.plant_selected = state["plant_selected"]
       self.sun_amount = state["sun_amount"]
       self.plant_seed_slot_selected = state["plant_seed_slot_selected"]
+      self.is_targeting = state["is_targeting"]
 
     def process_click(self):
       current_state = self.make_state()
       # self.has_ended = True
       # self.explosion_controller.add_explosion(self.mouseX, self.mouseY, "hellfire")
       current_state = self.gui_controller.process_click(current_state)
+
+      if self.gui_controller.is_targeting:
+        return
+
+      if not self.gui_controller.is_targeting and not self.gui_controller.targeted_location_x:
+        tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
+        if tile:
+          plant_on_tile = tile.get_plant_on_tile()
+          if plant_on_tile:
+            if plant_on_tile.plant_type == "cobcannon":
+              if plant_on_tile.is_ready_to_fire:
+                plant_on_tile.prepare_missile()
+                self.gui_controller.is_targeting = True
+              else:
+                self.gui_controller.display_notification("He isn't ready yet!")
+            return
 
       if self.plant_selected is not None and self.plant_seed_slot_selected is not None:
         tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
@@ -1821,6 +2010,8 @@ init python:
               tile.is_planted = True
               self.lanes.add_plant_tile(tile, self.plant_selected)
               self.plant_seed_slot_selected.reset_recharge_timer()
+              current_state["plant_seed_slot_selected"] = None
+              current_state["plant_selected"] = None
               current_state["sun_amount"] -= self.plant_seed_slot_selected.plant_config["cost"]
             else:
               self.gui_controller.display_notification("Can't plant there!")
