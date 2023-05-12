@@ -21,6 +21,8 @@ init python:
       return PeaShooter("peashooter", tile, lane)
     elif plant_type == "repeater":
       return PeaShooter("repeater", tile, lane)
+    elif plant_type == "fumeshroom":
+      return PeaShooter("fumeshroom", tile, lane)
     elif plant_type == "iceshooter":
       return IceShooter(tile, lane)
     elif plant_type == "wallnut":
@@ -62,6 +64,11 @@ init python:
       self.zombies = zombie_config
       self.projectiles = projectile_config
       self.explosions = explosion_config
+
+    def get_tile_width(self, level_name):
+      level_config = self.get_level_config(level_name)
+      env_width = config.screen_width * level_config["width_multiplier"]
+      return round(env_width / level_config["num_cols"])
 
     def get_explosion_config(self, explosion_type):
       return self.explosions[explosion_type]
@@ -186,7 +193,7 @@ init python:
       direction = 1.5 * math.pi
       x = x + renpy.random.randint(-x_variance, x_variance)
       super().__init__(x, y, color, 2, y_size, speed, direction, 0.5, False)
-      renpy.play(AUDIO_DIR + "voltage.mp3", channel = "audio")
+      
 
     def update(self):
       should_remove = super().update()
@@ -297,9 +304,9 @@ init python:
         # x = x + renpy.random.randint(-x_variance, x_variance)
         self.particles.append(Electric_Particle(x, y, x_variance))
 
-    def trail(self, x, y, color, life):
+    def trail(self, x, y, color, size, life):
       for i in range(1):
-        size = renpy.random.randint(3, 5)
+        size += renpy.random.randint(0, 2)
         speed = 1
         direction = renpy.random.uniform(0.7 * math.pi, 1.3 * math.pi)
         self.particles.append(Particle(x + 10, y, color, size, size, speed, direction, life, False))
@@ -624,8 +631,10 @@ init python:
       self.trail_time = time.time()
       self.leave_trail = False
       self.particle_color = None
+      self.particle_size = None
       if self.does_spawn_particle:
         self.particle_color = (self.projectile_config["particle_color"][0], self.projectile_config["particle_color"][1], self.projectile_config["particle_color"][2])
+        self.particle_size = self.projectile_config["particle_size"]
         self.leave_trail = self.projectile_config["leave_trail"]
 
       self.plant_spawn_x = self.plant.x_location + self.plant.plant_image_config["projectile_spawn_x"]
@@ -633,6 +642,8 @@ init python:
 
       self.x_location = self.plant_spawn_x - self.center_x
       self.y_location = self.plant_spawn_y - self.center_y
+
+      self.range = (config_data.get_tile_width("level1") * self.projectile_config["range"])
 
       self.active = True
       self.damaged_zombies = []
@@ -644,8 +655,9 @@ init python:
     def update(self):
       if self.active:
         self.x_location += self.speed * delta_multiplier * delta_time
+        self.range -= self.speed * delta_multiplier * delta_time
       
-      if self.x_location > config.screen_width:
+      if self.x_location > config.screen_width or self.range <= 0:
         self.active = False
 
       if self.leave_trail and time.time() - self.trail_time > 0.2:
@@ -662,7 +674,7 @@ init python:
       if self.does_spawn_particle:
         spawn_x = self.x_location + self.center_x
         spawn_y = self.y_location + self.center_y
-        particleSystem.trail(spawn_x, spawn_y, self.particle_color, 0.2)
+        particleSystem.trail(spawn_x, spawn_y, self.particle_color, self.particle_size, 0.2)
 
     def splash_effect(self):
       if self.does_spawn_particle:
@@ -874,7 +886,7 @@ init python:
           self.attack()
           self.attack_timer = time.time()
     
-  # covers peashooter and repeater
+  # covers peashooter and repeater, as well as fumeshroom
   class PeaShooter(Plant):
     def __init__(self, plant_name, tile, lane):
       super().__init__(tile, lane, plant_name)
@@ -883,10 +895,15 @@ init python:
       self.attack_delay = self.plant_config["attack_delay"]
       self.shot_delay = self.plant_config["shot_delay"]
       self.num_shot_already = 0
+      self.shot_range = (config_data.get_tile_width("level1") * config_data.get_projectile_config(self.projectile_type)["range"])
+
+      if plant_name == "fumeshroom":
+        renpy.play(AUDIO_DIR + "smoker-planted.mp3", channel = "audio")
 
     def does_lane_have_hittable_zombies(self):
+      
       for zombie in self.lane.zombies:
-        if zombie.x_location > (self.x_location + self.hitbox_distance):
+        if zombie.x_location > (self.x_location + self.hitbox_distance) and zombie.x_location < self.x_location + self.plant_image_config["projectile_spawn_x"] + self.shot_range:
           return True
       return False
 
@@ -1299,6 +1316,8 @@ init python:
       self.eye_effect = None
       self.laser_effect = None
 
+      self.electricity_sound_timer = time.time()
+
     def find_eye_location(self):
       eye_x = None
       eye_y = None
@@ -1348,7 +1367,13 @@ init python:
       if self.zombie_type == "kinetic":
         legs = [part for part in self.body_parts if part.part_type == "legs"]
         for leg in legs:
-          if leg.angle and abs(leg.angle) < 3 and self.motion_type == "walk":
+          min_angle = 3
+          if self.is_iced:
+            min_angle = 1
+          if leg.angle and abs(leg.angle) < min_angle and self.motion_type == "walk":
+            if time.time() - self.electricity_sound_timer > 1:
+              self.electricity_sound_timer = time.time()
+              renpy.play(AUDIO_DIR + "voltage.mp3", channel = "audio")
             particleSystem.electricity(self.x_location, self.y_location + self.image_config["fall_height"], 30) 
       
       eye_x, eye_y = self.find_eye_location()
@@ -1954,8 +1979,10 @@ init python:
 
       self.last_time = time.time()
 
+      self.loaded_plants = ["peashooter", "repeater", "iceshooter", "wallnut", "sunflower", "cobcannon", "fumeshroom"]
+
       all_images.load_zombies(["basic", "dog", "kinetic", "van", "conehead", "buckethead", "shield_bearer", "shield"])
-      all_images.load_plants(["peashooter", "repeater", "iceshooter", "wallnut", "sunflower", "cobcannon"])
+      all_images.load_plants(self.loaded_plants)
       all_images.load_explosions()
       all_images.load_gui()
 
@@ -1963,17 +1990,17 @@ init python:
       self.lanes = self.environment.gen_lanes()
       self.explosion_controller = ExplosionController(self.lanes)
 
-      self.gui_controller = GUIController(["peashooter", "repeater", "iceshooter", "wallnut", "sunflower", "cobcannon"])
+      self.gui_controller = GUIController(self.loaded_plants)
       self.lanes.set_gui_controller(self.gui_controller)
       self.gui_controller.explosion_controller = self.explosion_controller
 
       for _ in range(3):
-        self.lanes.randomly_add_zombie("buckethead")
-        self.lanes.randomly_add_zombie("conehead")
-        self.lanes.randomly_add_zombie("dog")
-        # self.lanes.randomly_add_zombie("basic")
-        # self.lanes.randomly_add_zombie("shield_bearer")
-        self.lanes.randomly_add_zombie("kinetic")
+        # self.lanes.randomly_add_zombie("buckethead")
+        # self.lanes.randomly_add_zombie("conehead")
+        # self.lanes.randomly_add_zombie("dog")
+        self.lanes.randomly_add_zombie("basic")
+        self.lanes.randomly_add_zombie("shield_bearer")
+        # self.lanes.randomly_add_zombie("kinetic")
         # self.lanes.randomly_add_zombie("van")
 
     def visit(self):

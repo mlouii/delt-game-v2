@@ -26,6 +26,19 @@
       "projectile_spawn_x": 112,
       "projectile_spawn_y": 117
     },
+    "fumeshroom": {
+      "resize_factor": 0.4,
+      "image_prefix": "fumeshroom",
+      "width": 240,
+      "height": 320,
+      "num_frames": 1,
+      "has_damage_frames": false,
+      "has_attack_frame": true,
+      "joint_x": 125,
+      "joint_y": 300,
+      "projectile_spawn_x": 112,
+      "projectile_spawn_y": 167
+    },
     "iceshooter": {
       "resize_factor": 0.4,
       "image_prefix": "iceshooter",
@@ -105,6 +118,18 @@
     "projectile_type": "baseball",
     "hitbox_distance": 10,
     "cost": 200,
+    "recharge_time": 5
+  },
+  "fumeshroom": {
+    "animation_type":"fumeshroom",
+    "health": 7,
+    "attack_delay": 1.5,
+    "num_shots": 1,
+    "shot_delay": 0.2,
+    "spawn_projectile": true,
+    "projectile_type": "smoke",
+    "hitbox_distance": 10,
+    "cost": 100,
     "recharge_time": 5
   },
 
