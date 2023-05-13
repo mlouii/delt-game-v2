@@ -818,6 +818,16 @@ init python:
     def missile_exploded(self):
       pass
 
+    def die(self):
+      super().die()
+      if self.in_firing_sequence:
+        self.gui_controller.is_targeting = False
+        self.gui_controller.targeted_location_x = None
+        self.gui_controller.targeted_location_y = None
+        if self.target_marker is not None:
+          self.target_marker.impacted()
+        
+
     def render(self, render):
       if not self.is_ready_to_fire:
         cooldown_height = int(self.plant_image_config["height"] * (time.time() - self.attack_timer) / self.attack_delay)
@@ -844,7 +854,7 @@ init python:
             renpy.play(AUDIO_DIR + "call-airstrike.mp3", channel = "audio")
             self.is_ready_to_fire = False
             self.attack_timer = time.time()
-            self.target_marker = self.gui_controller.add_target_marker(self.gui_controller.targeted_location_x, self.gui_controller.targeted_location_y)
+            self.target_marker = self.gui_controller.add_target_marker(self.gui_controller.targeted_location_x, self.gui_controller.targeted_location_y, self)
             self.target_coord_x = self.gui_controller.targeted_location_x
             self.target_coord_y = self.gui_controller.targeted_location_y
             self.gui_controller.targeted_location_x = None
@@ -854,6 +864,7 @@ init python:
           self.targeting_timer = None
           self.in_firing_sequence = False
           self.drop_hellfire()
+          self.target_marker = None
             
     def drop_hellfire(self):
       self.explosion_controller.add_missile(self.target_coord_x, self.target_coord_y, self, self.target_marker)
@@ -1823,14 +1834,17 @@ init python:
       return render
 
   class TargetMarker():
-    def __init__(self, x, y):
+    def __init__(self, x, y, cobcannon):
       self.x = x
       self.y = y
       self.image = all_images.images["gui"]["target"]
       self.should_delete = False
+      self.cobcannon = cobcannon
     
     def render(self, render):
       render.place(self.image, x = self.x - 65, y = self.y - 40)
+      if hasattr(self, "cobcannon") and self.cobcannon is None:
+        self.should_delete = True
       return render
 
     def impacted(self):
@@ -1868,8 +1882,8 @@ init python:
       self.wave_message = message
       self.wave_message_timer = time.time()
 
-    def add_target_marker(self, x, y):
-      target = TargetMarker(x, y)
+    def add_target_marker(self, x, y, cobcannon):
+      target = TargetMarker(x, y, cobcannon)
       self.target_markers.append(target)
       return target
 
@@ -1995,13 +2009,13 @@ init python:
       self.gui_controller.explosion_controller = self.explosion_controller
 
       for _ in range(3):
-        # self.lanes.randomly_add_zombie("buckethead")
-        # self.lanes.randomly_add_zombie("conehead")
-        # self.lanes.randomly_add_zombie("dog")
+        self.lanes.randomly_add_zombie("buckethead")
+        self.lanes.randomly_add_zombie("conehead")
+        self.lanes.randomly_add_zombie("dog")
         self.lanes.randomly_add_zombie("basic")
         self.lanes.randomly_add_zombie("shield_bearer")
-        # self.lanes.randomly_add_zombie("kinetic")
-        # self.lanes.randomly_add_zombie("van")
+        self.lanes.randomly_add_zombie("kinetic")
+        self.lanes.randomly_add_zombie("van")
 
     def visit(self):
       return self.environment.visit()
