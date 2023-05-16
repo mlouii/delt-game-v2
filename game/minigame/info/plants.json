@@ -26,6 +26,33 @@
       "projectile_spawn_x": 112,
       "projectile_spawn_y": 117
     },
+    "colin": {
+      "resize_factor": 0.4,
+      "image_prefix": "colin",
+      "width": 240,
+      "height": 320,
+      "num_frames": 1,
+      "has_damage_frames": false,
+      "has_attack_frame": true,
+      "joint_x": 125,
+      "joint_y": 300,
+      "projectile_spawn_x": 135,
+      "projectile_spawn_y": 128
+    },
+    "logan": {
+      "resize_factor": 0.4,
+      "image_prefix": "logan",
+      "width": 240,
+      "height": 320,
+      "num_frames": 1,
+      "has_damage_frames": false,
+      "has_attack_frame": true,
+      "other_frames": ["chugging"],
+      "joint_x": 125,
+      "joint_y": 300,
+      "projectile_spawn_x": 135,
+      "projectile_spawn_y": 128
+    },
     "fumeshroom": {
       "resize_factor": 0.4,
       "image_prefix": "fumeshroom",
@@ -93,6 +120,19 @@
       "other_frames": ["ready", "cooldown"],
       "joint_x": 180,
       "joint_y": 300
+    },
+    "pranav": {
+      "resize_factor": 0.4,
+      "image_prefix": "pranav",
+      "width": 240,
+      "height": 320,
+      "num_frames": 1,
+      "has_damage_frames": false,
+      "has_attack_frame": true,
+      "joint_x": 125,
+      "joint_y": 300,
+      "projectile_spawn_x": 106,
+      "projectile_spawn_y": 95
     }
   },
 
@@ -106,19 +146,33 @@
     "projectile_type": "baseball",
     "hitbox_distance": 10,
     "cost": 100,
-    "recharge_time": 5
+    "recharge_time": 5,
+    "almanac": {
+      "almanac_name": "Ber-t(hr)o(w)",
+      "description": "Ber-t(hr)o(w) launches baseballs at incoming opps. He is our first line of defense.",
+      "damage": "normal",
+      "range": "endless",
+      "story": "Nothing throws this man off his game. He’s been dedicated since day one, perfecting his baseball pitch. How does he do it? “It’s 90% mental, 5% physical”, he says. “I’m always thinking about balls.”"
+    }
   },
   "repeater": {
     "animation_type": "repeater",
     "health": 7,
-    "attack_delay": 1.5,
+    "attack_delay": 1.3,
     "num_shots": 2,
     "shot_delay": 0.2,
     "spawn_projectile": true,
     "projectile_type": "baseball",
     "hitbox_distance": 10,
     "cost": 200,
-    "recharge_time": 5
+    "recharge_time": 5,
+    "almanac": {
+      "almanac_name": "TwinPitch Bishop",
+      "description": "Bishop can throw two baseballs at a time",
+      "damage": "normal",
+      "firing speed": "2x",
+      "story": "Don’t let his small frame deceive you, he’s got a lot of strength and an even bigger package. He stays modest about it though, and he’s known for his excellent sportsmanship. His advice? “It’s not the size of the bat, or even the hardness of the wood. It’s the kindness that matters.”"
+    }
   },
   "fumeshroom": {
     "animation_type":"fumeshroom",
@@ -130,9 +184,53 @@
     "projectile_type": "smoke",
     "hitbox_distance": 10,
     "cost": 100,
-    "recharge_time": 5
+    "recharge_time": 5,
+    "almanac": {
+      "almanac_name": "Green Luis Haze",
+      "description": "Luis blows smoke that can pass through tables and opps",
+      "damage": "normal",
+      "range": "All opps in smoke cloud",
+      "story": "Luis exudes a laid-back vibe that's hard to miss. “It's all about the haze, man,” he says, exhaling a cloud of smoke that envelops approaching opps. The effectiveness of his method can't be denied - where there's smoke, there's Green Luis Haze."
+    }
   },
-
+  "colin": {
+    "animation_type": "colin",
+    "health": 7,
+    "attack_delay": 0.9,
+    "num_shots": 4,
+    "shot_delay": 0.2,
+    "spawn_projectile": true,
+    "projectile_type": "beer",
+    "hitbox_distance": 10,
+    "cost": 400,
+    "recharge_time": 1,
+    "alamanc": {
+      "almanac_name": "4.Alc Colin",
+      "description": "Throws four beer bottles at a time",
+      "damage": "normal",
+      "firing speed": "4x",
+      "story": "Colin is a man of 4-titude. Balancing a 4.0 GPA and a love 4 beer, he serves as our Director of Academic Affairs and our 4-front defense against opps. “I've got 4 words for you: work hard, play hard,” he advises, launching a four-pack salute of 4% ABV. “I'm all for balanced living”"
+    }
+  },
+  "logan": {
+    "animation_type": "logan",
+    "health": 7,
+    "attack_delay": 6,
+    "num_shots": 1,
+    "shot_delay": 0.2,
+    "spawn_projectile": true,
+    "projectile_type": "ice",
+    "hitbox_distance": 10,
+    "cost": 400,
+    "recharge_time": 1,
+    "almanac": {
+      "almanac_name": "Smirnoff Pl-ice-sted",
+      "description": "Pl-ice-sted throwssmirnoff ice bottles after chugging them that deal heavy damage",
+      "damage": "heavy",
+      "special": "Slows opps",
+      "story": "Smirnoff Pl-ice-sted is the life of the party. With his legendary 6-second Smirnoff Ice chugging skills, he's won the title of “Throat Goat” hands down. But don't think he's all drink and no drive - those bottles he chugs end up whizzing towards the opps. “It's my version of recycling”"
+    }
+  },
   "iceshooter": {
     "animation_type": "iceshooter",
     "health": 7,
@@ -143,7 +241,14 @@
     "projectile_type": "icicle",
     "hitbox_distance": 10,
     "cost": 200,
-    "recharge_time": 5
+    "recharge_time": 5,
+    "almanac": {
+      "almanac_name": "Dripden Skinner",
+      "description": "Skinner launches frozen ice that pierces and slows the opps",
+      "damage": "normal",
+      "special": "Slows opps and pierces three",
+      "story": "It all started when he put on that diamond. He’s always been known for his cool fashion sense, but now he's honestly gone too far. His outfit is freezing.You can’t even see that shit, it's under all that ice. The ice is blinding. Either way, he keeps his mind sharp and the opps at bay."
+    }
   }, 
   "cobcannon": {
     "animation_type": "cobcannon",
@@ -153,7 +258,14 @@
     "spawn_projectile": false,
     "hitbox_distance": 10,
     "cost": 700,
-    "recharge_time": 5
+    "recharge_time": 5,
+    "almanac": {
+      "almanac_name": "Captain Davis",
+      "description": "Tap on Captain Davis to request a deadly hellfire missile strike",
+      "damage": "massive",
+      "special": "Deals extreme damage with direct hit, a bit less with splash damage",
+      "story": "People think he’s trying to go into the military because of patriotism, or a particular disdain for minorities. But that’s not true. He wants BIG BUFF MEN to order him around and DOMINATE him. It’s not bad being a bootlicker when you freaking LOVE FEET"
+    }
   }, 
   "wallnut": {
     "animation_type": "wallnut",
@@ -161,7 +273,13 @@
     "spawn_projectile": false,
     "hitbox_distance": 10,
     "cost": 50,
-    "recharge_time": 5
+    "recharge_time": 5,
+    "almanac": {
+      "almanac_name": "Mario the Stoic",
+      "description": "Mario will take the pain and suffering so that you don’t have to.",
+      "toughness": "high",
+      "story": "The opps have learned the hard way that Mario the Stoic is an immovable force. Despite the chaos that often surrounds him, he remains relaxed and unfazed. He's been known to quip, “Dobble poundur wit freyes” as he blocks the path of the advancing opps."
+    }
   },
   "sunflower": {
     "animation_type": "sunflower",
@@ -171,6 +289,32 @@
     "spawn_projectile": false,
     "hitbox_distance": 10,
     "cost": 50,
-    "recharge_time": 5
+    "recharge_time": 5,
+    "almanac": {
+      "almanac_name": "House Manager",
+      "description": "House Managers produce Xs off, which allows you to recruit brothers. You need as many house managers as you can get!",
+      "special": "Produces Xs off",
+      "story": "Oh, there’s a drop of piss on the dining room floor? You didn’t do your chore, did you? GET FUCKED, here is a 1 MILLION Xs. Good luck paying that off, but in the meantime, how about you fight off some opps for me? I’ll pay in increments of 25"
+    }
+  },
+  "pranav": {
+    "animation_type": "pranav",
+    "health": 35,
+    "attack_delay": 1.5,
+    "num_shots": 1,
+    "shot_delay": 0.2,
+    "spawn_projectile": true,
+    "projectile_type": "pranav-smoke",
+    "hitbox_distance": 10,
+    "cost": 50,
+    "recharge_time": 5,
+    "almanac": {
+      "almanac_name":"Faded Pranav Purple",
+      "description": "Blocks and deals damage to opps with his smoke cloud",
+      "toughness": "medium",
+      "damage": "normal",
+      "range": "All opps in same tile",
+      "story": "Faded Pranav Purple knows how to cloud out the issues. His smoke is his shield, and he's more than happy to share it with the opps. “I'm not as tough as a Mario, but I'm way more fun at parties,” he remarks, puffing out another hot-box cloud. “What’s that smell?” The opps say."
+    }
   }
 }

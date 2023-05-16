@@ -2,7 +2,7 @@
   "hellfire": {
     "resize_factor": 1.5,
     "damage": 120,
-    "splash": 20,
+    "splash": 15,
     "horizontal_spread": 1,
     "vertical_spread": 1,
     "image_prefix": "frame_",

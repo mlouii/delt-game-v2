@@ -23,6 +23,12 @@ init python:
       return PeaShooter("repeater", tile, lane)
     elif plant_type == "fumeshroom":
       return PeaShooter("fumeshroom", tile, lane)
+    elif plant_type == "pranav":
+      return Pranav(tile, lane)
+    elif plant_type == "colin":
+      return PeaShooter("colin", tile, lane)
+    elif plant_type == "logan":
+      return Logan(tile, lane)
     elif plant_type == "iceshooter":
       return IceShooter(tile, lane)
     elif plant_type == "wallnut":
@@ -185,6 +191,28 @@ init python:
       render.place(image, x=self.x, y=self.y)
       return render
 
+  class Pranav_Smoke_Particle():
+    def __init__(self, x, y):
+      self.x = x - config_data.get_projectile_config("pranav-smoke")["center_x"]
+      self.y = y - config_data.get_projectile_config("pranav-smoke")["center_y"]
+      self.speed = renpy.random.randint(2, 3)
+      self.image = Image(IMG_DIR + "projectiles/" + "pranav-smoke" + ".png")
+      self.life = 1
+      self.age = 0
+
+    def update(self):
+      self.y -= self.speed * delta_multiplier * delta_time
+      self.age += delta_time
+      if self.age >= self.life:
+        return True
+      return False
+
+    def render(self, render):
+      image = self.image
+      # send_to_file("logz.txt", str(self.x), ", ", str(self.y) + "\n")
+      render.place(image, x=self.x, y=self.y)
+      return render
+
   class Electric_Particle(Particle):
     def __init__(self, x, y, x_variance):
       color = (255, 102, 255, 150)
@@ -317,6 +345,11 @@ init python:
         speed = renpy.random.randint(1, 4)
         direction = renpy.random.uniform(0, 2 * math.pi)
         self.particles.append(Particle(x, y, color, size, size, speed, direction, life, True))
+
+    def pranav_smoke_blow(self, x, y):
+      for i in range(5):
+        x_variance = config_data.get_tile_width("level1")//4
+        self.particles.append(Pranav_Smoke_Particle(x + renpy.random.randint(-x_variance, x_variance), y))
 
     def update(self):
       for particle in self.particles:
@@ -645,14 +678,47 @@ init python:
 
       self.range = (config_data.get_tile_width("level1") * self.projectile_config["range"])
 
+      self.angle = 0
+      self.angle_rotation_direction = 1
+      if renpy.random.randint(1, 2) == 1:
+        self.angle_rotation_direction = -1
+      self.angle_rotation_speed = renpy.random.randint(5, 9)
+
       self.active = True
       self.damaged_zombies = []
 
+    def process_rotation(self):
+      transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
+      # Calculate the offset of the joint after rotation
+      dx = self.center_x
+      dy = self.center_y
+      current_angle = math.atan2(dy, dx)
+      new_angle = current_angle + math.radians(self.angle)
+
+      new_dx = dx * math.cos(math.radians(self.angle)) - dy * math.sin(math.radians(self.angle))
+      new_dy = dx * math.sin(math.radians(self.angle)) + dy * math.cos(math.radians(self.angle))
+
+      # Calculate the position of the transformed image
+      x_location = self.x_location - new_dx + self.center_x
+      y_location = self.y_location - new_dy + self.center_y
+      return transformed_image, x_location, y_location
+
     def render(self, render):
-      render.place(self.image, x = self.x_location, y= self.y_location)
+
+      x = self.x_location 
+      y = self.y_location
+      image = self.image
+      if self.projectile_type == "beer" or self.projectile_type == "ice":
+        image, x, y = self.process_rotation()
+
+      render.place(image, x=x, y=y)
       return render
 
     def update(self):
+
+      if self.projectile_type == "beer" or self.projectile_type == "ice":
+        self.angle += self.angle_rotation_speed * self.angle_rotation_direction * delta_multiplier * delta_time
+
       if self.active:
         self.x_location += self.speed * delta_multiplier * delta_time
         self.range -= self.speed * delta_multiplier * delta_time
@@ -920,17 +986,50 @@ init python:
 
     def update(self):
       super().update()
+
+      if self.plant_type == "logan":
+        if not self.does_lane_have_hittable_zombies():
+          self.costume = "default"
+        if (time.time() - self.attack_timer <= self.attack_delay) and (time.time() - self.shot_timer > self.shot_delay):
+          self.costume = "chugging"
+
       if self.does_lane_have_hittable_zombies():
         if (time.time() - self.attack_timer > self.attack_delay):
           if (time.time() - self.shot_timer > self.shot_delay and self.num_shot_already < self.plant_config["num_shots"]):
             self.costume = "attack"
             self.attack_costume_timer = time.time()
+
+            if self.plant_type == "pranav":
+              particleSystem.pranav_smoke_blow(self.tile.target_location_x, self.tile.target_location_y) 
+
             self.lane.add_projectile(Projectile(self, self.projectile_type))
             self.shot_timer = time.time()
             self.num_shot_already += 1
             if self.num_shot_already >= self.plant_config["num_shots"]:
               self.num_shot_already = 0
               self.attack_timer = time.time()
+
+  class Pranav(PeaShooter):
+    def __init__(self, tile, lane):
+      super().__init__("pranav", tile, lane)
+
+    def render(self, render):
+      render = super().render(render)
+      health_bar_height = int(self.plant_image_config["height"] * (self.health / self.plant_config["health"]))
+      background_solid = Solid((0, 0, 0, 255), xsize=int(self.plant_image_config["width"]), ysize=int(self.plant_image_config["height"] - health_bar_height))
+      render.place(background_solid, x = self.x_location, y = self.y_location)
+      return render
+
+  class Logan(PeaShooter):
+    def __init__(self, tile, lane):
+      super().__init__("logan", tile, lane)
+
+    def render(self, render):
+      render = super().render(render)
+      if (time.time() - self.attack_timer <= self.attack_delay):
+        timer_text = Text(str(round((time.time() - self.attack_timer), 1)), size=20, color=(255, 255, 255, 255))
+        render.place(timer_text, x = self.x_location, y = self.y_location)
+      return render
 
   class Wallnut(Plant):
     def __init__(self, tile, lane):
@@ -1993,7 +2092,7 @@ init python:
 
       self.last_time = time.time()
 
-      self.loaded_plants = ["peashooter", "repeater", "iceshooter", "wallnut", "sunflower", "cobcannon", "fumeshroom"]
+      self.loaded_plants = ["peashooter", "repeater", "iceshooter", "wallnut", "sunflower", "cobcannon", "fumeshroom", "pranav", "colin", "logan"]
 
       all_images.load_zombies(["basic", "dog", "kinetic", "van", "conehead", "buckethead", "shield_bearer", "shield"])
       all_images.load_plants(self.loaded_plants)
@@ -2008,7 +2107,7 @@ init python:
       self.lanes.set_gui_controller(self.gui_controller)
       self.gui_controller.explosion_controller = self.explosion_controller
 
-      for _ in range(3):
+      for _ in range(5):
         self.lanes.randomly_add_zombie("buckethead")
         self.lanes.randomly_add_zombie("conehead")
         self.lanes.randomly_add_zombie("dog")
