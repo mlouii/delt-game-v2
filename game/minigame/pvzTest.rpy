@@ -369,7 +369,7 @@ init python:
 
     def load_gui(self):
       self.images["gui"] = {}
-      to_load = ["sun", "target", "hellfire"]
+      to_load = ["sun", "target", "hellfire", "shovel"]
       for image_name in to_load:
         location = IMG_DIR + "gui/" + image_name + ".png"
         image = Image(location)
@@ -915,6 +915,15 @@ init python:
           self.costume = "ready"
         if self.gui_controller.targeted_location_x:
           if not self.targeting_timer:
+            if not self.gui_controller.lanes.pos_to_tile(self.gui_controller.targeted_location_x, self.gui_controller.targeted_location_y):
+              self.in_firing_sequence = False
+              self.is_ready_to_fire = True
+              self.gui_controller.targeted_location_x = None
+              self.gui_controller.targeted_location_y = None
+              self.costume = "default"
+              self.gui_controller.display_notification("Must target a tile!")
+              return
+
             self.targeting_timer = time.time()
             self.gui_controller.is_targeting = False
             renpy.play(AUDIO_DIR + "call-airstrike.mp3", channel = "audio")
@@ -1958,8 +1967,10 @@ init python:
       self.sun_image = im.FactorScale(all_images.images["gui"]["sun"], 1.6)
       self.background_solid = Solid((160, 82, 45), xsize=150, ysize=200)
       self.explosion_controller = None
+      self.lanes = None
 
       self.targeting_image = im.FactorScale(all_images.images["gui"]["target"], 1)
+      self.shovel_image = shovel_image = im.FactorScale(all_images.images["gui"]["shovel"], 1)
       self.is_targeting = False
       self.targeted_location_x = None
       self.targeted_location_y = None
@@ -1989,6 +2000,10 @@ init python:
     def render(self, render, state):
       for plant_seed_card in self.plant_seed_cards:
         render = plant_seed_card.render(render)
+
+      shovel_location = 150 * len(self.plant_seed_cards) + 200 + 20
+      render.place(self.shovel_image, x = shovel_location, y = 30)
+
       for sun in self.suns:
         render = sun.render(render)
 
@@ -2005,6 +2020,9 @@ init python:
 
       if self.is_targeting and not self.targeted_location_x:
         render.place(self.targeting_image, x = state["mouseX"] - 65, y = state["mouseY"] - 40)
+
+      if state["is_shovelling"]:
+        render.place(self.shovel_image, x = state["mouseX"] - 65, y = state["mouseY"] - 40)
       
       for target_marker in self.target_markers:
         render = target_marker.render(render)
@@ -2019,6 +2037,12 @@ init python:
         self.is_targeting = False
         self.targeted_location_x = x
         self.targeted_location_y = y
+
+      if x > 150 * len(self.plant_seed_cards) + 200 + 20 and x < 150 * len(self.plant_seed_cards) + 200 + 20 + 100 and y > 30 and y < 30 + 100:
+        state["is_shovelling"] = True
+        state["plant_selected"] = None
+        state["plant_seed_slot_selected"] = None
+        return state
 
       plant_selected = state["plant_selected"]
       for plant_seed_card in self.plant_seed_cards:
@@ -2088,6 +2112,7 @@ init python:
       self.plant_selected = None
       self.plant_seed_slot_selected = None
       self.is_targeting = False
+      self.is_shovelling = False
       self.sun_amount = 5000
 
       self.last_time = time.time()
@@ -2104,6 +2129,7 @@ init python:
       self.explosion_controller = ExplosionController(self.lanes)
 
       self.gui_controller = GUIController(self.loaded_plants)
+      self.gui_controller.lanes = self.lanes
       self.lanes.set_gui_controller(self.gui_controller)
       self.gui_controller.explosion_controller = self.explosion_controller
 
@@ -2127,6 +2153,7 @@ init python:
         "sun_amount": self.sun_amount,
         "plant_seed_slot_selected": self.plant_seed_slot_selected,
         "is_targeting": self.is_targeting,
+        "is_shovelling": self.is_shovelling,
       }
 
     def alter_state(self, state):
@@ -2136,6 +2163,7 @@ init python:
       self.sun_amount = state["sun_amount"]
       self.plant_seed_slot_selected = state["plant_seed_slot_selected"]
       self.is_targeting = state["is_targeting"]
+      self.is_shovelling = state["is_shovelling"]
 
     def process_click(self):
       current_state = self.make_state()
@@ -2144,6 +2172,19 @@ init python:
       current_state = self.gui_controller.process_click(current_state)
 
       if self.gui_controller.is_targeting:
+        return
+
+      if self.is_shovelling:
+        tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
+        if tile:
+          if tile.is_planted:
+            tile.is_planted = False
+            tile.get_plant_on_tile().is_dead = True
+            tile.plant_on_tile = None
+          else:
+            self.gui_controller.display_notification("Nothing to remove!")
+        current_state["is_shovelling"] = False
+        self.alter_state(current_state)
         return
 
       if not self.gui_controller.is_targeting and not self.gui_controller.targeted_location_x:
@@ -2172,6 +2213,7 @@ init python:
               current_state["sun_amount"] -= self.plant_seed_slot_selected.plant_config["cost"]
             else:
               self.gui_controller.display_notification("Can't plant there!")
+
       self.alter_state(current_state)
 
         
