@@ -16,6 +16,11 @@ label start:
 
     scene bg room
     show eileen happy
+
+    call start_plant_select
+
+    e "waaa"
+
     e "lets test this game"
 
     e "goddamn i love dudes"

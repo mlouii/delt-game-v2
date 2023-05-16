@@ -983,7 +983,7 @@ init python:
       self.num_shot_already = 0
       self.shot_range = (config_data.get_tile_width("level1") * config_data.get_projectile_config(self.projectile_type)["range"])
 
-      if plant_name == "fumeshroom":
+      if plant_name == "fumeshroom" or plant_name == "pranav":
         renpy.play(AUDIO_DIR + "smoker-planted.mp3", channel = "audio")
 
     def does_lane_have_hittable_zombies(self):
@@ -2042,6 +2042,7 @@ init python:
         state["is_shovelling"] = True
         state["plant_selected"] = None
         state["plant_seed_slot_selected"] = None
+        renpy.play(AUDIO_DIR + "shovel-pickup.mp3", channel = "audio")
         return state
 
       plant_selected = state["plant_selected"]
