@@ -204,7 +204,7 @@
     "hitbox_distance": 10,
     "cost": 400,
     "recharge_time": 1,
-    "alamanc": {
+    "almanac": {
       "almanac_name": "4.Alc Colin",
       "description": "Throws four beer bottles at a time",
       "damage": "normal",
@@ -225,7 +225,7 @@
     "recharge_time": 1,
     "almanac": {
       "almanac_name": "Smirnoff Pl-ice-sted",
-      "description": "Pl-ice-sted throwssmirnoff ice bottles after chugging them that deal heavy damage",
+      "description": "Pl-ice-sted throws smirnoff ice bottles after chugging them that deal heavy damage",
       "damage": "heavy",
       "special": "Slows opps",
       "story": "Smirnoff Pl-ice-sted is the life of the party. With his legendary 6-second Smirnoff Ice chugging skills, he's won the title of “Throat Goat” hands down. But don't think he's all drink and no drive - those bottles he chugs end up whizzing towards the opps. “It's my version of recycling”"

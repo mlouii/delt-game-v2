@@ -16,7 +16,29 @@ init python:
     file_handle.close()
     return json.loads(file_contents)
 
-  class ConfigLoader():
+  def convert_to_2d_list(lst):
+    result = []
+    sublist = []
+    for i, item in enumerate(lst, 1):
+        sublist.append(item)
+        if i % 4 == 0:
+            result.append(sublist)
+            sublist = []
+    if sublist:
+        result.append(sublist)
+    return result
+
+  def recharge_time_to_text(recharge_time):
+    if recharge_time == 5:
+      return "fast"
+    elif recharge_time == 20:
+      return "slow"
+    elif recharge_time == 40:
+      return "very slow"
+    else:
+      return "Dawg you got a glitch"
+
+  class ConfigLoader_Select():
     def __init__(self, level):
       self.level_config = load_json_from_file(path=JSON_DIR + "levels.json")
       self.level = level
@@ -32,11 +54,13 @@ init python:
     def get_level_config(self):
       return self.level_config[self.level]
 
-  class ImageLoader():
+  class ImageLoader_Select():
     def __init__(self, config_loader):
       self.config_data = config_loader
       self.images = {}
       self.load_plant_images()
+      self.images["sun"] = im.FactorScale(Image(IMG_DIR + "gui/" + "sun" + ".png"), 0.75)
+      self.images["select-background"] = im.FactorScale(Image(IMG_DIR + "gui/" + "select-background" + ".png"), 1)
 
 
     def load_plant_images(self):
@@ -46,13 +70,221 @@ init python:
         resize_factor = self.config_data.get_plant_image_config(plant_name)["resize_factor"]
         image_prefix = config_data.get_plant_image_config(plant_name)["image_prefix"]
         self.images[plant_name] = im.FactorScale(Image(plant_location + "/" + image_prefix + "-0" + ".png"), resize_factor)
-        self.images[plant_name]["locked"] = im.MatrixColor(self.images[plant_name], im.matrix.brightness(-1))
+        self.images[plant_name + "locked"] = im.MatrixColor(self.images[plant_name], im.matrix.brightness(-1))      
 
-  class PlantSeedCard():
-    def __init__(self, plant_name, x, y):
+  class PlantSeedCard_Select():
+    def __init__(self, plant_name, x, y, is_locked, config_data, image_data, almanac):
       self.plant_name = plant_name
-      self.x = x
-      self.y = y
+      self.x_location = x
+      self.y_location = y
+
+      self.original_x = x
+      self.original_y = y
+
+      self.target_x = None
+      self.target_y = None
+
+      self.is_moving = False
+      self.speed = 1
+
+      self.x_distance = None
+      self.y_distance = None
+
+      self.y_velocity = None
+      self.x_velocity = None
+
+      self.is_locked = is_locked
+      self.already_selected = False
+      self.width = 130
+      self.height = 170
+      self.config_data = config_data
+      self.image_data = image_data
+      self.almanac = almanac
+      self.plant_config = self.config_data.get_plant_config(plant_name)
+      self.background_solid = Solid((50, 252, 104), xsize=self.width, ysize=self.height)
+      self.cost_text = None
+      if self.is_locked:
+        self.cost_text = Text("???", size = 20)
+      else:
+        self.cost_text = Text(str(self.plant_config["cost"]), size = 20)
+
+      self.image = None
+      if self.is_locked:
+        self.image = self.image_data.images[plant_name + "locked"]
+      else:
+        self.image = self.image_data.images[plant_name]
+
+    def render(self, render):
+      render.place(self.background_solid, x = self.x_location, y = self.y_location)
+      if self.plant_name == "cobcannon":
+        render.place(self.image, x = self.x_location, y = self.y_location+10)
+      else:
+        render.place(self.image, x = self.x_location+15, y = self.y_location+10)
+      render.place(self.cost_text, x = self.x_location+40, y = (self.y_location+self.height)-31)
+      render.place(self.image_data.images["sun"], x = (self.x_location+self.width)-40, y = (self.y_location+self.height)-35)
+      if self.is_locked:
+        self.gray_overlay = Solid((0, 0, 0, 100), xsize=self.width, ysize=self.height)
+        render.place(self.gray_overlay, x = self.x_location, y = self.y_location)
+      return render
+
+    def process_click(self, x, y, new_slot_x, new_slot_y, can_select):
+      if self.is_moving:
+        return False
+      if x > self.x_location and x < self.x_location + self.width and y > self.y_location and y < self.y_location + self.height:
+        self.almanac.plant_name = self.plant_name
+        if not self.is_locked:
+          if not self.already_selected:
+            if can_select:
+              self.already_selected = True
+              self.target_x = new_slot_x
+              self.target_y = new_slot_y
+            else:
+              return False
+          else:
+            self.already_selected = False
+            self.target_x = self.original_x
+            self.target_y = self.original_y
+          self.is_moving = True
+          self.x_distance = self.target_x - self.x_location
+          self.y_distance = self.target_y - self.y_location
+          return True
+      return False
+
+    def snap_to_target(self):
+      self.x_location = self.target_x
+      self.y_location = self.target_y
+      self.is_moving = False
+      self.speed = 1
+
+    def update(self):
+      if self.is_moving:
+        distance = ((self.x_distance ** 2) + (self.y_distance ** 2)) ** 0.5
+        if distance > 0:
+          angle = math.atan2(self.y_distance, self.x_distance)
+          move_speed_x = math.cos(angle) * self.speed
+          move_speed_y = math.sin(angle) * self.speed
+          self.x_location += move_speed_x
+          self.y_location += move_speed_y
+          self.speed = 1.1 * self.speed
+        if self.y_distance > 0:
+          if self.y_location > self.target_y:
+            self.snap_to_target()
+        else:
+          if self.y_location < self.target_y:
+            self.snap_to_target()
+
+  class AlamancEntry():
+    def __init__(self, x_location, y_location, config_data, image_data):
+      self.x_location = x_location
+      self.y_location = y_location
+      self.width = 1000
+      self.height = 550
+      self.background_solid = Solid((50, 252, 104), xsize=self.width, ysize=self.height)
+      self.config_data = config_data
+      self.image_data = image_data
+
+      self.plant_name = None
+      self.image = None
+
+      self.text_offset = 300
+
+    def load_plant(self, plant_name):
+      self.plant_name = plant_name
+
+    def add_newlines(self, text, line_length):
+        words = text.split()
+        lines = []
+        current_line = ""
+
+        for word in words:
+            if len(current_line) + len(word) <= line_length:
+                current_line += word + " "
+            else:
+                lines.append(current_line.rstrip())
+                current_line = word + " "
+
+        lines.append(current_line.rstrip())
+
+        return "\n".join(lines)
+
+    def render(self, render):
+      extra_x = 0
+      if self.plant_name == "cobcannon":
+        extra_x = 50
+      almanac = self.config_data.get_plant_config(self.plant_name)["almanac"]
+      render.place(self.background_solid, x = self.x_location, y = self.y_location)
+
+      image = im.FactorScale(self.image_data.images[self.plant_name], 2)
+      render.place(image, x = self.x_location+50, y = self.y_location+50)
+
+      name_text = Text(almanac["almanac_name"], size = 50, underline=True)
+      render.place(name_text, x = self.x_location+self.text_offset+extra_x, y = self.y_location+50)
+      description_text = Text(self.add_newlines(almanac["description"], 60), size = 20)
+      render.place(description_text, x = self.x_location+self.text_offset+extra_x, y = self.y_location+120)
+
+      param_counter = 1
+      #iterate through keys and values in alamanc
+      for key, value in almanac.items():
+        if key not in ["almanac_name", "description", "story"]:
+          key_text = Text(key.capitalize(), size = 20, bold = True)
+          value_text = Text(self.add_newlines(value, 30), size = 20)
+          render.place(key_text, x = self.x_location+self.text_offset+extra_x, y = self.y_location+150+(param_counter*30))
+          render.place(value_text, x = self.x_location+self.text_offset+200+extra_x, y = self.y_location+150+(param_counter*30))
+          param_counter += 1
+
+      story_text = Text(self.add_newlines(almanac["story"], 80), size = 20)
+      render.place(story_text, x = self.x_location+50, y = self.y_location+350)
+
+      sun_cost_text = Text("Sun Cost", size = 20, bold = True)
+      render.place(sun_cost_text, x = self.x_location+50, y = self.y_location+self.height-70)
+      sun_cost_text = Text(str(self.config_data.get_plant_config(self.plant_name)["cost"]), size = 20)
+      render.place(sun_cost_text, x = self.x_location+250, y = self.y_location+self.height-70)
+
+      recharge_text = Text("Recharge", size = 20, bold = True)
+      render.place(recharge_text, x = self.x_location+450, y = self.y_location+self.height-70)
+      recharge_text = Text(recharge_time_to_text(self.config_data.get_plant_config(self.plant_name)["recharge_time"]), size = 20)
+      render.place(recharge_text, x = self.x_location+650, y = self.y_location+self.height-70)
+      return render
+
+  class WarningDisplay():
+    def __init__(self, parent):
+      self.is_active = False
+      self.parent = parent
+      self.background_solid = Solid((0, 0, 0, 200), xsize=1900, ysize=1080)
+      self.x_location = 0
+      self.y_location = 0
+
+    def render(self, render):
+      if self.is_active:
+        render.place(self.background_solid, x = self.x_location, y = self.y_location)
+
+        warn_text = Text(f"Are you sure? You only have {len(self.parent.chosen_plants)} selected", size = 70, color=(255, 255, 255, 255))
+        render.place(warn_text, x = self.x_location+300, y = self.y_location+450)
+
+        yes_button = Solid((255, 50, 50, 255), xsize=500, ysize=100)
+        render.place(yes_button, x = self.x_location+300, y = self.y_location+600)
+
+        yes_text = Text("YES FUCK YOU", size = 45, color=(255, 255, 255, 255))
+        render.place(yes_text, x = self.x_location+400, y = self.y_location+630)
+
+        no_button = Solid((35, 235, 85, 255), xsize=500, ysize=100)
+        render.place(no_button, x = self.x_location+900, y = self.y_location+600)
+
+        no_text = Text("NO", size = 45, color=(255, 255, 255, 255))
+        render.place(no_text, x = self.x_location+1000, y = self.y_location+630)
+      return render
+
+    def process_click(self, x, y):
+      if self.is_active:
+        if x > self.x_location+300 and x < self.x_location+800 and y > self.y_location+600 and y < self.y_location+700:
+          self.is_active = False
+          self.parent.has_ended = True
+          return True
+        elif x > self.x_location+900 and x < self.x_location+1400 and y > self.y_location+600 and y < self.y_location+700:
+          self.is_active = False
+          return True
+      return False
+
 
   class PlantSelectDisplayable(renpy.Displayable):
     def __init__(self, unlocked_plants):
@@ -61,11 +293,31 @@ init python:
       self.has_ended = False
       self.chosen_plants = []
 
-      self.finish_button_background = Solid((0, 0, 0, 0), xsize=500, ysize=300)
-      self.finish_text = Text("Finish", size=50, color=(255, 255, 255, 255))
+      self.finish_button_background = Solid((255, 50, 50, 255), xsize=500, ysize=100)
+      self.finish_text = Text("OKAY IM DONE", size=45, color=(255, 255, 255, 255))
 
+      self.config_data = ConfigLoader_Select(1)
+      self.image_data = ImageLoader_Select(self.config_data)
+
+      self.render_order_plants = convert_to_2d_list(self.config_data.plant_show_order)
+
+      self.seed_select_start_x = 100
+      self.seed_select_start_y = 350
+
+      self.selected_start_x = 100
+      self.selected_start_y = 50
+      self.alamac = AlamancEntry(800, 330, self.config_data, self.image_data)
+      self.seed_choices = []
+      for i, row in enumerate(self.render_order_plants):
+        for j, plant_name in enumerate(row):
+          is_locked = True
+          if plant_name in self.unlocked_plants:
+            is_locked = False
+          self.seed_choices.append(PlantSeedCard_Select(plant_name, self.seed_select_start_x+(j*150), self.seed_select_start_y+(i*200), is_locked, self.config_data, self.image_data, self.alamac))
+      self.alamac.load_plant("peashooter")
       self.mouseX = 0
       self.mouseY = 0
+      self.warning = WarningDisplay(self)
 
     def event(self, ev, x, y, st):
       import pygame
@@ -76,25 +328,76 @@ init python:
         self.process_click()
 
       if self.has_ended:
-        return True
+        return self.chosen_plants
+
+    def update(self):
+      for plant in self.seed_choices:
+        plant.update()
 
     def render(self, width, height, st, at):
       if self.has_ended:
         return None
       r = renpy.Render(width, height)
 
-      r.place(self.finish_button_background, x=300, y=300)
-      r.place(self.finish_text, x=300, y=300)
+      r.place(self.image_data.images["select-background"], x=0, y=0)
 
-      mouse_text = Text("MouseX: " + str(self.mouseX) + " MouseY: " + str(self.mouseY), size=50, color=(255, 255, 255, 255))
-      r.place(mouse_text, x=self.mouseX, y=self.mouseY)
+      self.update()
+
+      width = 150 * 4 + 40
+      height = 200 * 3 + 40
+      brown_background = Solid((139, 69, 19, 250), xsize=width, ysize=height)
+      r.place(brown_background, x=self.seed_select_start_x-20, y=self.seed_select_start_y-20)
+
+      for i in range(6):
+        light_brown_background = Solid((205, 133, 63, 250), xsize=130, ysize=170)
+        r.place(light_brown_background, x=self.selected_start_x+(i*150), y=self.selected_start_y)
+
+      for plant in self.seed_choices:
+        r.place(light_brown_background, x=plant.original_x, y=plant.original_y)
+
+      for plant in self.seed_choices:
+        r = plant.render(r)
+
+      r.place(self.finish_button_background, x=self.seed_select_start_x, y=self.seed_select_start_y+(len(self.render_order_plants)*200))
+      r.place(self.finish_text, x=self.seed_select_start_x + 50, y=self.seed_select_start_y+(len(self.render_order_plants)*200) + 30)
+
+      # mouse_text = Text("MouseX: " + str(self.mouseX) + " MouseY: " + str(self.mouseY), size=50, color=(255, 255, 255, 255))
+      # r.place(mouse_text, x=self.mouseX-300, y=self.mouseY-300)
+
+      r = self.alamac.render(r)
+      if self.warning.is_active:
+        r = self.warning.render(r)
 
       renpy.redraw(self, 0)
       return r
 
+    def get_chosen_plants(self):
+      return self.chosen_plants
+
     def process_click(self):
-      if self.mouseX > 300 and self.mouseX < 800 and self.mouseY > 300 and self.mouseY < 600:
-        self.has_ended = True
+      if self.warning.is_active:
+        self.warning.process_click(self.mouseX, self.mouseY)
+        return True
+
+      if self.mouseX > self.seed_select_start_x and self.mouseX < self.seed_select_start_x + 500 and self.mouseY > self.seed_select_start_y+(len(self.render_order_plants)*200) and self.mouseY < self.seed_select_start_y+(len(self.render_order_plants)*200) + 100:
+        if len(self.chosen_plants) < 6:
+          self.warning.is_active = True
+        else:
+          self.has_ended = True
+          return True
+
+      for plant in self.seed_choices:
+        can_select = False
+        if len(self.chosen_plants) < 6:
+          can_select = True
+        if plant.process_click(self.mouseX, self.mouseY, self.selected_start_x + (len(self.chosen_plants) * 150), self.selected_start_y, can_select):
+          if plant.already_selected:
+            self.chosen_plants.append(plant.plant_name)
+          else:
+            self.chosen_plants.remove(plant.plant_name)
+          return True
+
+      return False
 
 
 
@@ -102,18 +405,16 @@ init python:
 
 screen plant_select_menu():
   modal True
-  $ plants = ["peashooter", "repeater", "iceshooter", "wallnut", "sunflower", "cobcannon", "fumeshroom"]
+  $ plants = ["peashooter", "repeater", "iceshooter", "wallnut", "sunflower", "cobcannon", "fumeshroom", "pranav", "colin", "logan"]
   $ game = PlantSelectDisplayable(plants)
   add game
 
-  if game.has_ended:
-    timer 0.1 action Return(True)
 
 label start_plant_select:
   window hide
   $ quick_menu = False
   $ _game_menu_screen = None
-  $ renpy.call_screen(_screen_name='plant_select_menu')
+  $ chosen_plants = renpy.call_screen(_screen_name='plant_select_menu')
   $ quick_menu = True
 
   return

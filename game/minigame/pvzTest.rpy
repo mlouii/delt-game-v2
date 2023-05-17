@@ -2093,7 +2093,7 @@ init python:
 
 
   class PvzGameDisplayable(renpy.Displayable):
-    def __init__(self, level):
+    def __init__(self, level, loaded_plants):
       super(PvzGameDisplayable, self).__init__()
       level_config = load_json_from_file(path=JSON_DIR + "levels.json")
       zombie_config = load_json_from_file(path=JSON_DIR + "zombies.json")
@@ -2118,7 +2118,7 @@ init python:
 
       self.last_time = time.time()
 
-      self.loaded_plants = ["peashooter", "repeater", "iceshooter", "wallnut", "sunflower", "cobcannon", "fumeshroom", "pranav", "colin", "logan"]
+      self.loaded_plants = loaded_plants
 
       all_images.load_zombies(["basic", "dog", "kinetic", "van", "conehead", "buckethead", "shield_bearer", "shield"])
       all_images.load_plants(self.loaded_plants)
@@ -2273,7 +2273,7 @@ screen pvz_game_menu():
       label "Lets give it a shot" xalign 0.5
       text "This is a test of the elements of the game menu screen."
 
-  $ game = PvzGameDisplayable(1)
+  $ game = PvzGameDisplayable(1, chosen_plants)
   add game
 
   if game.has_ended:

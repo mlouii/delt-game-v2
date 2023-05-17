@@ -5,6 +5,10 @@
 
 define e = Character("Eileen")
 
+init python:
+    global selected_plants
+
+
 
 # The game starts here.
 
@@ -17,11 +21,15 @@ label start:
     scene bg room
     show eileen happy
 
+    hide eileen
+
     call start_plant_select
 
     e "waaa"
 
-    e "lets test this game"
+    $ text = "You chose " + ", ".join(chosen_plants) + "."
+    # $ type_text = "the type of chosen_plants is " + str(type(chosen_plants)) + "."
+    e "hey [text]"
 
     e "goddamn i love dudes"
 
