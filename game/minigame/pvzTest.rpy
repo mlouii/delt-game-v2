@@ -37,6 +37,10 @@ init python:
       return Sunflower(tile, lane, gui_controller)
     elif plant_type == "cobcannon":
       return CobCannon(tile, lane, gui_controller)
+    elif plant_type == "andrew":
+      return Andrew(tile, lane)
+    elif plant_type == "jacob":
+      return Jacob(tile, lane)
 
 
   def load_json_from_file(path):
@@ -484,9 +488,15 @@ init python:
         projectile_location = IMG_DIR + "projectiles/" + projectile_name + ".png"
         resize_factor = config_data.get_projectile_config(projectile_name)["resize_factor"]
         config_data.modify_projectile_image_size(projectile_name, resize_factor=resize_factor)
-        self.images["projectiles"][projectile_name] = {
-          "image": im.FactorScale(Image(projectile_location), resize_factor)
-        }
+
+        if projectile_name != "andrew":
+          self.images["projectiles"][projectile_name] = {
+            "image": im.FactorScale(Image(projectile_location), resize_factor)
+          }
+        else:
+          self.images["projectiles"][projectile_name] = {}
+          for i in range(6):
+            self.images["projectiles"][projectile_name][i] = im.FactorScale(Image(IMG_DIR + "projectiles/" + projectile_name + "-" + str(i) + ".png"), resize_factor)
 
     def determine_projectiles_to_load(self, plant_names):
       projectiles = []
@@ -624,23 +634,6 @@ init python:
         tile.is_hovered = True
         tile.plant_selected = state["plant_selected"]
 
-    # def process_click(self):
-    #   # current_state = self.game.make_state()
-
-    #   for z in self.zombies:
-    #     z.motion_type = "attack"
-    #     z.update_motion()
-
-    #     choice = (renpy.random.choice(z.body_parts))
-    #     if choice.part_name != "torso":
-    #       choice.status = "detached"
-
-    #   if self.plant_selected is not None:
-    #     tile = self.environment.pos_to_tile(self.mouseX, self.mouseY)
-    #     if tile is not None and tile.plantable():
-    #       tile.is_planted = True
-    #       self.lanes.add_plant(tile, self.plant_selected)
-
     def visit(self):
       return list(itertools.chain(*[tile.visit() for tile in self.tiles]))
 
@@ -657,7 +650,9 @@ init python:
       self.center_x = self.projectile_config["center_x"]
       self.center_y = self.projectile_config["center_y"]
 
-      self.image = all_images.images["projectiles"][self.projectile_type]["image"]
+      self.image = None
+      if not self.projectile_type == "andrew":
+        self.image = all_images.images["projectiles"][self.projectile_type]["image"]
       self.effects = self.projectile_config["effects"]
       self.does_spawn_particle = self.projectile_config["spawn_particles"]
 
@@ -763,6 +758,24 @@ init python:
                 # if renpy.music.get_playing(channel = "sound") is None:
                 #   renpy.play(AUDIO_DIR + "splat.mp3", channel = "sound")
 
+  class Andrew_Projectile(Projectile):
+    def __init__(self, plant):
+      super().__init__(plant, "andrew")
+      self.frame = 0
+      self.frame_timer = time.time()
+      self.frame_delay = 0.2
+
+    def render(self, render):
+      image = all_images.images["projectiles"][self.projectile_type][self.frame]
+      render.place(image, x=self.x_location, y=self.y_location)
+      return render
+
+    def update(self):
+      super().update()
+      if time.time() - self.frame_timer > self.frame_delay:
+        self.frame_timer = time.time()
+        self.frame = (self.frame + 1) % 6
+
 
   class Plant():
     def __init__(self, tile, lane, plant_type):
@@ -859,6 +872,110 @@ init python:
           self.damaged_timer = None
 
       self.frame = (self.frame + 1) % len(self.frames)
+
+  class Jacob(Plant):
+    def __init__(self, tile, lane):
+      super().__init__(tile, lane, "jacob")
+      self.target_tile = None
+      self.attacking = False
+
+      self.is_jumping = False
+      self.jump_velocity = -15
+
+      self.is_falling = False
+      self.x_distance = None
+      self.y_distance = None
+
+      self.y_velocity = None
+      self.speed = 2
+
+
+    def get_zombie_costs_on_tile(self, tile):
+      zombie_costs = []
+      for zombie in self.lane.return_all_zombies_on_tile(tile):
+        zombie_costs.append(zombie.zombie_config["cost"])
+      return sum(zombie_costs)
+
+    def damage_zombies(self):
+      for zombie in self.lane.return_all_zombies_on_tile(self.target_tile):
+        zombie.damage(self.plant_config["damage"])
+
+    def damage(self, damage):
+      pass
+
+    def update(self):
+      if not self.attacking:
+        self.check_zombies_within_range()
+
+      if self.attacking:
+        self.y_location += self.y_velocity * delta_multiplier * delta_time
+        if self.is_jumping:
+          self.y_velocity += 0.5 * delta_multiplier * delta_time
+          if self.y_velocity >= 0:
+            self.is_jumping = False
+            self.y_velocity = 0
+            self.is_falling = True
+            self.x_distance = self.target_tile.target_location_x - self.x_location - self.plant_image_config["joint_x"]
+            self.y_distance = self.target_tile.target_location_y - self.y_location - self.plant_image_config["joint_y"]
+        
+        if self.is_falling:
+          distance = ((self.x_distance ** 2) + (self.y_distance ** 2)) ** 0.5
+          if distance > 0:
+            angle = math.atan2(self.y_distance, self.x_distance)
+            move_speed_x = math.cos(angle) * self.speed
+            move_speed_y = math.sin(angle) * self.speed
+            self.x_location += move_speed_x
+            self.y_location += move_speed_y
+            self.speed = 1.1 * self.speed
+
+            if self.y_location + self.plant_image_config["joint_y"]> self.target_tile.target_location_y:
+              self.damage_zombies()
+              self.is_dead = True
+              self.attacking = False
+              self.tile.is_planted = False
+              self.x_location = self.target_tile.target_location_x - self.plant_image_config["joint_x"]
+              self.y_location = self.target_tile.target_location_y - self.plant_image_config["joint_y"]
+              renpy.play(AUDIO_DIR + "thud.mp3", channel = "audio")
+
+        
+    def check_zombies_within_range(self):
+      current_tile_id = self.tile.row_id
+      tile_in_front = self.lane.get_tile_by_row_id(current_tile_id + 1)
+      tile_behind = self.lane.get_tile_by_row_id(current_tile_id - 1)
+      all_tiles = [self.tile, tile_in_front, tile_behind]
+      valid_tiles = [tile for tile in all_tiles if tile is not None]
+
+      best_tile = None
+      best_tile_cost = 0
+      for tile in valid_tiles:
+        zombie_costs = self.get_zombie_costs_on_tile(tile)
+        if zombie_costs > best_tile_cost:
+          best_tile_cost = zombie_costs
+          best_tile = tile
+
+      if best_tile is not None:
+        self.target_tile = best_tile
+        self.attacking = True
+        self.is_jumping = True
+        self.y_velocity = self.jump_velocity
+        self.costume = "attack"
+        renpy.play(AUDIO_DIR + "roar.mp3", channel = "audio")
+
+
+
+    
+
+  class Andrew(Plant):
+    def __init__(self, tile, lane):
+      super().__init__(tile, lane, "andrew")
+      self.launch_attack()
+
+    def launch_attack(self):
+      self.lane.add_projectile(Andrew_Projectile(plant=self))
+      self.is_dead = True
+      self.tile.is_planted = False
+      renpy.play(AUDIO_DIR + "griddy.mp3", channel = "audio")
+
 
   class CobCannon(Plant):
     def __init__(self, tile, lane, gui_controller):
@@ -1255,6 +1372,7 @@ init python:
       self.zombie_type = zombie_type
       self.animation_type = config_data.get_zombie_config(zombie_type)["animation_type"]
       self.image_config = config_data.get_zombie_image_config(self.animation_type)
+      self.zombie_config = config_data.get_zombie_config(zombie_type)
 
       self.x_location = x_location
       self.y_location = self.lane.tiles[0].target_location_y - self.image_config["fall_height"]
@@ -1449,6 +1567,8 @@ init python:
       return eye_x, eye_y
 
     def start_eating(self, plant):
+      if plant.plant_type == "jacob":
+        return 
       self.target_plant = plant
       self.motion_type = renpy.random.choice(self.attack_motions)
       self.attack_delay_timer = time.time()
@@ -1537,6 +1657,8 @@ init python:
 
     def check_attack_plant(self):
       if hasattr(self, "target_plant") and self.target_plant is not None: # check if target_plant still exists
+        if self.target_plant.plant_type == "jacob":
+          return
         self.target_plant.damage(self.attack)
         renpy.play(AUDIO_DIR + "plant-crushed.mp3", channel = "audio")
 
@@ -1562,6 +1684,13 @@ init python:
       self.tiles = tiles
       self.y_location = tiles[0].y_location
       self.target_location_y = tiles[0].target_location_y
+
+    def get_tile_by_row_id(self, row_id):
+      temp = [tile for tile in self.tiles if tile.row_id == row_id]
+      if len(temp) > 0:
+        return temp[0]
+      else:
+        return None
 
     def add_plant(self, plant):
       self.plants.append(plant)
@@ -2022,7 +2151,10 @@ init python:
         render.place(self.targeting_image, x = state["mouseX"] - 65, y = state["mouseY"] - 40)
 
       if state["is_shovelling"]:
-        render.place(self.shovel_image, x = state["mouseX"] - 65, y = state["mouseY"] - 40)
+        render.place(self.shovel_image, x = state["mouseX"] - 40, y = state["mouseY"] - 40)
+
+      if state["plant_selected"] and not self.is_targeting:
+        render.place(all_images.images["plants"][state["plant_selected"]]["animation"]["default"][0], x = state["mouseX"] - 65, y = state["mouseY"] - 40)
       
       for target_marker in self.target_markers:
         render = target_marker.render(render)
@@ -2209,11 +2341,11 @@ init python:
               tile.is_planted = True
               self.lanes.add_plant_tile(tile, self.plant_selected)
               self.plant_seed_slot_selected.reset_recharge_timer()
-              current_state["plant_seed_slot_selected"] = None
-              current_state["plant_selected"] = None
               current_state["sun_amount"] -= self.plant_seed_slot_selected.plant_config["cost"]
             else:
               self.gui_controller.display_notification("Can't plant there!")
+        current_state["plant_seed_slot_selected"] = None
+        current_state["plant_selected"] = None
 
       self.alter_state(current_state)
 

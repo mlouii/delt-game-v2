@@ -24,12 +24,15 @@ label start:
     hide eileen
 
     call start_plant_select
+    stop music fadeout 2.0
 
     e "waaa"
 
-    $ text = "You chose " + ", ".join(chosen_plants) + "."
+    # $ chosen_plants = ["jacob"]
+
+    # $ text = "You chose " + ", ".join(chosen_plants) + "."
     # $ type_text = "the type of chosen_plants is " + str(type(chosen_plants)) + "."
-    e "hey [text]"
+    # e "hey [text]"
 
     e "goddamn i love dudes"
 

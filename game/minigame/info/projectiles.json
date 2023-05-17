@@ -97,5 +97,22 @@
     "particle_type": "dot",
     "particle_color": [255, 255, 255],
     "particle_size": 5
+  },
+  "andrew": {
+    "resize_factor": 0.35,
+    "width": 276,
+    "height": 526,
+    "center_x": 129,
+    "center_y": 228,
+    "damage": 120,
+    "speed": 3,
+    "range": 10,
+    "pierce": 999,
+    "effects": "none",
+    "spawn_particles": true,
+    "leave_trail": false,
+    "particle_type": "dot",
+    "particle_color": [255, 255, 255],
+    "particle_size": 5
   }
 }

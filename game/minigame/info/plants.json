@@ -133,6 +133,30 @@
       "joint_y": 300,
       "projectile_spawn_x": 106,
       "projectile_spawn_y": 95
+    },
+    "andrew": {
+      "resize_factor": 0.4,
+      "image_prefix": "andrew",
+      "width": 240,
+      "height": 320,
+      "num_frames": 1,
+      "has_damage_frames": false,
+      "has_attack_frame": false,
+      "joint_x": 125,
+      "joint_y": 300,
+      "projectile_spawn_x": 106,
+      "projectile_spawn_y": 95
+    },
+    "jacob": {
+      "resize_factor": 0.4,
+      "image_prefix": "jacob",
+      "width": 240,
+      "height": 320,
+      "num_frames": 1,
+      "has_damage_frames": false,
+      "has_attack_frame": true,
+      "joint_x": 125,
+      "joint_y": 300
     }
   },
 
@@ -171,7 +195,7 @@
       "description": "Bishop can throw two baseballs at a time",
       "damage": "normal",
       "firing speed": "2x",
-      "story": "Don’t let his small frame deceive you, he’s got a lot of strength and an even bigger package. He stays modest about it though, and he’s known for his excellent sportsmanship. His advice? “It’s not the size of the bat, or even the hardness of the wood. It’s the kindness that matters.”"
+      "story": "Don’t let his small frame deceive you, he’s got a lot of strength and an even bigger package. He stays modest about it, though he finds it effortless to reach home base. His advice? “It’s not the size of the bat, or even the hardness of the wood. It’s the kindness that matters.”"
     }
   },
   "fumeshroom": {
@@ -278,7 +302,7 @@
       "almanac_name": "Mario the Stoic",
       "description": "Mario will take the pain and suffering so that you don’t have to.",
       "toughness": "high",
-      "story": "The opps have learned the hard way that Mario the Stoic is an immovable force. Despite the chaos that often surrounds him, he remains relaxed and unfazed. He's been known to quip, “Dobble poundur wit freyes” as he blocks the path of the advancing opps."
+      "story": "The opps have learned the hard way that Mario the Stoic is an immovable force. Despite the chaos that often surrounds him, he remains relaxed and unfazed. He's been known to mutter some unintelligible lines as he blocks the path of the advancing opps. A language barrier, perhaps."
     }
   },
   "sunflower": {
@@ -315,6 +339,40 @@
       "damage": "normal",
       "range": "All opps in same tile",
       "story": "Faded Pranav Purple knows how to cloud out the issues. His smoke is his shield, and he's more than happy to share it with the opps. “I'm not as tough as a Mario, but I'm way more fun at parties,” he remarks, puffing out another hot-box cloud. “What’s that smell?” The opps say."
+    }
+  },
+  "andrew": {
+    "animation_type": "andrew",
+    "health": 9999,
+    "attack_delay": 0,
+    "num_shots": 1,
+    "shot_delay": 0.2,
+    "spawn_projectile": true,
+    "projectile_type": "andrew",
+    "hitbox_distance": 10,
+    "cost": 125,
+    "recharge_time": 5,
+    "almanac": {
+      "almanac_name":"Griddy AndRizzle",
+      "description": "Single-use: Hits the griddy forward on the opps",
+      "damage": "massive",
+      "special": "Damages all opps caught in the griddy",
+      "story": "“Bitches love the way I move”. He says, as he hits a devious griddy and leaves the premises. AndRizzle is someone who just can't stay still, he's always looking for his next adventure. He's got a lot of exotic locations ahead of him, and he won't let the opps stand in his way."
+    }
+  },
+  "jacob": {
+    "animation_type": "jacob",
+    "health": 9999,
+    "spawn_projectile": false,
+    "hitbox_distance": 10,
+    "damage": 120,
+    "cost": 50,
+    "recharge_time": 5,
+    "almanac": {
+      "almanac_name":"Jacob Slammer",
+      "description": "Single-use: Smashes the opps in a single tile",
+      "damage": "massive",
+      "story": "Jacob Slammer is all about equations and wrestling. He's as likely to discuss differential calculus as he is to perform a body slam. When the opps encroach on his territory, he's ready to defend. “The integral part of a good defense is a good offense,” he says, cracking his knuckles."
     }
   }
 }

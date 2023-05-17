@@ -775,7 +775,8 @@
     "attack": 1,
     "hitbox_distance": 100,
     "hitbox_width": 40,
-    "speed": 0.35
+    "speed": 0.35,
+    "cost": 1
   },
 
   "shield_bearer": {
@@ -789,7 +790,8 @@
     "attack": 1,
     "hitbox_distance": 100,
     "hitbox_width": 40,
-    "speed": 0.35
+    "speed": 0.35,
+    "cost": 2
   },
 
   "shield": {
@@ -810,7 +812,8 @@
     "hitbox_distance": 50,
     "hitbox_width": 40,
     "speed": 0,
-    "attack": 0
+    "attack": 0,
+    "cost": 0
   },
 
   "conehead": {
@@ -830,7 +833,8 @@
     "attack": 1,
     "hitbox_distance": 100,
     "hitbox_width": 40,
-    "speed": 0.35
+    "speed": 0.35,
+    "cost": 2
   },
 
   "buckethead": {
@@ -850,7 +854,8 @@
     "attack": 1,
     "hitbox_distance": 100,
     "hitbox_width": 40,
-    "speed": 0.35
+    "speed": 0.35,
+    "cost": 4
   },
 
   "dog": {
@@ -864,7 +869,8 @@
     "attack": 1,
     "hitbox_distance": 100,
     "hitbox_width": 60,
-    "speed": 0.8
+    "speed": 0.8,
+    "cost": 2
   },
 
   "kinetic": {
@@ -878,7 +884,8 @@
     "attack": 100,
     "hitbox_distance": 100,
     "hitbox_width": 40,
-    "speed": 0.35
+    "speed": 0.35,
+    "cost": 3
   }, 
 
   "van": {
@@ -899,6 +906,7 @@
     "attack": 100,
     "hitbox_distance": 50,
     "hitbox_width": 300,
-    "speed": 0.35
+    "speed": 0.35,
+    "cost": 8
   }
 }

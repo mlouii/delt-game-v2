@@ -1,6 +1,7 @@
 define THIS_PATH = 'minigame/'
 define JSON_DIR = THIS_PATH + 'info/'
 define IMG_DIR = THIS_PATH + 'images/'
+define AUDIO_DIR = THIS_PATH + 'audio/'
 
 init python:
   import pygame
@@ -42,7 +43,7 @@ init python:
     def __init__(self, level):
       self.level_config = load_json_from_file(path=JSON_DIR + "levels.json")
       self.level = level
-      self.plant_show_order = ["peashooter", "repeater", "iceshooter", "wallnut", "sunflower", "cobcannon", "fumeshroom", "pranav", "colin", "logan"]
+      self.plant_show_order = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
       self.plant_config = load_json_from_file(path=JSON_DIR + "plants.json")
 
     def get_plant_config(self, plant_name):
@@ -131,8 +132,8 @@ init python:
       if self.is_moving:
         return False
       if x > self.x_location and x < self.x_location + self.width and y > self.y_location and y < self.y_location + self.height:
-        self.almanac.plant_name = self.plant_name
         if not self.is_locked:
+          self.almanac.plant_name = self.plant_name
           if not self.already_selected:
             if can_select:
               self.already_selected = True
@@ -235,7 +236,7 @@ init python:
       story_text = Text(self.add_newlines(almanac["story"], 80), size = 20)
       render.place(story_text, x = self.x_location+50, y = self.y_location+350)
 
-      sun_cost_text = Text("Sun Cost", size = 20, bold = True)
+      sun_cost_text = Text("Xs Off Required", size = 20, bold = True)
       render.place(sun_cost_text, x = self.x_location+50, y = self.y_location+self.height-70)
       sun_cost_text = Text(str(self.config_data.get_plant_config(self.plant_name)["cost"]), size = 20)
       render.place(sun_cost_text, x = self.x_location+250, y = self.y_location+self.height-70)
@@ -288,8 +289,10 @@ init python:
 
   class PlantSelectDisplayable(renpy.Displayable):
     def __init__(self, unlocked_plants):
+      renpy.play(AUDIO_DIR + "choose-your-seeds.mp3", channel = "music")
       super(PlantSelectDisplayable, self).__init__()
       self.unlocked_plants = unlocked_plants
+      self.max_slots = min(6, len(self.unlocked_plants))
       self.has_ended = False
       self.chosen_plants = []
 
@@ -348,7 +351,7 @@ init python:
       brown_background = Solid((139, 69, 19, 250), xsize=width, ysize=height)
       r.place(brown_background, x=self.seed_select_start_x-20, y=self.seed_select_start_y-20)
 
-      for i in range(6):
+      for i in range(self.max_slots):
         light_brown_background = Solid((205, 133, 63, 250), xsize=130, ysize=170)
         r.place(light_brown_background, x=self.selected_start_x+(i*150), y=self.selected_start_y)
 
@@ -380,7 +383,7 @@ init python:
         return True
 
       if self.mouseX > self.seed_select_start_x and self.mouseX < self.seed_select_start_x + 500 and self.mouseY > self.seed_select_start_y+(len(self.render_order_plants)*200) and self.mouseY < self.seed_select_start_y+(len(self.render_order_plants)*200) + 100:
-        if len(self.chosen_plants) < 6:
+        if len(self.chosen_plants) < self.max_slots:
           self.warning.is_active = True
         else:
           self.has_ended = True
@@ -405,7 +408,7 @@ init python:
 
 screen plant_select_menu():
   modal True
-  $ plants = ["peashooter", "repeater", "iceshooter", "wallnut", "sunflower", "cobcannon", "fumeshroom", "pranav", "colin", "logan"]
+  $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
   $ game = PlantSelectDisplayable(plants)
   add game
 
