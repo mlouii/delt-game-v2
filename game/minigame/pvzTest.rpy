@@ -2278,11 +2278,21 @@ init python:
       self.spent_per_lane = [0,0,0,0,0]
       self.displayed_probs = [0,0,0,0,0]
       self.interval = 0
+      self.fast_forward_seconds = 0
       self.max_interval = self.level_config["spawn"]["intervals"]
       self.has_finished = False
 
+      self.allow_fast_forward_timer = None
+
+      self.wave_intervals = []
+      for i in range(1, self.max_interval+1):
+        if self.level_config["spawn"][str(i)]["type"] == "wave":
+          self.wave_intervals.append(i)
+
       self.buffered_zombies = []
       self.spawn_x_location = 1600
+
+      self.progress_bar_background = Solid((0, 0, 0, 255), xsize=404, ysize=44)
 
     def reset(self):
       self.start_time = time.time()
@@ -2291,11 +2301,11 @@ init python:
       
     def calculate_interval(self):
       initial_delay = self.level_config["spawn"]["initial_delay"]
-      seconds_elapsed = time.time() - self.start_time
+      seconds_elapsed = time.time() - self.start_time + self.fast_forward_seconds
       if seconds_elapsed < initial_delay:
         return 0
       interval = int((seconds_elapsed - initial_delay)/20) + 1
-      if interval >= self.max_interval:
+      if interval > self.max_interval:
         self.has_finished = True
         return self.max_interval
       return int((seconds_elapsed - initial_delay)/20) + 1
@@ -2342,13 +2352,8 @@ init python:
 
         lane = random.choices(range(len(self.spent_per_lane)), weights=probabilities, k=1)[0]
         self.spent_per_lane[lane] += config_data.get_zombie_config(zombie)["cost"]
-        spawn_time = current_time + (i + 1) * spawn_delay
+        spawn_time = current_time + (i) * spawn_delay
         self.buffered_zombies.append(BufferedZombie(self, zombie, self.lanes.lanes[lane], spawn_time))
-
-        # delete this later
-        probabilities = [1/(spent**2) for spent in adjusted_spent_per_lane]
-        probabilities = [prob/sum(probabilities) for prob in probabilities]  # normalize probabilities
-        self.displayed_probs = probabilities
 
       
     def check_interval(self):
@@ -2356,7 +2361,14 @@ init python:
       if interval > self.interval:
         self.interval = interval
         self.prepare_zombie_interval()
+        self.allow_fast_forward_timer = time.time()
 
+    def check_fast_forward(self):
+      if self.interval > 0 and self.fast_forward_seconds < 1000:
+        if time.time() - self.allow_fast_forward_timer > 2:
+          if not self.lanes.get_all_zombies():
+            seconds_until_next_interval = 20 - (time.time() - self.start_time) % 20
+            self.fast_forward_seconds += seconds_until_next_interval
 
     def update(self):
       for buffered_zombie in self.buffered_zombies:
@@ -2364,13 +2376,25 @@ init python:
 
       self.buffered_zombies = [buffered_zombie for buffered_zombie in self.buffered_zombies if not buffered_zombie.should_delete]
       self.check_interval()
+      self.check_fast_forward()
 
     def render(self, render):
-      interval_text = Text((str(self.interval) + "-" + ",".join(str(item) for item in self.spent_per_lane)), size = 30)
-      render.place(interval_text, x = 1500, y = 100)
+      # interval_text = Text((str(self.interval) + "-" + ",".join(str(item) for item in self.spent_per_lane)), size = 30)
+      # render.place(interval_text, x = 1500, y = 100)
 
-      probability_text = Text((",".join(str(round(item, 2)) for item in self.displayed_probs)), size = 30)
-      render.place(probability_text, x = 1200, y = 170)
+      text = Text(str(time.time() - self.start_time + self.fast_forward_seconds), size = 30)
+      render.place(text, x = 1200, y = 170)
+
+      render.place(self.progress_bar_background, x = 1200, y = 100)
+
+      red_wave_ticks = Solid((255, 0, 0, 255), xsize=5, ysize=44)
+      for wave_interval in self.wave_intervals:
+        if wave_interval >= self.interval:
+          render.place(red_wave_ticks, x = ((400/self.max_interval) * wave_interval) + 1200, y = 100)
+
+      progress_bar_width = int((self.interval/self.max_interval) * 400)
+      progress_bar = Solid((0, 255, 0, 255), xsize=progress_bar_width, ysize=40)
+      render.place(progress_bar, x = 1202, y = 102)
       return render
 
 
@@ -2388,7 +2412,7 @@ init python:
 
       self.has_ended = False
 
-      self.level_config = config_data.get_level_config("level1")
+      self.level_config = config_data.get_level_config(level)
 
       self.mouseX = 0
       self.mouseY = 0
@@ -2396,7 +2420,7 @@ init python:
       self.plant_seed_slot_selected = None
       self.is_targeting = False
       self.is_shovelling = False
-      self.sun_amount = 50
+      self.sun_amount = 50000
 
       self.final_outcome = None
 
@@ -2548,7 +2572,7 @@ init python:
     
 screen pvz_game_menu():
   modal True
-  $ game = PvzGameDisplayable(1, chosen_plants)
+  $ game = PvzGameDisplayable("level1", chosen_plants)
   add game
 
 label test_game_entry_label:
