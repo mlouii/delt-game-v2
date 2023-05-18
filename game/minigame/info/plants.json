@@ -227,7 +227,7 @@
     "projectile_type": "beer",
     "hitbox_distance": 10,
     "cost": 400,
-    "recharge_time": 1,
+    "recharge_time": 5,
     "almanac": {
       "almanac_name": "4.Alc Colin",
       "description": "Throws four beer bottles at a time",
@@ -246,7 +246,7 @@
     "projectile_type": "ice",
     "hitbox_distance": 10,
     "cost": 400,
-    "recharge_time": 1,
+    "recharge_time": 5,
     "almanac": {
       "almanac_name": "Smirnoff Pl-ice-sted",
       "description": "Pl-ice-sted throws smirnoff ice bottles after chugging them that deal heavy damage",
@@ -282,7 +282,7 @@
     "spawn_projectile": false,
     "hitbox_distance": 10,
     "cost": 700,
-    "recharge_time": 5,
+    "recharge_time": 20,
     "almanac": {
       "almanac_name": "Captain Davis",
       "description": "Tap on Captain Davis to request a deadly hellfire missile strike",
@@ -297,7 +297,7 @@
     "spawn_projectile": false,
     "hitbox_distance": 10,
     "cost": 50,
-    "recharge_time": 5,
+    "recharge_time": 20,
     "almanac": {
       "almanac_name": "Mario the Stoic",
       "description": "Mario will take the pain and suffering so that you don’t have to.",
@@ -308,7 +308,7 @@
   "sunflower": {
     "animation_type": "sunflower",
     "health": 7,
-    "sun_delay": 5,
+    "sun_delay": 12,
     "glow_seconds_before_sun": 1,
     "spawn_projectile": false,
     "hitbox_distance": 10,
@@ -331,7 +331,7 @@
     "projectile_type": "pranav-smoke",
     "hitbox_distance": 10,
     "cost": 50,
-    "recharge_time": 5,
+    "recharge_time": 20,
     "almanac": {
       "almanac_name":"Faded Pranav Purple",
       "description": "Blocks and deals damage to opps with his smoke cloud",
@@ -351,7 +351,7 @@
     "projectile_type": "andrew",
     "hitbox_distance": 10,
     "cost": 125,
-    "recharge_time": 5,
+    "recharge_time": 20,
     "almanac": {
       "almanac_name":"Griddy AndRizzle",
       "description": "Single-use: Hits the griddy forward on the opps",
@@ -367,7 +367,7 @@
     "hitbox_distance": 10,
     "damage": 120,
     "cost": 50,
-    "recharge_time": 5,
+    "recharge_time": 20,
     "almanac": {
       "almanac_name":"Jacob Slammer",
       "description": "Single-use: Smashes the opps in a single tile",

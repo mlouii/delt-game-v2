@@ -1,14 +1,94 @@
 {
+  "areas": {
+    "area1": {
+      "lighter_color": [48, 176, 77],
+      "dark_color": [48, 143, 69],
+      "variance": [0, 7, 4],
+      "num_rows": 5,
+      "num_cols": 10,
+      "height_multiplier": 0.7,
+      "width_multiplier": 0.7,
+      "start_x": 0.15,
+      "start_y": 0.25,
+      "music": "grasswalk"
+    },
+    "area2": {
+      "lighter_color" : [168, 84, 163],
+      "dark_color": [140, 80, 137],
+      "variance": [0, 7, 4],
+      "num_rows": 5,
+      "num_cols": 10,
+      "height_multiplier": 0.7,
+      "width_multiplier": 0.7,
+      "start_x": 0.15,
+      "start_y": 0.25,
+      "music": "loonboon"
+    },
+    "area3": {
+      "lighter_color" : [232, 231, 190],
+      "dark_color": [194, 193, 172],
+      "variance": [0, 7, 4],
+      "num_rows": 5,
+      "num_cols": 10,
+      "height_multiplier": 0.7,
+      "width_multiplier": 0.7,
+      "start_x": 0.15,
+      "start_y": 0.25,
+      "music": "graze-the-roof"
+    }
+  },
+
   "level1" : {
-    "lighter_color" : [48, 176, 77],
-    "dark_color": [48, 143, 69],
-    "variance": [0, 7, 4],
-    "num_rows": 5,
-    "num_cols": 9,
-    "height_multiplier": 0.7,
-    "width_multiplier": 0.7,
-    "start_x": 0.15,
-    "start_y": 0.25,
-    "zombies": ["basic", "dog"]
+    "area": "area3",
+    "zombies": ["basic", "conehead", "buckethead"],
+    "spawn": {
+      "probabilities": {
+        "basic": 0.3,
+        "conehead": 0.5,
+        "buckethead": 0.2
+      },
+      "initial_delay": 3,
+      "intervals": 9,
+      "1": {
+        "type": "normal",
+        "budget": 2,
+        "max_cost": 1
+      },
+      "2": {
+        "type": "normal",
+        "budget": 4
+      }, 
+      "3": {
+        "type": "normal",
+        "budget": 6
+      },
+      "4": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 15
+      },
+      "5": {
+        "type": "normal",
+        "budget": 10
+      },
+      "6": {
+        "type": "normal",
+        "budget": 10
+      },
+      "7": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 20
+      },
+      "8": {
+        "type": "normal",
+        "budget": 10
+      },
+      "9": {
+        "type": "wave",
+        "wave_type": "final",
+        "budget": 40
+      }
+    }
   }
 }

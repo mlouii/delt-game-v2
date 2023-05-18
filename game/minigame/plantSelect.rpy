@@ -174,6 +174,20 @@ init python:
           if self.y_location < self.target_y:
             self.snap_to_target()
 
+        if self.x_distance > 0:
+          if self.x_location > self.target_x:
+            self.snap_to_target()
+        else:
+          if self.x_location < self.target_x:
+            self.snap_to_target()
+
+    def update_selected(self, new_slot_x, new_slot_y):
+      self.target_x = new_slot_x
+      self.target_y = new_slot_y
+      self.is_moving = True
+      self.x_distance = self.target_x - self.x_location
+      self.y_distance = self.target_y - self.y_location
+
   class AlamancEntry():
     def __init__(self, x_location, y_location, config_data, image_data):
       self.x_location = x_location
@@ -377,6 +391,9 @@ init python:
     def get_chosen_plants(self):
       return self.chosen_plants
 
+    def card_to_chosen_idx(self, card):
+      return self.chosen_plants.index(card.plant_name)
+
     def process_click(self):
       if self.warning.is_active:
         self.warning.process_click(self.mouseX, self.mouseY)
@@ -397,7 +414,12 @@ init python:
           if plant.already_selected:
             self.chosen_plants.append(plant.plant_name)
           else:
+            idx = self.chosen_plants.index(plant.plant_name)
+            plant_names_to_move = self.chosen_plants[idx+1:]
             self.chosen_plants.remove(plant.plant_name)
+            seed_cards_to_move = [card for card in self.seed_choices if card.plant_name in plant_names_to_move]
+            for card in seed_cards_to_move:
+              card.update_selected(self.selected_start_x + (self.card_to_chosen_idx(card) * 150), self.selected_start_y)
           return True
 
       return False

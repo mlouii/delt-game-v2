@@ -14,6 +14,7 @@ init python:
   import itertools
   import math
   import time
+  import random
 
 
   def plant_name_to_plant(tile, lane, plant_type, gui_controller):
@@ -84,7 +85,10 @@ init python:
       return self.explosions[explosion_type]
 
     def get_level_config(self, level_name):
-      return self.levels[level_name]
+      area_dict = self.levels["areas"][self.levels[level_name]["area"]]
+      toRet = self.levels[level_name].copy()
+      toRet.update(area_dict)
+      return toRet
 
     def get_zombie_config(self, zombie_type):
       return self.zombies[zombie_type]
@@ -1707,6 +1711,9 @@ init python:
     def get_zombies(self):
       return self.zombies
 
+    def has_zombies(self):
+      return len(self.zombies) > 0
+
     def check_collisions(self):
       for zombie in self.zombies:
         for plant in self.plants:
@@ -1760,6 +1767,12 @@ init python:
 
     def remove_zombie(self, lane_index, zombie):
         self.lanes[lane_index].remove_zombie(zombie)
+
+    def has_zombies(self):
+      for lane in self.lanes:
+        if lane.has_zombies():
+          return True
+      return False
 
     def get_all_zombies(self):
       zombies = []
@@ -2142,10 +2155,17 @@ init python:
       render.place(cost_text, x = 50, y = 100)
 
       if self.notification_message:
-        notification_background = Solid((255, 255, 255, 180), xsize=(len(self.notification_message) * 23), ysize=110)
-        render.place(notification_background, x = 680, y = 870)
+        notification_background = Solid((255, 255, 255, 180), xsize=(len(self.notification_message) * 25), ysize=110)
+        # center the notification background in the x axis
+        render.place(notification_background, x = int((1900/2) - (len(self.notification_message) * 25)/2), y = 870)
         notification_text = Text(self.notification_message, size = 40)
-        render.place(notification_text, x = 700, y = 900)
+        render.place(notification_text, x = int((1900/2) - (len(self.notification_message) * 25)/2) + 20, y = 900)
+
+      if self.wave_message:
+        notification_background = Solid((255, 255, 255, 180), xsize=(len(self.wave_message) * 30), ysize=110)
+        render.place(notification_background, x = int((1900/2) - (len(self.wave_message) * 25)/2), y = 470)
+        notification_text = Text(self.wave_message, size = 40, bold = True, color = (255, 0, 0))
+        render.place(notification_text, x = int((1900/2) - (len(self.wave_message) * 25)/2) + 20, y = 500)
 
       if self.is_targeting and not self.targeted_location_x:
         render.place(self.targeting_image, x = state["mouseX"] - 65, y = state["mouseY"] - 40)
@@ -2195,7 +2215,7 @@ init python:
       self.suns.append(Sun(x, y, target_y, from_sky))
 
     def update(self, state):
-      if time.time() - self.last_sun_timer > 100:
+      if time.time() - self.last_sun_timer > 10:
         self.last_sun_timer = time.time()
         self.add_sun(renpy.random.randint(300, 1300), 150, renpy.random.randint(600, 900), True)
 
@@ -2211,7 +2231,7 @@ init python:
         sun.update(state)
         if sun.is_dead:
           if sun.is_collected:
-            state["sun_amount"] += 25
+            state["sun_amount"] += 50
           self.suns.remove(sun)
 
       for plant_seed_card in self.plant_seed_cards:
@@ -2222,6 +2242,136 @@ init python:
           self.target_markers.remove(target_marker)
 
       return state
+
+  class BufferedZombie():
+    def __init__(self, zombie_spawner, zombie_type, lane, spawn_time):
+      self.zombie_spawner = zombie_spawner
+      self.zombie_type = zombie_type
+      self.lane = lane
+      self.spawn_time = spawn_time
+      self.should_delete = False
+
+    def update(self):
+      if time.time() - self.spawn_time >= 0:
+        self.spawn()
+        self.should_delete = True
+
+    def spawn(self):
+      zombie = Zombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
+      if self.zombie_type in  ["basic", "dog", "conehead", "buckethead", "shield_bearer"] :
+        zombie = BasicZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
+        if self.zombie_type == "shield_bearer":
+          lane.add_zombie(zombie)
+          shield = Shield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane, zombie)
+          zombie = shield
+      if self.zombie_type == "van":
+        zombie = VanZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
+      if self.zombie_type == "kinetic":
+        zombie = KineticZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
+      self.lane.add_zombie(zombie)
+
+  class ZombieSpawner():
+    def __init__(self, level_config, lanes):
+      self.start_time = time.time()
+      self.level_config = level_config
+      self.lanes = lanes
+      self.spent_per_lane = [0,0,0,0,0]
+      self.displayed_probs = [0,0,0,0,0]
+      self.interval = 0
+      self.max_interval = self.level_config["spawn"]["intervals"]
+      self.has_finished = False
+
+      self.buffered_zombies = []
+      self.spawn_x_location = 1600
+
+    def reset(self):
+      self.start_time = time.time()
+      self.interval = 0
+      self.buffered_zombies = []
+      
+    def calculate_interval(self):
+      initial_delay = self.level_config["spawn"]["initial_delay"]
+      seconds_elapsed = time.time() - self.start_time
+      if seconds_elapsed < initial_delay:
+        return 0
+      interval = int((seconds_elapsed - initial_delay)/20) + 1
+      if interval >= self.max_interval:
+        self.has_finished = True
+        return self.max_interval
+      return int((seconds_elapsed - initial_delay)/20) + 1
+
+    def prepare_zombie_interval(self):
+      current_time = time.time()
+      interval_config = self.level_config["spawn"][str(self.interval)]
+      zombie_types = self.level_config["spawn"]["probabilities"]
+      budget = interval_config["budget"]
+      zombies_to_spawn = []
+      remaining_budget = budget
+      while remaining_budget > 0:
+
+        can_afford = []
+        weights = []
+        for zombie in zombie_types.keys():
+          if config_data.get_zombie_config(zombie)["cost"] <= remaining_budget and ("max_cost" not in interval_config or config_data.get_zombie_config(zombie)["cost"] <= interval_config["max_cost"]):
+            can_afford.append(zombie)
+            weights.append(zombie_types[zombie])
+        if len(can_afford) == 0:
+          break
+        zombie = random.choices(can_afford, weights=weights, k=1)[0]
+        zombie_cost = config_data.get_zombie_config(zombie)["cost"]
+        zombies_to_spawn.append(zombie)
+        remaining_budget -= zombie_cost
+      
+      spawn_delay = 20 / len(zombies_to_spawn)
+      if interval_config["type"] == "wave":
+        spawn_delay /= 4
+        if interval_config["wave_type"] == "huge":
+          self.lanes.gui_controller.dispay_wave_message("A Huge wave of opps is approaching!")
+        else:
+          self.lanes.gui_controller.dispay_wave_message("Final Wave!")
+
+      for i, zombie in enumerate(zombies_to_spawn):
+        # Adding a small constant to prevent division by zero
+        adjusted_spent_per_lane = [spent + 0.01 for spent in self.spent_per_lane]
+        total_spent = sum(adjusted_spent_per_lane)
+
+        # Using the inverse of spending to calculate probabilities
+        probabilities = [1/(spent**2) for spent in adjusted_spent_per_lane]
+        probabilities = [prob/sum(probabilities) for prob in probabilities]  # normalize probabilities
+        self.displayed_probs = probabilities
+
+        lane = random.choices(range(len(self.spent_per_lane)), weights=probabilities, k=1)[0]
+        self.spent_per_lane[lane] += config_data.get_zombie_config(zombie)["cost"]
+        spawn_time = current_time + (i + 1) * spawn_delay
+        self.buffered_zombies.append(BufferedZombie(self, zombie, self.lanes.lanes[lane], spawn_time))
+
+        # delete this later
+        probabilities = [1/(spent**2) for spent in adjusted_spent_per_lane]
+        probabilities = [prob/sum(probabilities) for prob in probabilities]  # normalize probabilities
+        self.displayed_probs = probabilities
+
+      
+    def check_interval(self):
+      interval = self.calculate_interval()
+      if interval > self.interval:
+        self.interval = interval
+        self.prepare_zombie_interval()
+
+
+    def update(self):
+      for buffered_zombie in self.buffered_zombies:
+        buffered_zombie.update()
+
+      self.buffered_zombies = [buffered_zombie for buffered_zombie in self.buffered_zombies if not buffered_zombie.should_delete]
+      self.check_interval()
+
+    def render(self, render):
+      interval_text = Text((str(self.interval) + "-" + ",".join(str(item) for item in self.spent_per_lane)), size = 30)
+      render.place(interval_text, x = 1500, y = 100)
+
+      probability_text = Text((",".join(str(round(item, 2)) for item in self.displayed_probs)), size = 30)
+      render.place(probability_text, x = 1200, y = 170)
+      return render
 
 
   class PvzGameDisplayable(renpy.Displayable):
@@ -2246,13 +2396,15 @@ init python:
       self.plant_seed_slot_selected = None
       self.is_targeting = False
       self.is_shovelling = False
-      self.sun_amount = 5000
+      self.sun_amount = 50
+
+      self.final_outcome = None
 
       self.last_time = time.time()
 
       self.loaded_plants = loaded_plants
 
-      all_images.load_zombies(["basic", "dog", "kinetic", "van", "conehead", "buckethead", "shield_bearer", "shield"])
+      all_images.load_zombies(self.level_config["zombies"])
       all_images.load_plants(self.loaded_plants)
       all_images.load_explosions()
       all_images.load_gui()
@@ -2266,14 +2418,7 @@ init python:
       self.lanes.set_gui_controller(self.gui_controller)
       self.gui_controller.explosion_controller = self.explosion_controller
 
-      for _ in range(5):
-        self.lanes.randomly_add_zombie("buckethead")
-        self.lanes.randomly_add_zombie("conehead")
-        self.lanes.randomly_add_zombie("dog")
-        self.lanes.randomly_add_zombie("basic")
-        self.lanes.randomly_add_zombie("shield_bearer")
-        self.lanes.randomly_add_zombie("kinetic")
-        self.lanes.randomly_add_zombie("van")
+      self.zombie_spawner = ZombieSpawner(self.level_config, self.lanes)
 
     def visit(self):
       return self.environment.visit()
@@ -2300,8 +2445,6 @@ init python:
 
     def process_click(self):
       current_state = self.make_state()
-      # self.has_ended = True
-      # self.explosion_controller.add_explosion(self.mouseX, self.mouseY, "hellfire")
       current_state = self.gui_controller.process_click(current_state)
 
       if self.gui_controller.is_targeting:
@@ -2349,11 +2492,21 @@ init python:
 
       self.alter_state(current_state)
 
-        
+    def check_end(self):
+      all_zombies = self.lanes.get_all_zombies()
+      for zombie in all_zombies:
+        if zombie.x_location < 150:
+          self.has_ended = True
+          self.gui_controller.dispay_wave_message("You lost!")
+          return "Lost"
+
+      if self.zombie_spawner.has_finished:
+        if len(all_zombies) == 0:
+          self.has_ended = True
+          self.gui_controller.dispay_wave_message("You won!")
+          return "Won"
 
     def render(self, width, height, st, at):
-      if self.has_ended:
-        return None
       global delta_time
       current_time = time.time()
       delta_time = (current_time - self.last_time)
@@ -2363,7 +2516,9 @@ init python:
       self.environment.update(current_state)
       self.lanes.update()
       self.explosion_controller.update()
+      self.zombie_spawner.update()
       new_state = self.gui_controller.update(state=current_state)
+      self.final_outcome = self.check_end()
       self.alter_state(new_state)
 
       r = renpy.Render(width, height)
@@ -2371,6 +2526,7 @@ init python:
       r = self.lanes.render(r)
       r = self.explosion_controller.render(r)
       r = self.gui_controller.render(r, new_state)
+      r = self.zombie_spawner.render(r)
 
       # r.place(text, x = current_state["mouseX"], y = current_state["mouseY"])
 
@@ -2386,36 +2542,20 @@ init python:
         self.process_click()
 
       if self.has_ended:
-        return True
+        return self.final_outcome
 
       # send_to_file("logz.txt", str(self.mouseX) + " " + str(self.mouseY) + "\n")
     
 screen pvz_game_menu():
   modal True
-
-  frame:
-    xalign 0.5
-    yalign 0.5
-    xsize 400
-    ysize 400
-
-    vbox:
-      text "This is a test of the elements of the game menu screen."
-      label "Game Menu" xalign 0.5
-      label "Lets give it a shot" xalign 0.5
-      text "This is a test of the elements of the game menu screen."
-
   $ game = PvzGameDisplayable(1, chosen_plants)
   add game
-
-  if game.has_ended:
-    timer 0.1 action Return(True)
 
 label test_game_entry_label:
   window hide
   $ quick_menu = False
   $ _game_menu_screen = None
-  $ renpy.call_screen(_screen_name='pvz_game_menu')
+  $ level_outcome = renpy.call_screen(_screen_name='pvz_game_menu')
   $ quick_menu = True
 
 

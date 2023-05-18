@@ -7,6 +7,7 @@ define e = Character("Eileen")
 
 init python:
     global selected_plants
+    global level_outcome
 
 
 
@@ -28,13 +29,15 @@ label start:
 
     e "waaa"
 
-    # $ chosen_plants = ["jacob"]
+    # $ chosen_plants = ["jacob", "pranav"]
 
-    # $ text = "You chose " + ", ".join(chosen_plants) + "."
+    $ text = "You chose " + ", ".join(chosen_plants) + "."
     # $ type_text = "the type of chosen_plants is " + str(type(chosen_plants)) + "."
-    # e "hey [text]"
+    e "hey [text]"
 
-    e "goddamn i love dudes"
+    # e "goddamn i love dudes"
+
+    # $ level_outcome = "undefined"
 
     call test_game_entry_label
 
@@ -46,7 +49,7 @@ label start:
 
     # These display lines of dialogue.
 
-    e "You've created a new Ren'Py game."
+    e "Lol I heard that you [level_outcome]"
 
     e "Once you add a story, pictures, and music, you can release it to the world!"
 
