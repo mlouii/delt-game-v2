@@ -17,7 +17,7 @@ init python:
     file_handle.close()
     return json.loads(file_contents)
 
-  def convert_to_2d_list(lst):
+  def convert_to_2d_list(lst, n=4):
     result = []
     sublist = []
     for i, item in enumerate(lst, 1):
@@ -44,13 +44,18 @@ init python:
       self.level_config = load_json_from_file(path=JSON_DIR + "levels.json")
       self.level = level
       self.plant_show_order = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
+      self.zombie_show_order = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "van"]
       self.plant_config = load_json_from_file(path=JSON_DIR + "plants.json")
+      self.zombie_config = load_json_from_file(path=JSON_DIR + "zombies.json")
 
     def get_plant_config(self, plant_name):
       return self.plant_config[plant_name]
 
     def get_plant_image_config(self, plant_name):
       return self.plant_config["image_data"][plant_name]
+
+    def get_zombie_config(self, zombie_name):
+      return self.zombie_config[zombie_name]
 
     def get_level_config(self):
       return self.level_config[self.level]
@@ -60,8 +65,11 @@ init python:
       self.config_data = config_loader
       self.images = {}
       self.load_plant_images()
+      self.load_zombie_images()
       self.images["sun"] = im.FactorScale(Image(IMG_DIR + "gui/" + "sun" + ".png"), 0.75)
       self.images["select-background"] = im.FactorScale(Image(IMG_DIR + "gui/" + "select-background" + ".png"), 1)
+      self.images["locked-zombie"] = im.FactorScale(Image(IMG_DIR + "gui/" + "locked-zombie" + ".png"), 0.5)
+      self.images["not-today"] = im.FactorScale(Image(IMG_DIR + "gui/" + "not-today" + ".png"), 0.5)
 
 
     def load_plant_images(self):
@@ -71,7 +79,42 @@ init python:
         resize_factor = self.config_data.get_plant_image_config(plant_name)["resize_factor"]
         image_prefix = config_data.get_plant_image_config(plant_name)["image_prefix"]
         self.images[plant_name] = im.FactorScale(Image(plant_location + "/" + image_prefix + "-0" + ".png"), resize_factor)
-        self.images[plant_name + "locked"] = im.MatrixColor(self.images[plant_name], im.matrix.brightness(-1))      
+        self.images[plant_name + "locked"] = im.MatrixColor(self.images[plant_name], im.matrix.brightness(-1))
+
+    def load_zombie_images(self):
+      for zombie_name in self.config_data.zombie_show_order:
+        zombie_location = IMG_DIR + "zombies/" + zombie_name
+        self.images[zombie_name] = im.FactorScale(Image(zombie_location + "/" + zombie_name + ".png"), 0.5)   
+
+  class ZombieCard_Select():
+    def __init__(self, zombie_name, x, y, is_locked, is_today, config_data, image_data, zombie_almanac):
+      self.zombie_name = zombie_name
+      self.x_location = x
+      self.y_location = y
+      self.is_locked = is_locked
+      self.is_today = is_today
+      self.config_data = config_data
+      self.image_data = image_data
+      self.zombie_almanac = zombie_almanac
+
+      self.width = 130
+      self.height = 170
+
+      self.image = self.image_data.images["locked-zombie"]
+      if not self.is_locked:
+        self.image = self.image_data.images[self.zombie_name]
+
+    def process_click(self, x, y):
+      if x > self.x_location and x < self.x_location + self.width and y > self.y_location and y < self.y_location + self.height:
+        self.zombie_almanac.load_zombie(self.zombie_name)
+        return True
+      return False
+
+    def render(self, render):
+      render.place(self.image, x = self.x_location, y = self.y_location)
+      if not self.is_today and not self.is_locked:
+        render.place(self.image_data.images["not-today"], x = self.x_location, y = self.y_location)
+      return render
 
   class PlantSeedCard_Select():
     def __init__(self, plant_name, x, y, is_locked, config_data, image_data, almanac):
@@ -188,7 +231,66 @@ init python:
       self.x_distance = self.target_x - self.x_location
       self.y_distance = self.target_y - self.y_location
 
-  class AlamancEntry():
+  class ZombieAlamanac():
+    def __init__(self, x_location, y_location, config_data, image_data):
+      self.x_location = x_location
+      self.y_location = y_location
+      self.width = 1000
+      self.height = 550
+      self.background_solid = Solid((50, 252, 104), xsize=self.width, ysize=self.height)
+      self.config_data = config_data
+      self.image_data = image_data
+
+      self.zombie_name = None
+      self.image = None
+
+      self.text_offset = 300
+
+    def load_zombie(self, zombie_name):
+      self.zombie_name = zombie_name
+
+    def add_newlines(self, text, line_length):
+      words = text.split()
+      lines = []
+      current_line = ""
+
+      for word in words:
+          if len(current_line) + len(word) <= line_length:
+              current_line += word + " "
+          else:
+              lines.append(current_line.rstrip())
+              current_line = word + " "
+
+      lines.append(current_line.rstrip())
+
+      return "\n".join(lines)
+
+    def render(self, render):
+      almanac = self.config_data.get_zombie_config(self.zombie_name)["almanac"]
+      render.place(self.background_solid, x = self.x_location, y = self.y_location)
+
+      image = im.FactorScale(self.image_data.images[self.zombie_name], 2)
+      render.place(image, x = self.x_location+50, y = self.y_location+50)
+
+      name_text = Text(almanac["almanac_name"], size = 50, underline=True)
+      render.place(name_text, x = self.x_location+self.text_offset, y = self.y_location+50)
+      description_text = Text(self.add_newlines(almanac["description"], 60), size = 20)
+      render.place(description_text, x = self.x_location+self.text_offset, y = self.y_location+120)
+
+      param_counter = 1
+      #iterate through keys and values in alamanc
+      for key, value in almanac.items():
+        if key not in ["almanac_name", "description"]:
+          key_text = Text(key.capitalize(), size = 20, bold = True)
+          value_text = Text(self.add_newlines(value, 30), size = 20)
+          render.place(key_text, x = self.x_location+self.text_offset, y = self.y_location+150+(param_counter*30))
+          render.place(value_text, x = self.x_location+self.text_offset+200, y = self.y_location+150+(param_counter*30))
+          param_counter += 1
+      return render
+
+
+
+  class AlmanacEntry():
     def __init__(self, x_location, y_location, config_data, image_data):
       self.x_location = x_location
       self.y_location = y_location
@@ -302,28 +404,34 @@ init python:
 
 
   class PlantSelectDisplayable(renpy.Displayable):
-    def __init__(self, unlocked_plants):
+    def __init__(self, unlocked_plants, num_seed_slots, seen_zombies, level):
       renpy.play(AUDIO_DIR + "choose-your-seeds.mp3", channel = "music")
       super(PlantSelectDisplayable, self).__init__()
       self.unlocked_plants = unlocked_plants
-      self.max_slots = min(6, len(self.unlocked_plants))
+      self.seen_zombies = seen_zombies
+      self.level = level
+      self.max_slots = min(num_seed_slots, len(self.unlocked_plants))
       self.has_ended = False
       self.chosen_plants = []
 
       self.finish_button_background = Solid((255, 50, 50, 255), xsize=500, ysize=100)
       self.finish_text = Text("OKAY IM DONE", size=45, color=(255, 255, 255, 255))
 
+      self.switch_to_zombie_background = Solid((35, 235, 85, 255), xsize=500, ysize=100)
+      self.switch_to_zombie_text = Text("WHO MY OPPS?", size=45, color=(255, 255, 255, 255))
+
       self.config_data = ConfigLoader_Select(1)
       self.image_data = ImageLoader_Select(self.config_data)
 
       self.render_order_plants = convert_to_2d_list(self.config_data.plant_show_order)
+      self.render_order_zombies = convert_to_2d_list(self.config_data.zombie_show_order)
 
       self.seed_select_start_x = 100
       self.seed_select_start_y = 350
 
       self.selected_start_x = 100
       self.selected_start_y = 50
-      self.alamac = AlamancEntry(800, 330, self.config_data, self.image_data)
+      self.alamac = AlmanacEntry(800, 330, self.config_data, self.image_data)
       self.seed_choices = []
       for i, row in enumerate(self.render_order_plants):
         for j, plant_name in enumerate(row):
@@ -335,6 +443,24 @@ init python:
       self.mouseX = 0
       self.mouseY = 0
       self.warning = WarningDisplay(self)
+
+      self.level_config = load_json_from_file(path=JSON_DIR + "levels.json")["level1"]
+      self.level_zombies = self.level_config["zombies"]
+      self.is_on_zombie_page = False
+
+      self.zombie_almanac = ZombieAlamanac(800, 330, self.config_data, self.image_data)
+      self.zombie_almanac.load_zombie("basic")
+      self.zombie_cards = []
+      for i, row in enumerate(self.render_order_zombies):
+        for j, zombie_name in enumerate(row):
+          is_locked = True
+          if zombie_name in self.seen_zombies:
+            is_locked = False
+          is_today = False
+          if zombie_name in self.level_zombies:
+            is_today = True
+          self.zombie_cards.append(ZombieCard_Select(zombie_name, self.seed_select_start_x+(j*150), self.seed_select_start_y+(i*200), is_locked,is_today, self.config_data, self.image_data, self.zombie_almanac))
+      
 
     def event(self, ev, x, y, st):
       import pygame
@@ -355,33 +481,51 @@ init python:
       if self.has_ended:
         return None
       r = renpy.Render(width, height)
-
-      r.place(self.image_data.images["select-background"], x=0, y=0)
-
       self.update()
 
-      width = 150 * 4 + 40
-      height = 200 * 3 + 40
-      brown_background = Solid((139, 69, 19, 250), xsize=width, ysize=height)
-      r.place(brown_background, x=self.seed_select_start_x-20, y=self.seed_select_start_y-20)
+      if not self.is_on_zombie_page:
+        r.place(self.image_data.images["select-background"], x=0, y=0)
+        width = 150 * 4 + 40
+        height = 200 * 3 + 40
+        brown_background = Solid((139, 69, 19, 250), xsize=width, ysize=height)
+        r.place(brown_background, x=self.seed_select_start_x-20, y=self.seed_select_start_y-20)
 
-      for i in range(self.max_slots):
+        for i in range(self.max_slots):
+          light_brown_background = Solid((205, 133, 63, 250), xsize=130, ysize=170)
+          r.place(light_brown_background, x=self.selected_start_x+(i*150), y=self.selected_start_y)
+
+        for plant in self.seed_choices:
+          r.place(light_brown_background, x=plant.original_x, y=plant.original_y)
+
+        for plant in self.seed_choices:
+          r = plant.render(r)
+
+        r.place(self.finish_button_background, x=self.seed_select_start_x, y=self.seed_select_start_y+(len(self.render_order_plants)*200))
+        r.place(self.finish_text, x=self.seed_select_start_x + 50, y=self.seed_select_start_y+(len(self.render_order_plants)*200) + 30)
+        r = self.alamac.render(r)
+      else:
+        r.place(self.image_data.images["select-background"], x=0, y=0)
+        width = 150 * 4 + 40
+        height = 200 * 3 + 40
+        brown_background = Solid((139, 69, 19, 250), xsize=width, ysize=height)
         light_brown_background = Solid((205, 133, 63, 250), xsize=130, ysize=170)
-        r.place(light_brown_background, x=self.selected_start_x+(i*150), y=self.selected_start_y)
+        r.place(brown_background, x=self.seed_select_start_x-20, y=self.seed_select_start_y-20)
 
-      for plant in self.seed_choices:
-        r.place(light_brown_background, x=plant.original_x, y=plant.original_y)
+        for zombie in self.zombie_cards:
+          r.place(light_brown_background, x=zombie.x_location, y=zombie.y_location)
 
-      for plant in self.seed_choices:
-        r = plant.render(r)
+        for zombie in self.zombie_cards:
+          r = zombie.render(r)
 
-      r.place(self.finish_button_background, x=self.seed_select_start_x, y=self.seed_select_start_y+(len(self.render_order_plants)*200))
-      r.place(self.finish_text, x=self.seed_select_start_x + 50, y=self.seed_select_start_y+(len(self.render_order_plants)*200) + 30)
+        r = self.zombie_almanac.render(r)
+
+
+      r.place(self.switch_to_zombie_background, x=1400, y=950)
+      r.place(self.switch_to_zombie_text, x=1500, y=980)
 
       # mouse_text = Text("MouseX: " + str(self.mouseX) + " MouseY: " + str(self.mouseY), size=50, color=(255, 255, 255, 255))
       # r.place(mouse_text, x=self.mouseX-300, y=self.mouseY-300)
 
-      r = self.alamac.render(r)
       if self.warning.is_active:
         r = self.warning.render(r)
 
@@ -398,29 +542,44 @@ init python:
       if self.warning.is_active:
         self.warning.process_click(self.mouseX, self.mouseY)
         return True
-
-      if self.mouseX > self.seed_select_start_x and self.mouseX < self.seed_select_start_x + 500 and self.mouseY > self.seed_select_start_y+(len(self.render_order_plants)*200) and self.mouseY < self.seed_select_start_y+(len(self.render_order_plants)*200) + 100:
-        if len(self.chosen_plants) < self.max_slots:
-          self.warning.is_active = True
-        else:
-          self.has_ended = True
-          return True
-
-      for plant in self.seed_choices:
-        can_select = False
-        if len(self.chosen_plants) < 6:
-          can_select = True
-        if plant.process_click(self.mouseX, self.mouseY, self.selected_start_x + (len(self.chosen_plants) * 150), self.selected_start_y, can_select):
-          if plant.already_selected:
-            self.chosen_plants.append(plant.plant_name)
+      if not self.is_on_zombie_page: 
+        if self.mouseX > self.seed_select_start_x and self.mouseX < self.seed_select_start_x + 500 and self.mouseY > self.seed_select_start_y+(len(self.render_order_plants)*200) and self.mouseY < self.seed_select_start_y+(len(self.render_order_plants)*200) + 100:
+          if len(self.chosen_plants) < self.max_slots:
+            self.warning.is_active = True
           else:
-            idx = self.chosen_plants.index(plant.plant_name)
-            plant_names_to_move = self.chosen_plants[idx+1:]
-            self.chosen_plants.remove(plant.plant_name)
-            seed_cards_to_move = [card for card in self.seed_choices if card.plant_name in plant_names_to_move]
-            for card in seed_cards_to_move:
-              card.update_selected(self.selected_start_x + (self.card_to_chosen_idx(card) * 150), self.selected_start_y)
+            self.has_ended = True
+            return True
+
+        if self.mouseX > 1400 and self.mouseX < 1900 and self.mouseY > 950 and self.mouseY < 1050:
+          self.is_on_zombie_page = True
+          self.switch_to_zombie_text = Text("BACK TO BROTHERS", size=45, color=(255, 255, 255, 255))
           return True
+
+        for plant in self.seed_choices:
+          can_select = False
+          if len(self.chosen_plants) < self.max_slots:
+            can_select = True
+          if plant.process_click(self.mouseX, self.mouseY, self.selected_start_x + (len(self.chosen_plants) * 150), self.selected_start_y, can_select):
+            if plant.already_selected:
+              self.chosen_plants.append(plant.plant_name)
+            else:
+              idx = self.chosen_plants.index(plant.plant_name)
+              plant_names_to_move = self.chosen_plants[idx+1:]
+              self.chosen_plants.remove(plant.plant_name)
+              seed_cards_to_move = [card for card in self.seed_choices if card.plant_name in plant_names_to_move]
+              for card in seed_cards_to_move:
+                card.update_selected(self.selected_start_x + (self.card_to_chosen_idx(card) * 150), self.selected_start_y)
+            return True
+      else:
+        if self.mouseX > 1400 and self.mouseX < 1900 and self.mouseY > 950 and self.mouseY < 1050:
+          self.is_on_zombie_page = False
+          self.switch_to_zombie_text = Text("WHO MY OPPS?", size=45, color=(255, 255, 255, 255))
+          return True
+
+        for zombie in self.zombie_cards:
+          if not zombie.is_locked:
+            if zombie.process_click(self.mouseX, self.mouseY):
+              return True
 
       return False
 
@@ -431,7 +590,8 @@ init python:
 screen plant_select_menu():
   modal True
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
-  $ game = PlantSelectDisplayable(plants)
+  $ seen_zombies = ["basic", "conehead", "buckethead", "dog", "van", "shield_bearer", "kinetic"]
+  $ game = PlantSelectDisplayable(plants, 7, seen_zombies, "level1")
   add game
 
 

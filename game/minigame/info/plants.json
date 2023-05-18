@@ -227,7 +227,7 @@
     "projectile_type": "beer",
     "hitbox_distance": 10,
     "cost": 400,
-    "recharge_time": 5,
+    "recharge_time": 1,
     "almanac": {
       "almanac_name": "4.Alc Colin",
       "description": "Throws four beer bottles at a time",
@@ -246,7 +246,7 @@
     "projectile_type": "ice",
     "hitbox_distance": 10,
     "cost": 400,
-    "recharge_time": 5,
+    "recharge_time": 1,
     "almanac": {
       "almanac_name": "Smirnoff Pl-ice-sted",
       "description": "Pl-ice-sted throws smirnoff ice bottles after chugging them that deal heavy damage",

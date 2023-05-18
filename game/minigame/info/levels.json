@@ -5,7 +5,7 @@
       "dark_color": [48, 143, 69],
       "variance": [0, 7, 4],
       "num_rows": 5,
-      "num_cols": 10,
+      "num_cols": 9,
       "height_multiplier": 0.7,
       "width_multiplier": 0.7,
       "start_x": 0.15,
@@ -17,7 +17,7 @@
       "dark_color": [140, 80, 137],
       "variance": [0, 7, 4],
       "num_rows": 5,
-      "num_cols": 10,
+      "num_cols": 9,
       "height_multiplier": 0.7,
       "width_multiplier": 0.7,
       "start_x": 0.15,
@@ -29,7 +29,7 @@
       "dark_color": [194, 193, 172],
       "variance": [0, 7, 4],
       "num_rows": 5,
-      "num_cols": 10,
+      "num_cols": 9,
       "height_multiplier": 0.7,
       "width_multiplier": 0.7,
       "start_x": 0.15,
@@ -39,27 +39,30 @@
   },
 
   "level1" : {
-    "area": "area3",
-    "zombies": ["basic", "conehead", "buckethead"],
+    "area": "area1",
+    "zombies": ["basic", "van", "shield", "shield_bearer"],
     "spawn": {
       "probabilities": {
         "basic": 0.3,
-        "conehead": 0.5,
+        "van": 55.5,
         "buckethead": 0.2
       },
       "initial_delay": 3,
       "intervals": 9,
       "1": {
-        "type": "normal",
-        "budget": 2,
-        "max_cost": 1
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 20,
+        "max_cost": 20
       },
       "2": {
-        "type": "normal",
+        "type": "wave",
+        "wave_type": "huge",
         "budget": 4
       }, 
       "3": {
-        "type": "normal",
+        "type": "wave",
+        "wave_type": "huge",
         "budget": 6
       },
       "4": {
@@ -68,11 +71,13 @@
         "budget": 15
       },
       "5": {
-        "type": "normal",
+        "type": "wave",
+        "wave_type": "huge",
         "budget": 10
       },
       "6": {
-        "type": "normal",
+        "type": "wave",
+        "wave_type": "huge",
         "budget": 10
       },
       "7": {
@@ -81,7 +86,8 @@
         "budget": 20
       },
       "8": {
-        "type": "normal",
+        "type": "wave",
+        "wave_type": "huge",
         "budget": 10
       },
       "9": {

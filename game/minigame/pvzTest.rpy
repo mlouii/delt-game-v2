@@ -2261,13 +2261,13 @@ init python:
       if self.zombie_type in  ["basic", "dog", "conehead", "buckethead", "shield_bearer"] :
         zombie = BasicZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
         if self.zombie_type == "shield_bearer":
-          lane.add_zombie(zombie)
-          shield = Shield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane, zombie)
+          self.lane.add_zombie(zombie)
+          shield = Shield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane, zombie)
           zombie = shield
       if self.zombie_type == "van":
-        zombie = VanZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
+        zombie = VanZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane)
       if self.zombie_type == "kinetic":
-        zombie = KineticZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
+        zombie = KineticZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane)
       self.lane.add_zombie(zombie)
 
   class ZombieSpawner():

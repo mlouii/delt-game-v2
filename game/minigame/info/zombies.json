@@ -776,7 +776,12 @@
     "hitbox_distance": 100,
     "hitbox_width": 40,
     "speed": 0.35,
-    "cost": 1
+    "cost": 1, 
+    "almanac": {
+      "almanac_name": "Oppa Sig",
+      "description": "Normal in all aspects",
+      "toughness": "low"
+    }
   },
 
   "shield_bearer": {
@@ -791,7 +796,14 @@
     "hitbox_distance": 100,
     "hitbox_width": 40,
     "speed": 0.35,
-    "cost": 2
+    "cost": 2,
+    "almanac": {
+      "almanac_name": "Shield Bearer GF",
+      "description": "Her beer pong table is an effective shield",
+      "toughness": "low",
+      "table toughess": "high",
+      "weakness": "Hates the smell of smoke"
+    }
   },
 
   "shield": {
@@ -834,7 +846,12 @@
     "hitbox_distance": 100,
     "hitbox_width": 40,
     "speed": 0.35,
-    "cost": 2
+    "cost": 2,
+    "almanac": {
+      "almanac_name": "Conehead Oppa Sig",
+      "description": "The traffic cone makes him tougher than others",
+      "toughness": "medium"
+    }
   },
 
   "buckethead": {
@@ -855,7 +872,12 @@
     "hitbox_distance": 100,
     "hitbox_width": 40,
     "speed": 0.35,
-    "cost": 4
+    "cost": 4,
+    "almanac": {
+      "almanac_name": "Buckethead Oppa Sig",
+      "description": "His bucket makes him extremely resistant to damage",
+      "toughness": "high"
+    }
   },
 
   "dog": {
@@ -870,7 +892,13 @@
     "hitbox_distance": 100,
     "hitbox_width": 60,
     "speed": 0.8,
-    "cost": 2
+    "cost": 2,
+    "almanac": {
+      "almanac_name": "Dawg",
+      "description": "Speedy Opp that runs on all fours",
+      "toughness": "low",
+      "speed": "fast"
+    }
   },
 
   "kinetic": {
@@ -885,7 +913,13 @@
     "hitbox_distance": 100,
     "hitbox_width": 40,
     "speed": 0.35,
-    "cost": 3
+    "cost": 3,
+    "almanac": {
+      "almanac_name": "Kinetic Footwear Opp",
+      "description": "Charges up a powerful laser attack",
+      "toughness": "medium",
+      "special": "Evaporates everything in its path"
+    }
   }, 
 
   "van": {
@@ -907,6 +941,12 @@
     "hitbox_distance": 50,
     "hitbox_width": 300,
     "speed": 0.35,
-    "cost": 8
+    "cost": 10,
+    "almanac": {
+      "almanac_name": "Public Safety Van",
+      "description": "Brings the opps right to your doorstep",
+      "toughness": "very high",
+      "special": "Drops off opps when destroyed"
+    }
   }
 }
