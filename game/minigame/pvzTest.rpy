@@ -307,8 +307,11 @@ init python:
       self.distance_to_target = int(math.sqrt((self.target_x - self.x)**2 + (self.target_y - self.y)**2)) + 10
       self.angle_to_rotate = math.degrees(math.atan2(self.target_y - self.y, self.target_x - self.x))
       if self.is_tranformation:
-        self.size_1 = renpy.random.randint(25, 35)
-        self.size_2 = renpy.random.randint(40, 50)
+        self.size_1 = renpy.random.randint(5, 50)
+        self.size_2 = renpy.random.randint(70, 90)
+        opacity = renpy.random.randint(100, 140)
+        self.color = (255,255,59, opacity+50)
+        self.color_2 = (250,225,97, opacity)
       else:
         self.size_1 = renpy.random.randint(5, 7)
         self.size_2 = renpy.random.randint(10, 15)
@@ -319,13 +322,15 @@ init python:
       return False
 
     def render(self, render):
-      image_1 = Transform(Solid(self.color, xsize=self.distance_to_target, ysize=self.size_1), rotate=self.angle_to_rotate, anchor = (0, 0), transform_anchor = True)
-      image_2 = Transform(Solid(self.color_2, xsize=self.distance_to_target, ysize=self.size_2), rotate=self.angle_to_rotate, anchor = (0, 0), transform_anchor = True)
-
       if self.is_tranformation:
-        render.place(image_1, x=self.x - int(self.size_1/2), y=self.y)
-        render.place(image_2, x=self.x - int(self.size_2/2), y=self.y)
+        image_1 = Solid(self.color, xsize=self.size_1, ysize=self.distance_to_target)
+        image_2 = Solid(self.color_2, xsize=self.size_2, ysize=self.distance_to_target)
+        offset = renpy.random.randint(-10, 10)
+        render.place(image_2, x=self.x - int(self.size_2/2) + offset, y=self.y)
+        render.place(image_1, x=self.x - int(self.size_1/2) - offset, y=self.y)
       else:
+        image_1 = Transform(Solid(self.color, xsize=self.distance_to_target, ysize=self.size_1), rotate=self.angle_to_rotate, anchor = (0, 0), transform_anchor = True)
+        image_2 = Transform(Solid(self.color_2, xsize=self.distance_to_target, ysize=self.size_2), rotate=self.angle_to_rotate, anchor = (0, 0), transform_anchor = True)
         render.place(image_1, x=self.x, y=self.y + int(self.size_1))
         render.place(image_2, x=self.x, y=self.y + int(self.size_2))
       return render
@@ -1258,7 +1263,7 @@ init python:
       self.limit = None
       self.direction = None
       self.motion_type = None
-      self.angle = None
+      self.angle = 0
       self.update_motion_params(reset_angles=True)
 
       self.image = all_images.images["zombies"][self.zombie.zombie_type][self.zombie.costume][self.part_type]
@@ -1316,16 +1321,8 @@ init python:
         self.image = all_images.images["zombies"][self.zombie.zombie_type]["blackened"][self.part_type]
 
       if self.status == "attached":
-        if self.motion_type != "rotate":
-          transformed_image = Transform(self.image, rotate=self.angle, anchor = (0, 0), transform_anchor = True)
-          # Calculate the position of the transformed image
-          x_location = self.zombie.x_location + self.target_location_x - self.joint_location_x
-          y_location = self.zombie.y_location + self.target_location_y - self.joint_location_y
-          render.place(transformed_image, x=x_location, y=y_location)
-        elif(self.motion_type == "rotate"):
-          transformed_image, x_location, y_location = self.process_rotation()
-          render.place(transformed_image, x=x_location, y=y_location)
-
+        transformed_image, x_location, y_location = self.process_rotation()
+        render.place(transformed_image, x=x_location, y=y_location)
       elif self.status == "detached":
 
         costume_name = self.zombie.costume
@@ -1587,7 +1584,7 @@ init python:
     def __init__(self, x_location, y_location, lane):
       super().__init__(x_location, y_location, "neil", lane)
       self.transform_timer = time.time()
-      self.transform_interval = 30
+      self.transform_interval = 20
       self.eye_effect = None
 
       self.lanes = self.lane.lanes
@@ -1607,10 +1604,10 @@ init python:
       return eye_x, eye_y
 
     def start_transform(self):
-      self.motion_type = renpy.random.choice(self.attack_motions)
+      self.motion_type = "stay_still"
       self.update_motion()
       eye_x, eye_y = self.find_eye_location()
-      self.eye_effect = EyeEffect(eye_x, eye_y+3)
+      self.eye_effect = EyeEffect(eye_x, eye_y-5)
       self.transform_delay_timer = time.time()
     
     def transform(self):
@@ -1633,6 +1630,7 @@ init python:
         self.eye_effect = None
         self.motion_type = renpy.random.choice(config_data.get_zombie_config(self.zombie_type)["motions"])
         self.update_motion()
+        self.target_plant = None
 
     def render(self, render):
       render = super().render(render)
@@ -1666,7 +1664,7 @@ init python:
       return eye_x, eye_y
 
     def start_eating(self, plant):
-      if plant.plant_type == "jacob":
+      if plant.plant_type == "jacob" or self.pause_timer:
         return 
       self.target_plant = plant
       self.motion_type = renpy.random.choice(self.attack_motions)
@@ -1827,7 +1825,7 @@ init python:
           zombie.is_dead = True
           did_transform_anything = True
           kinetic = KineticZombie(zombie.x_location, zombie.y_location, self)
-          particleSystem.transformation(zombie.x_location+60, zombie.y_location + zombie.image_config["fall_height"])
+          particleSystem.transformation(zombie.x_location+20, zombie.y_location + zombie.image_config["fall_height"])
           self.add_zombie(kinetic)
           kinetic.pause_two_seconds()
       return did_transform_anything
