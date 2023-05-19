@@ -275,17 +275,28 @@ init python:
       return render
 
   class LaserEffect():
-    def __init__(self, x, y, target_x, target_y):
+    def __init__(self, x, y, target_x, target_y, is_tranformation=False, life=False):
       self.x = x
       self.y = y
+      self.is_tranformation = is_tranformation
       self.target_x = target_x
       self.target_y = target_y
       self.size_1 = 7
       self.size_2 = 10
+
+      self.spawn_time = time.time()
+      self.life = life
+
+      if self.is_tranformation:
+        self.size_1 = 30
+        self.size_2 = 40
+
       self.color = (255, 102, 255, 150)
       self.color_2 = (255, 102, 255, 100)
       self.size = 1
-      renpy.play(AUDIO_DIR + "zap.mp3", channel = "audio")
+
+      if not self.is_tranformation:
+        renpy.play(AUDIO_DIR + "zap.mp3", channel = "audio")
 
       self.distance_to_target = int(math.sqrt((self.target_x - self.x)**2 + (self.target_y - self.y)**2)) + 10
       self.angle_to_rotate = math.degrees(math.atan2(self.target_y - self.y, self.target_x - self.x))
@@ -295,14 +306,28 @@ init python:
       self.y = y
       self.distance_to_target = int(math.sqrt((self.target_x - self.x)**2 + (self.target_y - self.y)**2)) + 10
       self.angle_to_rotate = math.degrees(math.atan2(self.target_y - self.y, self.target_x - self.x))
-      self.size_1 = renpy.random.randint(5, 7)
-      self.size_2 = renpy.random.randint(10, 15)
+      if self.is_tranformation:
+        self.size_1 = renpy.random.randint(25, 35)
+        self.size_2 = renpy.random.randint(40, 50)
+      else:
+        self.size_1 = renpy.random.randint(5, 7)
+        self.size_2 = renpy.random.randint(10, 15)
+
+      if self.life:
+        if time.time() - self.spawn_time > self.life:
+          return True
+      return False
 
     def render(self, render):
       image_1 = Transform(Solid(self.color, xsize=self.distance_to_target, ysize=self.size_1), rotate=self.angle_to_rotate, anchor = (0, 0), transform_anchor = True)
-      render.place(image_1, x=self.x, y=self.y + int(self.size_1))
       image_2 = Transform(Solid(self.color_2, xsize=self.distance_to_target, ysize=self.size_2), rotate=self.angle_to_rotate, anchor = (0, 0), transform_anchor = True)
-      render.place(image_2, x=self.x, y=self.y + int(self.size_2))
+
+      if self.is_tranformation:
+        render.place(image_1, x=self.x - int(self.size_1/2), y=self.y)
+        render.place(image_2, x=self.x - int(self.size_2/2), y=self.y)
+      else:
+        render.place(image_1, x=self.x, y=self.y + int(self.size_1))
+        render.place(image_2, x=self.x, y=self.y + int(self.size_2))
       return render
 
 
@@ -340,6 +365,10 @@ init python:
         # x = x + renpy.random.randint(-x_variance, x_variance)
         self.particles.append(Electric_Particle(x, y, x_variance))
 
+    def transformation(self, target_x, target_y):
+      for i in range(1):
+        self.particles.append(LaserEffect(target_x, 100, target_x, target_y, is_tranformation=True, life=2))
+
     def trail(self, x, y, color, size, life):
       for i in range(1):
         size += renpy.random.randint(0, 2)
@@ -361,7 +390,12 @@ init python:
 
     def update(self):
       for particle in self.particles:
-        if particle.update():
+        result = None
+        if isinstance(particle, LaserEffect):
+          result = particle.update(particle.x, particle.y)
+        else:
+          result = particle.update()
+        if result:
           self.particles.remove(particle)
 
     def render(self, render):
@@ -1549,6 +1583,65 @@ init python:
           self.motion_type = renpy.random.choice(config_data.get_zombie_config(self.zombie_type)["motions"])
           self.update_motion()
 
+  class NeilZombie(BasicZombie):
+    def __init__(self, x_location, y_location, lane):
+      super().__init__(x_location, y_location, "neil", lane)
+      self.transform_timer = time.time()
+      self.transform_interval = 30
+      self.eye_effect = None
+
+      self.lanes = self.lane.lanes
+      self.transform_delay_timer = None
+      self.transform_delay = 2
+
+
+    def find_eye_location(self):
+      eye_x = None
+      eye_y = None
+      if len(self.body_parts) > 5:
+        eye_x = self.x_location + self.body_parts[-2].target_location_x - self.body_parts[-2].joint_location_x + (self.body_parts[-2].image_width / 5)
+        eye_y = self.y_location + self.body_parts[-2].target_location_y - self.body_parts[-2].joint_location_y + (self.body_parts[-2].image_height / 2)
+      else:
+        eye_x = self.x_location + self.body_parts[-1].target_location_x - self.body_parts[-1].joint_location_x + (self.body_parts[-1].image_width / 5)
+        eye_y = self.y_location + self.body_parts[-1].target_location_y - self.body_parts[-1].joint_location_y + (self.body_parts[-1].image_height / 2)
+      return eye_x, eye_y
+
+    def start_transform(self):
+      self.motion_type = renpy.random.choice(self.attack_motions)
+      self.update_motion()
+      eye_x, eye_y = self.find_eye_location()
+      self.eye_effect = EyeEffect(eye_x, eye_y+3)
+      self.transform_delay_timer = time.time()
+    
+    def transform(self):
+      self.lanes.transform_basic_and_conehead_to_kinetic()
+      
+    def update(self):
+      super().update()
+      if time.time() - self.transform_timer > self.transform_interval:
+        if self.lanes.has_basic_or_conehead():
+          self.transform_timer = time.time()
+          self.start_transform()
+
+      if self.eye_effect:
+        self.eye_effect.update()
+
+      if self.transform_delay_timer and time.time() - self.transform_delay_timer > self.transform_delay:
+        self.transform_delay_timer = None
+        self.transform()
+        self.eye_effect.stop_growth = True
+        self.eye_effect = None
+        self.motion_type = renpy.random.choice(config_data.get_zombie_config(self.zombie_type)["motions"])
+        self.update_motion()
+
+    def render(self, render):
+      render = super().render(render)
+      if self.eye_effect:
+        render = self.eye_effect.render(render)
+      return render
+
+      
+
   class KineticZombie(Zombie):
     def __init__(self, x_location, y_location, lane):
       super().__init__(x_location, y_location, "kinetic", lane)
@@ -1558,6 +1651,8 @@ init python:
       self.laser_effect = None
 
       self.electricity_sound_timer = time.time()
+
+      self.pause_timer = None
 
     def find_eye_location(self):
       eye_x = None
@@ -1596,6 +1691,11 @@ init python:
         if self.target_plant.is_dead:
           self.target_plant = None
           self.post_kill_timer = time.time()
+
+    def pause_two_seconds(self):
+      self.motion_type = renpy.random.choice(self.attack_motions)
+      self.update_motion()
+      self.pause_timer = time.time()
     
     def render(self, render):
       render = super().render(render)
@@ -1624,6 +1724,11 @@ init python:
         self.eye_effect.update()
       if self.laser_effect:
         self.laser_effect.update(eye_x, eye_y)
+
+      if self.pause_timer and time.time() - self.pause_timer > 2:
+        self.pause_timer = None
+        self.motion_type = renpy.random.choice(config_data.get_zombie_config(self.zombie_type)["motions"])
+        self.update_motion()
 
       if self.post_kill_timer and time.time() - self.post_kill_timer > 1.5:
         self.motion_type = renpy.random.choice(config_data.get_zombie_config(self.zombie_type)["motions"])
@@ -1674,8 +1779,10 @@ init python:
 
 
 
+
+
   class Lane():
-    def __init__(self, id):
+    def __init__(self, id, lanes):
       self.id = id
       self.y_location = None
       self.target_location_y = None
@@ -1683,6 +1790,7 @@ init python:
       self.plants = []
       self.zombies = []
       self.projectiles = []
+      self.lanes = lanes
 
     def populate_tiles(self, tiles):
       self.tiles = tiles
@@ -1710,6 +1818,20 @@ init python:
 
     def get_zombies(self):
       return self.zombies
+
+    def transform_basic_and_conehead_to_kinetic(self):
+      did_transform_anything = False
+      for zombie in self.zombies:
+        if zombie.zombie_type in ["basic", "conehead"]:
+          zombie.should_delete = True
+          zombie.is_dead = True
+          did_transform_anything = True
+          kinetic = KineticZombie(zombie.x_location, zombie.y_location, self)
+          particleSystem.transformation(zombie.x_location+60, zombie.y_location + zombie.image_config["fall_height"])
+          self.add_zombie(kinetic)
+          kinetic.pause_two_seconds()
+      return did_transform_anything
+
 
     def has_zombies(self):
       return len(self.zombies) > 0
@@ -1743,7 +1865,7 @@ init python:
 
   class Lanes:
     def __init__(self, num_lanes):
-        self.lanes = [Lane(i) for i in range(num_lanes)]
+        self.lanes = [Lane(i, self) for i in range(num_lanes)]
         self.gui_controller = None
 
     def set_gui_controller(self, gui_controller):
@@ -1767,6 +1889,21 @@ init python:
 
     def remove_zombie(self, lane_index, zombie):
         self.lanes[lane_index].remove_zombie(zombie)
+
+    def has_basic_or_conehead(self):
+      for lane in self.lanes:
+        for zombie in lane.zombies:
+          if zombie.zombie_type in ["basic", "conehead"]:
+            return True
+      return False
+
+    def transform_basic_and_conehead_to_kinetic(self):
+      did_transform_anything = False
+      for lane in self.lanes:
+        did_transform_anything = lane.transform_basic_and_conehead_to_kinetic() or did_transform_anything
+      
+      if did_transform_anything:
+        renpy.play(AUDIO_DIR + "transformation.mp3", channel = "audio")
 
     def has_zombies(self):
       for lane in self.lanes:
@@ -2268,6 +2405,8 @@ init python:
         zombie = VanZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane)
       if self.zombie_type == "kinetic":
         zombie = KineticZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane)
+      if self.zombie_type == "neil":
+        zombie = NeilZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane)
       self.lane.add_zombie(zombie)
 
   class ZombieSpawner():

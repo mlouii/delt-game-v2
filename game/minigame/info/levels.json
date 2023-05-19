@@ -40,19 +40,18 @@
 
   "level1" : {
     "area": "area1",
-    "zombies": ["basic", "van", "shield", "shield_bearer"],
+    "zombies": ["basic", "neil", "shield", "shield_bearer", "kinetic"],
     "spawn": {
       "probabilities": {
         "basic": 0.3,
-        "van": 55.5,
-        "buckethead": 0.2
+        "neil": 0.1
       },
-      "initial_delay": 3,
+      "initial_delay": 1,
       "intervals": 9,
       "1": {
-        "type": "wave",
+        "type": "normal",
         "wave_type": "huge",
-        "budget": 20,
+        "budget": 10,
         "max_cost": 20
       },
       "2": {
