@@ -240,16 +240,24 @@ init python:
       return super().render(render)
 
   class EyeEffect():
-    def __init__(self, x, y):
+    def __init__(self, x, y, is_tranformation=False):
       self.x = x
       self.y = y
       self.color_1 = (255, 102, 255, 150)
       self.color_2 = (255, 102, 255, 100)
+      self.size_limit = 5
+
+      if is_tranformation:
+        self.color_1 = (255,255,59, 150)
+        self.color_2 = (250,225,97, 100)
+
       self.size_1 = 1
       self.size_2 = 2
-      self.size_limit = 5
       self.spawn_time = time.time()
-      renpy.play(AUDIO_DIR + "charge.mp3", channel = "audio")
+      if not is_tranformation:
+        renpy.play(AUDIO_DIR + "charge.mp3", channel = "audio")
+      else:
+        renpy.play(AUDIO_DIR + "neil-roar.mp3", channel = "audio")
       self.stop_growth = False
 
     def calculate_placement_location(self, target_x, target_y, size):
@@ -349,6 +357,9 @@ init python:
         direction = 1.5 * math.pi
         x = x + renpy.random.randint(-x_variance, x_variance)
         self.particles.append(Particle(x, y, color, 6, y_size, speed, direction, 1, False))
+
+    def clear(self):
+      self.particles = []
 
     def explosion(self, x, y):
       for i in range(20):
@@ -1589,7 +1600,7 @@ init python:
 
       self.lanes = self.lane.lanes
       self.transform_delay_timer = None
-      self.transform_delay = 2
+      self.transform_delay = 2.5
 
 
     def find_eye_location(self):
@@ -1607,7 +1618,7 @@ init python:
       self.motion_type = "stay_still"
       self.update_motion()
       eye_x, eye_y = self.find_eye_location()
-      self.eye_effect = EyeEffect(eye_x, eye_y-5)
+      self.eye_effect = EyeEffect(eye_x, eye_y-5, is_tranformation=True)
       self.transform_delay_timer = time.time()
     
     def transform(self):
@@ -2548,6 +2559,7 @@ init python:
       config_data = ConfigLoader(level_config, zombie_config, plant_config, projectile_config, explosion_config)
 
       self.has_ended = False
+      particleSystem.clear()
 
       self.level_config = config_data.get_level_config(level)
 
