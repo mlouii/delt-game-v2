@@ -45,7 +45,8 @@
       "probabilities": {
         "kanishk": 0.3,
         "basic": 0.5,
-        "neil": 0.3
+        "neil": 0.1,
+        "shield_bearer": 0.2
       },
       "initial_delay": 10,
       "intervals": 9,

@@ -1657,7 +1657,7 @@ init python:
 
     def render(self, render):
       render = super().render(render)
-      if self.eye_effect:
+      if self.eye_effect and not self.is_dead:
         render = self.eye_effect.render(render)
       return render
 
@@ -1697,7 +1697,7 @@ init python:
         plant_image = all_images.images["plants"][self.target_steal_plant.plant_type]["animation"]["default"][0]
         render.place(plant_image, x = self.x_location-self.target_steal_plant.plant_image_config["width"]-40, y = self.y_location)
       else:
-        if self.target_steal_plant:
+        if self.target_steal_plant and not self.is_dead:
           target_image = all_images.images["gui"]["evil"]
           render.place(target_image, x = self.target_steal_plant.tile.target_location_x - 70, y = self.target_steal_plant.tile.target_location_y - 180)
       return render

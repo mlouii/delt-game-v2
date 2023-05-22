@@ -208,7 +208,7 @@
     "projectile_type": "smoke",
     "hitbox_distance": 10,
     "cost": 100,
-    "recharge_time": 5,
+    "recharge_time": 1,
     "almanac": {
       "almanac_name": "Green Luis Haze",
       "description": "Luis blows smoke that can pass through tables and opps",
@@ -264,7 +264,7 @@
     "spawn_projectile": true,
     "projectile_type": "icicle",
     "hitbox_distance": 10,
-    "cost": 200,
+    "cost": 250,
     "recharge_time": 1,
     "almanac": {
       "almanac_name": "Dripden Skinner",
