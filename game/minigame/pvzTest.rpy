@@ -1032,6 +1032,7 @@ init python:
   class Andrew(Plant):
     def __init__(self, tile, lane):
       super().__init__(tile, lane, "andrew")
+      tile.is_planted = False
       self.launch_attack()
 
     def launch_attack(self):
@@ -1680,7 +1681,6 @@ init python:
         self.target_steal_plant = copy.copy(plant)
         self.target_steal_plant.is_being_stolen = True
         plant.is_dead = True
-        plant.tile.is_plantable = True
         plant.tile.is_planted = False
         if plant.plant_type == "cobcannon":
           if plant.target_marker is not None:
@@ -1990,8 +1990,11 @@ init python:
         self.lanes[lane_index].add_plant(plant)
 
     def add_plant_tile(self, tile, plant):
+        plant_name = plant
         plant = plant_name_to_plant(tile, self.lane_id_to_lane(tile.lane_id), plant, self.gui_controller)
         self.lanes[tile.lane_id].add_plant(plant)
+        if plant_name != "andrew":
+          tile.is_planted = True
         return plant
 
     def get_all_plants(self):
@@ -2648,15 +2651,16 @@ init python:
     def render(self, render):
       # interval_text = Text((str(self.interval) + "-" + ",".join(str(item) for item in self.spent_per_lane)), size = 30)
       # render.place(interval_text, x = 1500, y = 100)
-
-      text = Text(str(time.time() - self.start_time + self.fast_forward_seconds), size = 30)
+      
+      time_elapsed = time.time() - self.start_time + self.fast_forward_seconds
+      text = Text(str(time_elapsed), size = 30)
       render.place(text, x = 1200, y = 170)
 
       render.place(self.progress_bar_background, x = 1200, y = 100)
 
       red_wave_ticks = Solid((255, 0, 0, 255), xsize=5, ysize=44)
       for wave_interval in self.wave_intervals:
-        if wave_interval >= self.interval:
+        if wave_interval > self.interval:
           render.place(red_wave_ticks, x = ((400/self.max_interval) * wave_interval) + 1200, y = 100)
 
       progress_bar_width = int((self.interval/self.max_interval) * 400)
@@ -2761,24 +2765,27 @@ init python:
           plant_on_tile = tile.get_plant_on_tile()
           if plant_on_tile:
             if plant_on_tile.plant_type == "cobcannon":
+              current_state["plant_seed_slot_selected"] = None
+              current_state["plant_selected"] = None
+              self.alter_state(current_state)
               if plant_on_tile.is_ready_to_fire:
                 plant_on_tile.prepare_missile()
                 self.gui_controller.is_targeting = True
               else:
                 self.gui_controller.display_notification("He isn't ready yet!")
-            return
+              return
 
       if self.plant_selected is not None and self.plant_seed_slot_selected is not None:
         tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
         if tile:
           if current_state["sun_amount"] >= self.plant_seed_slot_selected.plant_config["cost"] and self.plant_seed_slot_selected.is_recharge_ready:
-            if tile.plantable():
+            if not tile.is_planted:
               tile.is_planted = True
               self.lanes.add_plant_tile(tile, self.plant_selected)
               self.plant_seed_slot_selected.reset_recharge_timer()
               current_state["sun_amount"] -= self.plant_seed_slot_selected.plant_config["cost"]
             else:
-              self.gui_controller.display_notification("Can't plant there!")
+              self.gui_controller.display_notification("Can't place him there!")
         current_state["plant_seed_slot_selected"] = None
         current_state["plant_selected"] = None
 
