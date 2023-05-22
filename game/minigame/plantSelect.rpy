@@ -44,7 +44,7 @@ init python:
       self.level_config = load_json_from_file(path=JSON_DIR + "levels.json")
       self.level = level
       self.plant_show_order = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
-      self.zombie_show_order = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "van"]
+      self.zombie_show_order = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "van", "neil", "kanishk"]
       self.plant_config = load_json_from_file(path=JSON_DIR + "plants.json")
       self.zombie_config = load_json_from_file(path=JSON_DIR + "zombies.json")
 
@@ -68,6 +68,7 @@ init python:
       self.load_zombie_images()
       self.images["sun"] = im.FactorScale(Image(IMG_DIR + "gui/" + "sun" + ".png"), 0.75)
       self.images["select-background"] = im.FactorScale(Image(IMG_DIR + "gui/" + "select-background" + ".png"), 1)
+      self.images["opp-background"] = im.FactorScale(Image(IMG_DIR + "gui/" + "opp-background" + ".png"), 1)
       self.images["locked-zombie"] = im.FactorScale(Image(IMG_DIR + "gui/" + "locked-zombie" + ".png"), 0.5)
       self.images["not-today"] = im.FactorScale(Image(IMG_DIR + "gui/" + "not-today" + ".png"), 0.5)
 
@@ -504,7 +505,7 @@ init python:
         r.place(self.finish_text, x=self.seed_select_start_x + 50, y=self.seed_select_start_y+(len(self.render_order_plants)*200) + 30)
         r = self.alamac.render(r)
       else:
-        r.place(self.image_data.images["select-background"], x=0, y=0)
+        r.place(self.image_data.images["opp-background"], x=0, y=0)
         width = 150 * 4 + 40
         height = 200 * 3 + 40
         brown_background = Solid((139, 69, 19, 250), xsize=width, ysize=height)
@@ -590,7 +591,7 @@ init python:
 screen plant_select_menu():
   modal True
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
-  $ seen_zombies = ["basic", "conehead", "buckethead", "dog", "van", "shield_bearer", "kinetic"]
+  $ seen_zombies = ["basic", "conehead", "buckethead", "dog", "van", "shield_bearer", "kinetic", "neil", "kanishk"]
   $ game = PlantSelectDisplayable(plants, 7, seen_zombies, "level1")
   add game
 

@@ -15,6 +15,7 @@ init python:
   import math
   import time
   import random
+  import copy
 
 
   def plant_name_to_plant(tile, lane, plant_type, gui_controller):
@@ -427,7 +428,7 @@ init python:
 
     def load_gui(self):
       self.images["gui"] = {}
-      to_load = ["sun", "target", "hellfire", "shovel"]
+      to_load = ["sun", "target", "hellfire", "shovel", "evil"]
       for image_name in to_load:
         location = IMG_DIR + "gui/" + image_name + ".png"
         image = Image(location)
@@ -842,6 +843,7 @@ init python:
       self.health = self.plant_config["health"]
       self.animation_type = self.plant_config["animation_type"]
       self.hitbox_distance = self.plant_config["hitbox_distance"]
+      self.cost = self.plant_config["cost"]
 
       self.does_spawn_projectile = self.plant_config["spawn_projectile"]
       self.projectile_type = None
@@ -860,7 +862,14 @@ init python:
       self.x_location = self.tile.target_location_x - self.plant_image_config["joint_x"]
       self.y_location = self.tile.target_location_y - self.plant_image_config["joint_y"]
 
+      self.is_being_stolen = False
+
       renpy.play(AUDIO_DIR + "plant-planted.mp3", channel = "audio")
+
+    def set_new_tile(self, tile):
+      self.tile = tile
+      self.x_location = self.tile.target_location_x - self.plant_image_config["joint_x"]
+      self.y_location = self.tile.target_location_y - self.plant_image_config["joint_y"]
 
     def render(self, render):
       if self.costume in ["default", "damaged_default"]:
@@ -875,7 +884,8 @@ init python:
     def die(self):
       self.tile.is_planted = False
       self.is_dead = True
-      renpy.play(AUDIO_DIR + "oof.mp3", channel = "audio")
+      if not self.plant_type == "jacob":
+        renpy.play(AUDIO_DIR + "oof.mp3", channel = "audio")
 
     def damage(self, damage):
       self.health -= damage
@@ -1615,6 +1625,8 @@ init python:
       return eye_x, eye_y
 
     def start_transform(self):
+      if self.is_dead:
+        return
       self.motion_type = "stay_still"
       self.update_motion()
       eye_x, eye_y = self.find_eye_location()
@@ -1634,7 +1646,7 @@ init python:
       if self.eye_effect:
         self.eye_effect.update()
 
-      if self.transform_delay_timer and time.time() - self.transform_delay_timer > self.transform_delay:
+      if self.transform_delay_timer and time.time() - self.transform_delay_timer > self.transform_delay and not self.is_dead:
         self.transform_delay_timer = None
         self.transform()
         self.eye_effect.stop_growth = True
@@ -1649,7 +1661,88 @@ init python:
         render = self.eye_effect.render(render)
       return render
 
-      
+  class KanishkZombie(Zombie):
+    def __init__(self, x_location, y_location, lane):
+      super().__init__(x_location, y_location, "kanishk", lane)
+      self.target_steal_plant = self.lane.get_most_expensive_plant()
+      self.has_stolen_plant = False
+
+    def walk_backwards(self):
+      self.speed = self.zombie_config["speed"] * -0.5
+      self.motion_type = "walk_shield"
+      self.update_motion()
+
+    def start_eating(self, plant):
+      if not self.target_steal_plant or self.has_stolen_plant:
+        return
+      if plant.x_location == self.target_steal_plant.x_location and not self.has_stolen_plant and not self.target_steal_plant.plant_type == "jacob":
+        self.has_stolen_plant = True
+        self.target_steal_plant = copy.copy(plant)
+        self.target_steal_plant.is_being_stolen = True
+        plant.is_dead = True
+        plant.tile.is_plantable = True
+        plant.tile.is_planted = False
+        if plant.plant_type == "cobcannon":
+          if plant.target_marker is not None:
+            plant.target_marker.impacted()
+        self.walk_backwards()
+
+
+    def check_attack_plant(self):
+      pass
+
+    def render(self, render):
+      render = super().render(render)
+      if self.has_stolen_plant and self.target_steal_plant:
+        plant_image = all_images.images["plants"][self.target_steal_plant.plant_type]["animation"]["default"][0]
+        render.place(plant_image, x = self.x_location-self.target_steal_plant.plant_image_config["width"]-40, y = self.y_location)
+      else:
+        if self.target_steal_plant:
+          target_image = all_images.images["gui"]["evil"]
+          render.place(target_image, x = self.target_steal_plant.tile.target_location_x - 70, y = self.target_steal_plant.tile.target_location_y - 180)
+      return render
+
+    def die(self):
+      if self.target_steal_plant and self.has_stolen_plant:
+        new_plant_tile = self.lane.x_location_to_tile(self.x_location)
+        plant_currently_on_tile = new_plant_tile.get_plant_on_tile()
+        if plant_currently_on_tile:
+          plant_currently_on_tile.die()
+
+        new_plant = self.lane.lanes.add_plant_tile(new_plant_tile, self.target_steal_plant.plant_type)
+        new_plant.health = self.target_steal_plant.health
+        if self.target_steal_plant.plant_type == "cobcannon":
+          new_plant.is_ready_to_fire = False
+          new_plant.attack_timer = time.time()
+        self.target_steal_plant = None
+      super().die()
+
+    def does_target_plant_exist(self):
+      if self.target_steal_plant in self.lane.plants:
+        return True
+      return False
+
+    def update(self):
+      super().update()
+      if self.target_steal_plant and self.speed > 0:
+        if self.target_steal_plant.is_being_stolen or not self.does_target_plant_exist():
+          self.target_steal_plant = self.lane.get_most_expensive_plant()
+          if self.target_steal_plant and self.target_steal_plant.x_location > self.x_location:
+            self.walk_backwards()
+
+      if not self.target_steal_plant and self.x_location < 1200 and self.speed > 0:
+        self.target_steal_plant = self.lane.get_most_expensive_plant()
+        if not self.target_steal_plant:
+          self.walk_backwards()
+
+      if self.target_steal_plant and self.target_steal_plant.x_location > self.x_location:
+        self.walk_backwards()
+
+      if self.x_location > 1550 and self.speed < 0:
+        self.should_delete = True
+        self.is_dead = True
+        
+
 
   class KineticZombie(Zombie):
     def __init__(self, x_location, y_location, lane):
@@ -1708,7 +1801,7 @@ init python:
     
     def render(self, render):
       render = super().render(render)
-      if self.eye_effect:
+      if self.eye_effect and not self.is_dead:
         render = self.eye_effect.render(render)
       if self.laser_effect:
         render = self.laser_effect.render(render)
@@ -1813,6 +1906,16 @@ init python:
       else:
         return None
 
+    def get_most_expensive_plant(self):
+      plants = self.plants
+      if len(plants) > 0:
+        return max(plants, key=lambda plant: plant.cost)
+      else:
+        return None
+
+    def x_location_to_tile(self, x_location):
+      return [tile for tile in self.tiles if tile.x_location < x_location and tile.x_location + tile.width > x_location][0]
+
     def add_plant(self, plant):
       self.plants.append(plant)
 
@@ -1889,6 +1992,20 @@ init python:
     def add_plant_tile(self, tile, plant):
         plant = plant_name_to_plant(tile, self.lane_id_to_lane(tile.lane_id), plant, self.gui_controller)
         self.lanes[tile.lane_id].add_plant(plant)
+        return plant
+
+    def get_all_plants(self):
+      plants = []
+      for lane in self.lanes:
+          plants += lane.plants
+      return plants
+
+    def get_most_expensive_plant(self):
+      plants = self.get_all_plants()
+      if len(plants) > 0:
+        return max(plants, key=lambda plant: plant.cost)
+      else:
+        return None
 
     def remove_plant(self, lane_index, plant):
         self.lanes[lane_index].remove_plant(plant)
@@ -2416,6 +2533,8 @@ init python:
         zombie = KineticZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane)
       if self.zombie_type == "neil":
         zombie = NeilZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane)
+      if self.zombie_type == "kanishk":
+        zombie = KanishkZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane)
       self.lane.add_zombie(zombie)
 
   class ZombieSpawner():
@@ -2691,7 +2810,8 @@ init python:
       self.explosion_controller.update()
       self.zombie_spawner.update()
       new_state = self.gui_controller.update(state=current_state)
-      self.final_outcome = self.check_end()
+      if not self.final_outcome:
+        self.final_outcome = self.check_end()
       self.alter_state(new_state)
 
       r = renpy.Render(width, height)

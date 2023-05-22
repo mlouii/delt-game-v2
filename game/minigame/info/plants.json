@@ -265,7 +265,7 @@
     "projectile_type": "icicle",
     "hitbox_distance": 10,
     "cost": 200,
-    "recharge_time": 5,
+    "recharge_time": 1,
     "almanac": {
       "almanac_name": "Dripden Skinner",
       "description": "Skinner launches frozen ice that pierces and slows the opps",
@@ -282,7 +282,7 @@
     "spawn_projectile": false,
     "hitbox_distance": 10,
     "cost": 700,
-    "recharge_time": 20,
+    "recharge_time": 2,
     "almanac": {
       "almanac_name": "Captain Davis",
       "description": "Tap on Captain Davis to request a deadly hellfire missile strike",
@@ -297,7 +297,7 @@
     "spawn_projectile": false,
     "hitbox_distance": 10,
     "cost": 50,
-    "recharge_time": 20,
+    "recharge_time": 1,
     "almanac": {
       "almanac_name": "Mario the Stoic",
       "description": "Mario will take the pain and suffering so that you don’t have to.",
@@ -367,7 +367,7 @@
     "hitbox_distance": 10,
     "damage": 120,
     "cost": 50,
-    "recharge_time": 20,
+    "recharge_time": 1,
     "almanac": {
       "almanac_name":"Jacob Slammer",
       "description": "Single-use: Smashes the opps in a single tile",
