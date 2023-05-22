@@ -351,7 +351,7 @@
     "projectile_type": "andrew",
     "hitbox_distance": 10,
     "cost": 125,
-    "recharge_time": 20,
+    "recharge_time": 1,
     "almanac": {
       "almanac_name":"Griddy AndRizzle",
       "description": "Single-use: Hits the griddy forward on the opps",

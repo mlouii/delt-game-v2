@@ -2300,6 +2300,17 @@ init python:
 
       self.y_velocity = None
       self.x_velocity = None
+
+      self.background_size = 70
+      self.size_limits = [60, 80]
+
+      self.opacity = 150
+      self.opacity_change = -3
+      self.opacity_limits = [100, 180]
+      self.size_change = 1
+      self.background_color_yellow = (255, 255, 0, 150)
+      self.background_angle = 0
+
       if not self.from_sky:
         self.y_velocity = -8
         self.x_velocity = renpy.random.randint(-1, 1)
@@ -2345,7 +2356,45 @@ init python:
           self.is_collected = True
           self.is_dead = True
 
+      if self.size_change == 1:
+        self.background_size += 1
+        if self.background_size > self.size_limits[1]:
+          self.size_change = -1
+      else:
+        self.background_size -= 1
+        if self.background_size < self.size_limits[0]:
+          self.size_change = 1
+
+      self.opacity += self.opacity_change
+      if self.opacity > self.opacity_limits[1] or self.opacity < self.opacity_limits[0]:
+        self.opacity_change *= -1
+
+
+      self.background_angle += 1
+
+    def process_rotation(self):
+      self.background_color_yellow = (255, 255, 0, self.opacity)
+      transformed_image = Transform(Solid(self.background_color_yellow, xsize=self.background_size, ysize=self.background_size), rotate=self.background_angle, anchor = (0, 0), transform_anchor = True)
+      # Calculate the offset of the joint after rotation
+      dx = int(self.background_size /2) 
+      dy = int(self.background_size /2) 
+      current_angle = math.atan2(dy, dx)
+      new_angle = current_angle + math.radians(self.background_angle)
+
+      new_dx = dx * math.cos(math.radians(self.background_angle)) - dy * math.sin(math.radians(self.background_angle))
+      new_dy = dx * math.sin(math.radians(self.background_angle)) + dy * math.cos(math.radians(self.background_angle))
+
+      # Calculate the position of the transformed image
+      x_location = self.x - new_dx + 37
+      y_location = self.y - new_dy + 33
+      return transformed_image, x_location, y_location
+
+
     def render(self, render):
+      # rotate background and center it
+      background_image,background_x, background_y = self.process_rotation()
+      render.place(background_image, x = background_x, y = background_y)
+
       render.place(self.image, x = self.x, y = self.y)
       return render
 
@@ -2607,8 +2656,10 @@ init python:
         spawn_delay /= 4
         if interval_config["wave_type"] == "huge":
           self.lanes.gui_controller.dispay_wave_message("A Huge wave of opps is approaching!")
+          renpy.play(AUDIO_DIR + "metal-pipe.mp3", channel = "audio")
         else:
           self.lanes.gui_controller.dispay_wave_message("Final Wave!")
+          renpy.play(AUDIO_DIR + "alarm.mp3", channel = "audio")
 
       for i, zombie in enumerate(zombies_to_spawn):
         # Adding a small constant to prevent division by zero
@@ -2651,21 +2702,27 @@ init python:
     def render(self, render):
       # interval_text = Text((str(self.interval) + "-" + ",".join(str(item) for item in self.spent_per_lane)), size = 30)
       # render.place(interval_text, x = 1500, y = 100)
+
+      progress_bar_y = 70
+      progress_bar_x = 1500
       
       time_elapsed = time.time() - self.start_time + self.fast_forward_seconds
       text = Text(str(time_elapsed), size = 30)
-      render.place(text, x = 1200, y = 170)
+      render.place(text, x = progress_bar_x, y = progress_bar_y+70)
 
-      render.place(self.progress_bar_background, x = 1200, y = 100)
+      text = Text("Progress against the OPPS", size = 20)
+      render.place(text, x = progress_bar_x, y = progress_bar_y-30)
+
+      render.place(self.progress_bar_background, x = progress_bar_x, y = progress_bar_y)
 
       red_wave_ticks = Solid((255, 0, 0, 255), xsize=5, ysize=44)
       for wave_interval in self.wave_intervals:
         if wave_interval > self.interval:
-          render.place(red_wave_ticks, x = ((400/self.max_interval) * wave_interval) + 1200, y = 100)
+          render.place(red_wave_ticks, x = ((400/self.max_interval) * wave_interval) + progress_bar_x, y = progress_bar_y)
 
       progress_bar_width = int((self.interval/self.max_interval) * 400)
       progress_bar = Solid((0, 255, 0, 255), xsize=progress_bar_width, ysize=40)
-      render.place(progress_bar, x = 1202, y = 102)
+      render.place(progress_bar, x = progress_bar_x+2, y = progress_bar_y+2)
       return render
 
 
@@ -2685,6 +2742,7 @@ init python:
       particleSystem.clear()
 
       self.level_config = config_data.get_level_config(level)
+      renpy.audio.music.play(AUDIO_DIR + self.level_config["music"], channel = "music", loop = True, fadein = 1.0)
 
       self.mouseX = 0
       self.mouseY = 0
