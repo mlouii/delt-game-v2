@@ -11,7 +11,7 @@
       "start_x": 0.15,
       "start_y": 0.25,
       "sun_fall_delay": 10,
-      "starting_sun": 50,
+      "starting_sun": 5000,
       "music": "grasswalk.mp3"
     },
     "area2": {
@@ -50,7 +50,8 @@
     "spawn": {
       "probabilities": {
         "basic": 0.5,
-        "shield_bearer": 0.2
+        "shield_bearer": 0.2,
+        "kanishk": 3
       },
       "initial_delay": 2,
       "intervals": 9,

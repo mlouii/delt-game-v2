@@ -19,7 +19,7 @@ label start:
     # add a file (named either "bg room.png" or "bg room.jpg") to the
     # images directory to show it.
 
-    scene bg room
+    scene area1
     show eileen happy
 
     hide eileen
@@ -27,13 +27,13 @@ label start:
     call start_plant_select
     stop music fadeout 2.0
 
-    e "waaa"
+    # e "waaa"
 
-    # $ chosen_plants = ["jacob", "pranav"]
+    # $ chosen_plants = ["jacob", "wallnut", "cobcannon", "iceshooter"]
 
-    $ text = "You chose " + ", ".join(chosen_plants) + "."
-    # $ type_text = "the type of chosen_plants is " + str(type(chosen_plants)) + "."
-    e "hey [text]"
+    # $ text = "You chose " + ", ".join(chosen_plants) + "."
+    # # $ type_text = "the type of chosen_plants is " + str(type(chosen_plants)) + "."
+    # e "hey [text]"
 
     # e "goddamn i love dudes"
 

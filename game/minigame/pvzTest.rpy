@@ -1669,6 +1669,8 @@ init python:
       self.has_stolen_plant = False
 
     def walk_backwards(self):
+      if self.speed < 0:
+        return
       self.speed = self.zombie_config["speed"] * -0.5
       self.motion_type = "walk_shield"
       self.update_motion()
@@ -1724,7 +1726,14 @@ init python:
 
     def update(self):
       super().update()
-      if self.target_steal_plant and self.speed > 0:
+      if not self.has_stolen_plant and self.speed < 0:
+        walk_speed = self.speed
+        if self.is_iced:
+          walk_speed = walk_speed * 0.5
+        if self.motion_config["moving"]:
+          self.x_location -= (walk_speed * delta_time * delta_multiplier)
+
+      if self.target_steal_plant and not self.has_stolen_plant:
         if self.target_steal_plant.is_being_stolen or not self.does_target_plant_exist():
           self.target_steal_plant = self.lane.get_most_expensive_plant()
           if self.target_steal_plant and self.target_steal_plant.x_location > self.x_location:
@@ -2009,6 +2018,21 @@ init python:
         return max(plants, key=lambda plant: plant.cost)
       else:
         return None
+
+    def has_expensive_plant(self):
+      plants = self.get_all_plants()
+      for plant in plants:
+        if plant.cost >= 175:
+          return True
+      return False
+
+    def lane_indexes_with_expensive_plants(self):
+      indexes = []
+      plants = self.get_all_plants()
+      for plant in plants:
+        if plant.cost >= 175:
+          indexes.append(plant.tile.lane_id)
+      return indexes
 
     def remove_plant(self, lane_index, plant):
         self.lanes[lane_index].remove_plant(plant)
@@ -2416,7 +2440,7 @@ init python:
       self.should_delete = True
 
   class GUIController():
-    def __init__(self, plant_names):
+    def __init__(self, plant_names, level_config):
       self.plant_seed_cards = []
       self.last_sun_timer = time.time()
       self.suns = []
@@ -2425,6 +2449,7 @@ init python:
       self.background_solid = Solid((160, 82, 45), xsize=150, ysize=200)
       self.explosion_controller = None
       self.lanes = None
+      self.level_config = level_config
 
       self.targeting_image = im.FactorScale(all_images.images["gui"]["target"], 1)
       self.shovel_image = shovel_image = im.FactorScale(all_images.images["gui"]["shovel"], 1)
@@ -2530,7 +2555,7 @@ init python:
       self.suns.append(Sun(x, y, target_y, from_sky))
 
     def update(self, state):
-      if time.time() - self.last_sun_timer > 10:
+      if time.time() - self.last_sun_timer > self.level_config["sun_fall_delay"]:
         self.last_sun_timer = time.time()
         self.add_sun(renpy.random.randint(300, 1300), 150, renpy.random.randint(600, 900), True)
 
@@ -2642,6 +2667,8 @@ init python:
         weights = []
         for zombie in zombie_types.keys():
           if config_data.get_zombie_config(zombie)["cost"] <= remaining_budget and ("max_cost" not in interval_config or config_data.get_zombie_config(zombie)["cost"] <= interval_config["max_cost"]):
+            if zombie == "kanishk" and not self.lanes.has_expensive_plant():
+              continue
             can_afford.append(zombie)
             weights.append(zombie_types[zombie])
         if len(can_afford) == 0:
@@ -2672,6 +2699,8 @@ init python:
         self.displayed_probs = probabilities
 
         lane = random.choices(range(len(self.spent_per_lane)), weights=probabilities, k=1)[0]
+        if zombie == "kanishk":
+          lane = random.choices(self.lanes.lane_indexes_with_expensive_plants(), k=1)[0]
         self.spent_per_lane[lane] += config_data.get_zombie_config(zombie)["cost"]
         spawn_time = current_time + (i) * spawn_delay
         self.buffered_zombies.append(BufferedZombie(self, zombie, self.lanes.lanes[lane], spawn_time))
@@ -2750,7 +2779,7 @@ init python:
       self.plant_seed_slot_selected = None
       self.is_targeting = False
       self.is_shovelling = False
-      self.sun_amount = 50000
+      self.sun_amount = self.level_config["starting_sun"]
 
       self.final_outcome = None
 
@@ -2767,7 +2796,7 @@ init python:
       self.lanes = self.environment.gen_lanes()
       self.explosion_controller = ExplosionController(self.lanes)
 
-      self.gui_controller = GUIController(self.loaded_plants)
+      self.gui_controller = GUIController(self.loaded_plants, self.level_config)
       self.gui_controller.lanes = self.lanes
       self.lanes.set_gui_controller(self.gui_controller)
       self.gui_controller.explosion_controller = self.explosion_controller
