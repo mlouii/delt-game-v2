@@ -19,8 +19,10 @@ label start:
     # add a file (named either "bg room.png" or "bg room.jpg") to the
     # images directory to show it.
 
-    scene area1
+    scene bg room
     show eileen happy
+
+    $ config.rollback_enabled = False
 
     hide eileen
 
@@ -38,6 +40,8 @@ label start:
     # e "goddamn i love dudes"
 
     # $ level_outcome = "undefined"
+
+    scene area1
 
     call test_game_entry_label
 

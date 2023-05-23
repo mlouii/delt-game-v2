@@ -2583,7 +2583,7 @@ init python:
 
     def spawn(self):
       zombie = Zombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
-      if self.zombie_type in  ["basic", "dog", "conehead", "buckethead", "shield_bearer", "mask_shield_bearer"]:
+      if self.zombie_type in  ["basic", "dog", "conehead", "buckethead", "shield_bearer", "mask_shield_bearer", "officer"]:
         zombie = BasicZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
         if self.zombie_type in ["shield_bearer", "mask_shield_bearer"]:
           self.lane.add_zombie(zombie)

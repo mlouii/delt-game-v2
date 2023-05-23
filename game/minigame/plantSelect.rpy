@@ -44,7 +44,7 @@ init python:
       self.level_config = load_json_from_file(path=JSON_DIR + "levels.json")
       self.level = level
       self.plant_show_order = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
-      self.zombie_show_order = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "van", "mask_shield_bearer", "neil", "kanishk"]
+      self.zombie_show_order = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic","officer","van", "mask_shield_bearer", "neil", "kanishk"]
       self.plant_config = load_json_from_file(path=JSON_DIR + "plants.json")
       self.zombie_config = load_json_from_file(path=JSON_DIR + "zombies.json")
 
@@ -595,7 +595,7 @@ init python:
 screen plant_select_menu():
   modal True
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
-  $ seen_zombies = ["basic", "conehead", "buckethead", "dog", "van", "shield_bearer", "kinetic", "neil", "kanishk", "mask_shield_bearer"]
+  $ seen_zombies = ["basic", "conehead", "buckethead", "dog", "van", "shield_bearer", "kinetic", "neil", "kanishk", "mask_shield_bearer", "officer"]
   $ game = PlantSelectDisplayable(plants, 7, seen_zombies, "level1")
   add game
 

@@ -46,12 +46,10 @@
 
   "level1" : {
     "area": "area1",
-    "zombies": ["basic", "neil", "shield", "mask_shield_bearer", "shield_bearer","kinetic", "kanishk"],
+    "zombies": ["basic", "neil", "shield", "mask_shield_bearer", "shield_bearer","kinetic", "kanishk", "officer"],
     "spawn": {
       "probabilities": {
-        "shield_bearer": 0.2,
-        "mask_shield_bearer": 0.2,
-        "kanishk": 0
+        "officer": 1
       },
       "initial_delay": 2,
       "intervals": 9,
