@@ -961,6 +961,70 @@
         "joint_y": 40
       }
     },
+    "mask_shield_bearer": {
+      "class": "zombie",
+      "resize_factor": 0.55,
+      "fall_height": 135,
+      "parts": ["head", "torso", "arms", "legs", "hat"],
+      "part_name_order": ["left_leg", "left_arm","right_leg", "torso", "head", "hat", "right_arm"],
+      "damage_fall_order": {
+        "hat": 0.57,
+        "right_arm": 0.8,
+        "head": 1
+      },
+      "arms": {
+        "width": 41,
+        "height": 141,
+        "joint_x": 20,
+        "joint_y": 8
+      },
+      "torso": {
+        "width": 80,
+        "height": 148,
+        "head_joint": {
+          "x": 33,
+          "y": 1
+        },
+        "left_arm_joint": {
+          "x": 35,
+          "y": 20
+        },
+        "right_arm_joint": {
+          "x": 35,
+          "y": 20
+        },
+        "left_leg_joint": {
+          "x": 29,
+          "y": 120
+        },
+        "right_leg_joint": {
+          "x": 29,
+          "y": 120
+        },
+        "hat_joint": {
+          "x": 33,
+          "y": -35
+        }
+      },
+      "legs": {
+        "width": 50,
+        "height": 160,
+        "joint_x": 29,
+        "joint_y": 3
+      },
+      "head": {
+        "width": 60,
+        "height": 60,
+        "joint_x": 30,
+        "joint_y": 48
+      },
+      "hat": {
+        "width": 60,
+        "height": 50,
+        "joint_x": 38,
+        "joint_y": 25
+      }
+    },
     "shield": {
       "class": "shield",
       "resize_factor": 0.2,
@@ -1049,6 +1113,28 @@
     }
   },
 
+  "mask_shield_bearer": {
+    "animation_type": "mask_shield_bearer",
+    "motions": ["walk_shield"],
+    "attack_motions": ["attack_shield"],
+    "death_motions": ["basic_death"],
+    "has_damage_frames": false,
+    "blacken_on_explosion": true,
+    "health": 28,
+    "attack": 1,
+    "hitbox_distance": 100,
+    "hitbox_width": 40,
+    "speed": 0.35,
+    "cost": 2,
+    "almanac": {
+      "almanac_name": "Gas Mask GF",
+      "description": "She is fed up with all these SMOKERS!!",
+      "toughness": "medium",
+      "table toughess": "high",
+      "special": "Immune to smoke"
+    }
+  },
+
   "shield": {
     "animation_type": "shield",
     "motions": ["shield"],
@@ -1070,6 +1156,7 @@
     "attack": 0,
     "cost": 0
   },
+  
 
   "conehead": {
     "animation_type": "conehead",

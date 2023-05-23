@@ -44,7 +44,7 @@ init python:
       self.level_config = load_json_from_file(path=JSON_DIR + "levels.json")
       self.level = level
       self.plant_show_order = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
-      self.zombie_show_order = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "van", "neil", "kanishk"]
+      self.zombie_show_order = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "van", "mask_shield_bearer", "neil", "kanishk"]
       self.plant_config = load_json_from_file(path=JSON_DIR + "plants.json")
       self.zombie_config = load_json_from_file(path=JSON_DIR + "zombies.json")
 
@@ -183,6 +183,7 @@ init python:
               self.already_selected = True
               self.target_x = new_slot_x
               self.target_y = new_slot_y
+              renpy.play(AUDIO_DIR + "seed-select.mp3", channel = "audio")
             else:
               return False
           else:
@@ -407,6 +408,7 @@ init python:
   class PlantSelectDisplayable(renpy.Displayable):
     def __init__(self, unlocked_plants, num_seed_slots, seen_zombies, level):
       renpy.play(AUDIO_DIR + "choose-your-seeds.mp3", channel = "music")
+      renpy.music.set_volume(0.5, channel = "music")
       super(PlantSelectDisplayable, self).__init__()
       self.unlocked_plants = unlocked_plants
       self.seen_zombies = seen_zombies
@@ -554,6 +556,7 @@ init python:
         if self.mouseX > 1400 and self.mouseX < 1900 and self.mouseY > 950 and self.mouseY < 1050:
           self.is_on_zombie_page = True
           self.switch_to_zombie_text = Text("BACK TO BROTHERS", size=45, color=(255, 255, 255, 255))
+          renpy.play(AUDIO_DIR + "splat.mp3", channel = "audio")
           return True
 
         for plant in self.seed_choices:
@@ -575,6 +578,7 @@ init python:
         if self.mouseX > 1400 and self.mouseX < 1900 and self.mouseY > 950 and self.mouseY < 1050:
           self.is_on_zombie_page = False
           self.switch_to_zombie_text = Text("WHO MY OPPS?", size=45, color=(255, 255, 255, 255))
+          renpy.play(AUDIO_DIR + "splat.mp3", channel = "audio")
           return True
 
         for zombie in self.zombie_cards:
@@ -591,7 +595,7 @@ init python:
 screen plant_select_menu():
   modal True
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
-  $ seen_zombies = ["basic", "conehead", "buckethead", "dog", "van", "shield_bearer", "kinetic", "neil", "kanishk"]
+  $ seen_zombies = ["basic", "conehead", "buckethead", "dog", "van", "shield_bearer", "kinetic", "neil", "kanishk", "mask_shield_bearer"]
   $ game = PlantSelectDisplayable(plants, 7, seen_zombies, "level1")
   add game
 

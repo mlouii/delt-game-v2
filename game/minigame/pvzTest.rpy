@@ -805,6 +805,8 @@ init python:
             if self.check_reference_in_list(zombie, self.damaged_zombies) is False:
               if self.effects == "ice":
                 zombie.get_iced()
+              if self.projectile_type in ["smoke", "pranav-smoke"] and zombie.zombie_type == "mask_shield_bearer":
+                return
               zombie.damage(self.damage)
               self.damaged_zombies.append(zombie)
               if len(self.damaged_zombies) >= self.pierce:
@@ -1688,7 +1690,7 @@ init python:
           if plant.target_marker is not None:
             plant.target_marker.impacted()
         self.walk_backwards()
-
+        renpy.play(AUDIO_DIR + "heheha.mp3", channel = "audio")
 
     def check_attack_plant(self):
       pass
@@ -2080,23 +2082,6 @@ init python:
         for tile in tiles:
           tile.lane = self.lanes[lane_index]
         self.lanes[lane_index].populate_tiles(tiles)
-
-    def randomly_add_zombie(self, zombie_type):
-        lane_index = renpy.random.randint(0, len(self.lanes) - 1)
-        lane = self.lanes[lane_index]
-        zombie = Zombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location + renpy.random.randint(-5,5), zombie_type, lane)
-        if zombie_type in  ["basic", "dog", "conehead", "buckethead", "shield_bearer"] :
-          zombie = BasicZombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location + renpy.random.randint(-5,5), zombie_type, lane)
-          if zombie_type == "shield_bearer":
-            lane.add_zombie(zombie)
-            shield = Shield(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location + renpy.random.randint(-5,5), lane, zombie)
-            zombie = shield
-        if zombie_type == "van":
-          zombie = VanZombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location + renpy.random.randint(-5,5), lane)
-        if zombie_type == "kinetic":
-          zombie = KineticZombie(lane.tiles[-1].x_location + renpy.random.randint(-1* lane.tiles[-1].width, lane.tiles[-1].width), lane.y_location + renpy.random.randint(-5,5), lane)
-        lane.add_zombie(zombie)
-
 
     def update(self):
       for lane in self.lanes:
@@ -2598,9 +2583,9 @@ init python:
 
     def spawn(self):
       zombie = Zombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
-      if self.zombie_type in  ["basic", "dog", "conehead", "buckethead", "shield_bearer"] :
+      if self.zombie_type in  ["basic", "dog", "conehead", "buckethead", "shield_bearer", "mask_shield_bearer"]:
         zombie = BasicZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
-        if self.zombie_type == "shield_bearer":
+        if self.zombie_type in ["shield_bearer", "mask_shield_bearer"]:
           self.lane.add_zombie(zombie)
           shield = Shield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane, zombie)
           zombie = shield
@@ -2625,6 +2610,7 @@ init python:
       self.fast_forward_seconds = 0
       self.max_interval = self.level_config["spawn"]["intervals"]
       self.has_finished = False
+      self.announced_first_wave = False
 
       self.allow_fast_forward_timer = None
 
@@ -2648,6 +2634,9 @@ init python:
       seconds_elapsed = time.time() - self.start_time + self.fast_forward_seconds
       if seconds_elapsed < initial_delay:
         return 0
+      if not self.announced_first_wave:
+        renpy.play(AUDIO_DIR + "opps-coming.mp3", channel = "audio")
+        self.announced_first_wave = True
       interval = int((seconds_elapsed - initial_delay)/20) + 1
       if interval > self.max_interval:
         self.has_finished = True
@@ -2662,11 +2651,10 @@ init python:
       zombies_to_spawn = []
       remaining_budget = budget
       while remaining_budget > 0:
-
         can_afford = []
         weights = []
         for zombie in zombie_types.keys():
-          if config_data.get_zombie_config(zombie)["cost"] <= remaining_budget and ("max_cost" not in interval_config or config_data.get_zombie_config(zombie)["cost"] <= interval_config["max_cost"]):
+          if config_data.get_zombie_config(zombie)["cost"] <= remaining_budget and ("max_cost" not in interval_config or config_data.get_zombie_config(zombie)["cost"] <= interval_config["max_cost"]) and ("banned_zombies" not in interval_config or zombie not in interval_config["banned_zombies"]):
             if zombie == "kanishk" and not self.lanes.has_expensive_plant():
               continue
             can_afford.append(zombie)
@@ -2771,7 +2759,7 @@ init python:
       particleSystem.clear()
 
       self.level_config = config_data.get_level_config(level)
-      renpy.audio.music.play(AUDIO_DIR + self.level_config["music"], channel = "music", loop = True, fadein = 1.0)
+      renpy.audio.music.play(AUDIO_DIR + self.level_config["music"], channel = "music", loop = True, fadein = 1.0, relative_volume = 0.6)
 
       self.mouseX = 0
       self.mouseY = 0

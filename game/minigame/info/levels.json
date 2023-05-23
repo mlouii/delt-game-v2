@@ -46,24 +46,25 @@
 
   "level1" : {
     "area": "area1",
-    "zombies": ["basic", "neil", "shield", "shield_bearer", "kinetic", "kanishk"],
+    "zombies": ["basic", "neil", "shield", "mask_shield_bearer", "shield_bearer","kinetic", "kanishk"],
     "spawn": {
       "probabilities": {
-        "basic": 0.5,
         "shield_bearer": 0.2,
-        "kanishk": 3
+        "mask_shield_bearer": 0.2,
+        "kanishk": 0
       },
       "initial_delay": 2,
       "intervals": 9,
       "1": {
         "type": "normal",
         "wave_type": "huge",
-        "budget": 3,
-        "max_cost": 20
+        "budget": 6,
+        "max_cost": 20,
+        "banned_zombies": ["kanishk"]
       },
       "2": {
-        "type": "normal",
-        "wave_type": "huge",
+        "type": "wave",
+        "wave_type": "final",
         "budget": 4
       }, 
       "3": {
