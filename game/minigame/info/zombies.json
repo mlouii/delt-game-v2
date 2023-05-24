@@ -1096,6 +1096,22 @@
         "joint_y": 403
     }
     },
+    "armored_shield": {
+      "class": "shield",
+      "resize_factor": 0.2,
+      "fall_height": 120,
+      "parts": ["torso"],
+      "part_name_order": ["torso"],
+      "damage_fall_order": {
+        "torso": 1.2
+      },
+      "torso": {
+        "width": 490,
+        "height": 882,
+        "joint_x": 122,
+        "joint_y": 103
+    }
+    },
     "van": {
       "class": "vehicle",
       "resize_factor": 1.15,
@@ -1142,7 +1158,8 @@
     "almanac": {
       "almanac_name": "Oppa Sig",
       "description": "Normal in all aspects",
-      "toughness": "low"
+      "toughness": "low",
+      "story": "The typical Oppa Sig. Hobbies include lifting weights, and umm, umm... He also likes.... ummm..."
     }
   },
 
@@ -1153,16 +1170,17 @@
     "death_motions": ["basic_death"],
     "has_damage_frames": false,
     "blacken_on_explosion": true,
-    "health": 70,
+    "health": 75,
     "attack": 1,
-    "hitbox_distance": 130,
+    "hitbox_distance": 80,
     "hitbox_width": 60,
     "speed": 0.2,
-    "cost": 1, 
+    "cost": 3, 
     "almanac": {
       "almanac_name": "Fatass officer",
       "description": "Normal in all aspects",
-      "toughness": "Very High"
+      "toughness": "Very High",
+      "story": "This is not the cool biker public safety officer that lets you smoke weed. Nah. This mf is the real deal, and he gets a bonus for every arrest."
     }
   },
 
@@ -1184,7 +1202,8 @@
       "description": "Her beer pong table is an effective shield",
       "toughness": "low",
       "table toughess": "high",
-      "weakness": "Hates the smell of smoke"
+      "weakness": "Hates the smell of smoke",
+      "story": "The typical Oppa Sig GF. Body count is off the charts. Rizz with caution. You can fix her tho."
     }
   },
 
@@ -1200,17 +1219,40 @@
     "hitbox_distance": 100,
     "hitbox_width": 40,
     "speed": 0.35,
-    "cost": 2,
+    "cost": 4,
     "almanac": {
       "almanac_name": "Gas Mask GF",
       "description": "She is fed up with all these SMOKERS!!",
       "toughness": "medium",
       "table toughess": "high",
-      "special": "Immune to smoke"
+      "special": "Immune to smoke",
+      "story": "Despite her posh fiending, she's finally sick of fake watermelon scent."
     }
   },
 
   "shield": {
+    "animation_type": "shield",
+    "motions": ["shield"],
+    "attack_motions": [],
+    "death_motions": ["shield_death"],
+    "has_damage_frames": true,
+    "blacken_on_explosion": true,
+    "damage_frame_order": {
+      "torso": {
+        "damaged-1": 0.25,
+        "damaged-2": 0.7,
+        "damaged-3": 0.85
+      }
+    },
+    "health": 55,
+    "hitbox_distance": 50,
+    "hitbox_width": 40,
+    "speed": 0,
+    "attack": 0,
+    "cost": 0
+  },
+
+  "armored_shield": {
     "animation_type": "shield",
     "motions": ["shield"],
     "attack_motions": [],
@@ -1255,7 +1297,8 @@
     "almanac": {
       "almanac_name": "Conehead Oppa Sig",
       "description": "The traffic cone makes him tougher than others",
-      "toughness": "medium"
+      "toughness": "medium",
+      "story": "Traffic cone aquired via hazing."
     }
   },
 
@@ -1281,7 +1324,8 @@
     "almanac": {
       "almanac_name": "Buckethead Oppa Sig",
       "description": "His bucket makes him extremely resistant to damage",
-      "toughness": "high"
+      "toughness": "high",
+      "story": "The Oppa Sig's capstone project came in clutch. His bucket is difficult to dent."
     }
   },
 
@@ -1297,12 +1341,13 @@
     "hitbox_distance": 100,
     "hitbox_width": 60,
     "speed": 0.8,
-    "cost": 2,
+    "cost": 1.5,
     "almanac": {
       "almanac_name": "Dawg",
       "description": "Speedy Opp that runs on all fours",
       "toughness": "low",
-      "speed": "fast"
+      "speed": "fast",
+      "story": "He got that dawg in him? Furry shit? I honestly don't know how to make this canon."
     }
   },
 
@@ -1323,7 +1368,8 @@
       "almanac_name": "Kinetic Footwear Opp",
       "description": "Charges up a powerful laser attack",
       "toughness": "medium",
-      "special": "Evaporates everything in its path"
+      "special": "Evaporates everything in its path",
+      "story": "The kicks came to play. His power level increases with every step."
     }
   }, 
 
@@ -1339,12 +1385,13 @@
     "hitbox_distance": 100,
     "hitbox_width": 40,
     "speed": 0.35,
-    "cost": 3,
+    "cost": 6,
     "almanac": {
       "almanac_name": "Neil John",
       "description": "Gives out free kinetic footwears",
       "toughness": "high",
-      "special": "Turns basic opps into kinetic opps"
+      "special": "Turns basic opps into kinetic opps",
+      "story": "Business is booming. Fuck Jordans, kinetic footwear is the shit."
     }
   }, 
 
@@ -1365,7 +1412,8 @@
       "almanac_name": "Kanishk Pal",
       "description": "Steals ur shit",
       "toughness": "high",
-      "special": "On god you gonna have nothing left"
+      "special": "He takes your most valuable possesions and ignores the rest. He's fed up.",
+      "story": "He hasn't reacted well to the amount of AP kids. On god you gonna have nothing left."
     }
   }, 
 
@@ -1393,7 +1441,8 @@
       "almanac_name": "Public Safety Van",
       "description": "Brings the opps right to your doorstep",
       "toughness": "very high",
-      "special": "Drops off opps when destroyed"
+      "special": "Drops off opps when destroyed",
+      "story": "Growing up a poor orphan, this 2018 Toyota Sienna has never had anywhere to call home. However, public safety has been kind to it and he will fight with all it's might to protect it... After all, this is all it has left."
     }
   }
 }

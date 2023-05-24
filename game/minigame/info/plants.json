@@ -168,7 +168,7 @@
     "shot_delay": 0.2,
     "spawn_projectile": true,
     "projectile_type": "baseball",
-    "hitbox_distance": 10,
+    "hitbox_distance": 25,
     "cost": 100,
     "recharge_time": 5,
     "almanac": {
@@ -187,7 +187,7 @@
     "shot_delay": 0.2,
     "spawn_projectile": true,
     "projectile_type": "baseball",
-    "hitbox_distance": 10,
+    "hitbox_distance": 25,
     "cost": 200,
     "recharge_time": 5,
     "almanac": {
@@ -206,7 +206,7 @@
     "shot_delay": 0.2,
     "spawn_projectile": true,
     "projectile_type": "smoke",
-    "hitbox_distance": 10,
+    "hitbox_distance": 25,
     "cost": 100,
     "recharge_time": 1,
     "almanac": {
@@ -225,7 +225,7 @@
     "shot_delay": 0.2,
     "spawn_projectile": true,
     "projectile_type": "beer",
-    "hitbox_distance": 10,
+    "hitbox_distance": 25,
     "cost": 400,
     "recharge_time": 1,
     "almanac": {
@@ -244,7 +244,7 @@
     "shot_delay": 0.2,
     "spawn_projectile": true,
     "projectile_type": "ice",
-    "hitbox_distance": 10,
+    "hitbox_distance": 25,
     "cost": 400,
     "recharge_time": 1,
     "almanac": {
@@ -263,7 +263,7 @@
     "shot_delay": 0.2,
     "spawn_projectile": true,
     "projectile_type": "icicle",
-    "hitbox_distance": 10,
+    "hitbox_distance": 25,
     "cost": 250,
     "recharge_time": 1,
     "almanac": {
@@ -280,7 +280,7 @@
     "attack_delay": 25,
     "targeting_delay": 3,
     "spawn_projectile": false,
-    "hitbox_distance": 10,
+    "hitbox_distance": 25,
     "cost": 700,
     "recharge_time": 2,
     "almanac": {
@@ -295,7 +295,7 @@
     "animation_type": "wallnut",
     "health": 70,
     "spawn_projectile": false,
-    "hitbox_distance": 10,
+    "hitbox_distance": 25,
     "cost": 50,
     "recharge_time": 1,
     "almanac": {
@@ -311,7 +311,7 @@
     "sun_delay": 12,
     "glow_seconds_before_sun": 1,
     "spawn_projectile": false,
-    "hitbox_distance": 10,
+    "hitbox_distance": 25,
     "cost": 50,
     "recharge_time": 5,
     "almanac": {
@@ -329,7 +329,7 @@
     "shot_delay": 0.2,
     "spawn_projectile": true,
     "projectile_type": "pranav-smoke",
-    "hitbox_distance": 10,
+    "hitbox_distance": 25,
     "cost": 50,
     "recharge_time": 20,
     "almanac": {
@@ -349,7 +349,7 @@
     "shot_delay": 0.2,
     "spawn_projectile": true,
     "projectile_type": "andrew",
-    "hitbox_distance": 10,
+    "hitbox_distance": 25,
     "cost": 125,
     "recharge_time": 1,
     "almanac": {
@@ -364,7 +364,7 @@
     "animation_type": "jacob",
     "health": 9999,
     "spawn_projectile": false,
-    "hitbox_distance": 10,
+    "hitbox_distance": 25,
     "damage": 120,
     "cost": 50,
     "recharge_time": 1,

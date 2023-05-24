@@ -15,8 +15,8 @@
       "music": "grasswalk.mp3"
     },
     "area2": {
-      "lighter_color" : [168, 84, 163],
-      "dark_color": [140, 80, 137],
+      "lighter_color" : [232, 231, 190],
+      "dark_color": [194, 193, 172],
       "variance": [0, 7, 4],
       "num_rows": 5,
       "num_cols": 9,
@@ -29,8 +29,8 @@
       "music": "loonboon.mp3"
     },
     "area3": {
-      "lighter_color" : [232, 231, 190],
-      "dark_color": [194, 193, 172],
+      "lighter_color" : [168, 84, 163],
+      "dark_color": [140, 80, 137],
       "variance": [0, 7, 4],
       "num_rows": 5,
       "num_cols": 9,
@@ -39,30 +39,37 @@
       "start_x": 0.15,
       "start_y": 0.25,
       "sun_fall_delay": 500,
-      "starting_sun": 500,
+      "starting_sun": 5000,
       "music": "graze-the-roof.mp3"
     }
   },
 
   "level1" : {
-    "area": "area1",
-    "zombies": ["basic", "neil", "shield", "mask_shield_bearer", "shield_bearer","kinetic", "kanishk", "officer"],
+    "area": "area3",
+    "zombies": ["basic", "neil", "shield", "mask_shield_bearer", "shield_bearer","kinetic", "kanishk", "officer", "dog", "armored_shield"],
     "spawn": {
       "probabilities": {
-        "officer": 1
+        "basic": 1,
+        "dog": 1,
+        "neil": 0.3,
+        "officer": 0.5,
+        "mask_shield_bearer": 0.5
       },
-      "initial_delay": 2,
+      "initial_delay": 0,
       "intervals": 9,
       "1": {
         "type": "normal",
-        "wave_type": "huge",
-        "budget": 6,
-        "max_cost": 20,
-        "banned_zombies": ["kanishk"]
+        "budget": 2,
+        "max_cost": 1,
+        "banned_zombies": ["kanishk"],
+        "must_spawn": {
+          "mask_shield_bearer": 4,
+          "shield_bearer": 4
+        }
       },
       "2": {
         "type": "wave",
-        "wave_type": "final",
+        "wave_type": "huge",
         "budget": 4
       }, 
       "3": {

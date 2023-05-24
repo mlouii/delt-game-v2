@@ -282,12 +282,15 @@ init python:
       param_counter = 1
       #iterate through keys and values in alamanc
       for key, value in almanac.items():
-        if key not in ["almanac_name", "description"]:
+        if key not in ["almanac_name", "description", "story"]:
           key_text = Text(key.capitalize(), size = 20, bold = True)
           value_text = Text(self.add_newlines(value, 30), size = 20)
           render.place(key_text, x = self.x_location+self.text_offset, y = self.y_location+150+(param_counter*30))
           render.place(value_text, x = self.x_location+self.text_offset+200, y = self.y_location+150+(param_counter*30))
           param_counter += 1
+
+      story_text = Text(self.add_newlines(almanac["story"], 80), size = 20)
+      render.place(story_text, x = self.x_location+50, y = self.y_location+400)
       return render
 
 

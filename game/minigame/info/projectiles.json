@@ -58,7 +58,7 @@
     "center_y": 35,
     "damage": 1,
     "speed": 8,
-    "range": 0.5,
+    "range": 0.7,
     "pierce": 999,
     "effects": "none",
     "spawn_particles": false,

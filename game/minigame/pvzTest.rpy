@@ -69,6 +69,9 @@ init python:
   def lighten(color):
         return(color[0], color[1] + 8, color[2] + 4)
 
+  def level_to_area(level_name):
+    return level_config[level_name]["area"]
+
   class ConfigLoader():
     def __init__(self, level_config, zombie_config, plant_config, projectile_config, explosion_config):
       self.levels = level_config
@@ -516,7 +519,7 @@ init python:
           part_types_with_damage_frames = config_data.get_zombie_config(zombie_name)["damage_frame_order"].keys()
 
         types_to_loop = ["default", "iced"]
-        if zombie_name == "shield":
+        if zombie_name == "shield" or zombie_name == "armored_shield":
           types_to_loop = ["default"]
         for type_to_loop in types_to_loop:
           suffix = ""
@@ -809,6 +812,8 @@ init python:
                 return
               zombie.damage(self.damage)
               self.damaged_zombies.append(zombie)
+              if zombie.zombie_type == "armored_shield" and self.projectile_type == "icicle":
+                self.pierce = 0
               if len(self.damaged_zombies) >= self.pierce:
                 self.active = False
                 self.splash_effect()
@@ -909,7 +914,7 @@ init python:
 
     def check_collision(self, zombie):
       if zombie.lane is self.lane:
-        if abs(zombie.x_location - zombie.hitbox_distance - self.x_location) <= (self.hitbox_distance + renpy.random.randint(0,4)) and zombie.is_dead is False:
+        if abs(zombie.x_location - zombie.hitbox_distance - (self.x_location- self.hitbox_distance*0.5)) - self.hitbox_distance*0.5 <= (self.hitbox_distance + renpy.random.randint(0,4)) and zombie.is_dead is False:
           return True
       else: 
         return False
@@ -1570,8 +1575,8 @@ init python:
         hand_location_x = math.cos(true_angle) * self.bearer.body_parts[1].image_height *0.7
         hand_location_y = math.sin(true_angle) * self.bearer.body_parts[1].image_height * 0.7
 
-        torso_joint_x = self.body_parts[0].image_width / 3
-        torso_joint_y = self.body_parts[0].image_height / 3
+        torso_joint_x = self.body_parts[0].image_width
+        torso_joint_y = self.body_parts[0].image_height
 
         self.x_location = int(self.bearer.x_location + hand_location_x - torso_joint_x)
         self.y_location = int(self.bearer.y_location - hand_location_y - torso_joint_y)
@@ -1582,6 +1587,10 @@ init python:
         self.die()
         self.should_delete = True
 
+  class ArmoredShield(Shield):
+    def __init__(self, x_location, y_location, lane, bearer):
+      super().__init__(x_location, y_location, lane, bearer)
+      self.zombie_type = "armored_shield"
 
   # basic zombie covers all zombies that don't have a special class, such as dog
   class BasicZombie(Zombie):
@@ -2585,10 +2594,16 @@ init python:
       zombie = Zombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
       if self.zombie_type in  ["basic", "dog", "conehead", "buckethead", "shield_bearer", "mask_shield_bearer", "officer"]:
         zombie = BasicZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
-        if self.zombie_type in ["shield_bearer", "mask_shield_bearer"]:
-          self.lane.add_zombie(zombie)
+        if self.zombie_type in ["shield_bearer"]:
           shield = Shield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane, zombie)
-          zombie = shield
+          self.lane.add_zombie(shield)
+          self.lane.add_zombie(zombie)
+
+        if self.zombie_type in ["mask_shield_bearer"]:
+          shield = ArmoredShield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane, zombie)
+          self.lane.add_zombie(shield)
+          self.lane.add_zombie(zombie)
+        return
       if self.zombie_type == "van":
         zombie = VanZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane)
       if self.zombie_type == "kinetic":
@@ -2650,6 +2665,11 @@ init python:
       budget = interval_config["budget"]
       zombies_to_spawn = []
       remaining_budget = budget
+      if "must_spawn" in interval_config:
+        for key, val in interval_config["must_spawn"].items():
+          for i in range(val):
+            zombies_to_spawn.append(key)
+            remaining_budget -= config_data.get_zombie_config(key)["cost"]
       while remaining_budget > 0:
         can_afford = []
         weights = []
@@ -2675,7 +2695,7 @@ init python:
         else:
           self.lanes.gui_controller.dispay_wave_message("Final Wave!")
           renpy.play(AUDIO_DIR + "alarm.mp3", channel = "audio")
-
+      random.shuffle(zombies_to_spawn)
       for i, zombie in enumerate(zombies_to_spawn):
         # Adding a small constant to prevent division by zero
         adjusted_spent_per_lane = [spent + 0.01 for spent in self.spent_per_lane]
@@ -2872,13 +2892,13 @@ init python:
         if zombie.x_location < 150:
           self.has_ended = True
           self.gui_controller.dispay_wave_message("You lost!")
-          return "Lost"
+          return "lost"
 
       if self.zombie_spawner.has_finished:
         if len(all_zombies) == 0:
           self.has_ended = True
           self.gui_controller.dispay_wave_message("You won!")
-          return "Won"
+          return "won"
 
     def render(self, width, height, st, at):
       global delta_time
@@ -2932,6 +2952,4 @@ label test_game_entry_label:
   $ _game_menu_screen = None
   $ level_outcome = renpy.call_screen(_screen_name='pvz_game_menu')
   $ quick_menu = True
-
-
   return
