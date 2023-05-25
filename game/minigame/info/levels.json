@@ -11,7 +11,7 @@
       "start_x": 0.15,
       "start_y": 0.25,
       "sun_fall_delay": 10,
-      "starting_sun": 5000,
+      "starting_sun": 50,
       "music": "grasswalk.mp3"
     },
     "area2": {
@@ -44,7 +44,7 @@
     }
   },
 
-  "level1" : {
+  "level0" : {
     "area": "area3",
     "zombies": ["basic", "neil", "shield", "mask_shield_bearer", "shield_bearer","kinetic", "kanishk", "officer", "dog", "armored_shield"],
     "spawn": {
@@ -106,6 +106,243 @@
         "type": "wave",
         "wave_type": "final",
         "budget": 40
+      }
+    }
+  },
+
+  "level1" : {
+    "area": "area1",
+    "zombies": ["basic"],
+    "spawn": {
+      "probabilities": {
+        "basic": 1
+      },
+      "initial_delay": 12,
+      "intervals": 7,
+      "1": {
+        "type": "normal",
+        "budget": 2
+      },
+      "2": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 3,
+        "max_cost": 3
+      }, 
+      "3": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 5,
+        "max_cost": 3
+      },
+      "4": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 6,
+        "max_cost": 3
+      },
+      "5": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 9,
+        "max_cost": 3
+      },
+      "6": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 8,
+        "max_cost": 4
+      },
+      "7": {
+        "type": "wave",
+        "wave_type": "final",
+        "budget": 10
+      }
+    }
+  }, 
+
+  "level2" : {
+    "area": "area1",
+    "zombies": ["basic", "dog"],
+    "spawn": {
+      "probabilities": {
+        "basic": 2,
+        "dog": 1
+      },
+      "initial_delay": 12,
+      "intervals": 7,
+      "1": {
+        "type": "normal",
+        "budget": 2,
+        "banned_zombies": ["dog"]
+      },
+      "2": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 3,
+        "max_cost": 3,
+        "banned_zombies": ["dog"]
+      }, 
+      "3": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 6,
+        "max_cost": 3,
+        "banned_zombies": ["dog"]
+      },
+      "4": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 8,
+        "max_cost": 3,
+        "banned_zombies": ["dog"]
+      },
+      "5": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 10,
+        "max_cost": 3
+      },
+      "6": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 9,
+        "max_cost": 4
+      },
+      "7": {
+        "type": "wave",
+        "wave_type": "final",
+        "budget": 12
+      }
+    }
+  },
+
+  "level3" : {
+    "area": "area1",
+    "zombies": ["basic", "dog", "conehead"],
+    "spawn": {
+      "probabilities": {
+        "basic": 2,
+        "dog": 1,
+        "conehead": 1
+      },
+      "initial_delay": 12,
+      "intervals": 8,
+      "1": {
+        "type": "normal",
+        "budget": 2,
+        "banned_zombies": ["dog", "conehead"]
+      },
+      "2": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 4,
+        "max_cost": 3,
+        "banned_zombies": ["dog", "conehead"]
+      }, 
+      "3": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 7,
+        "max_cost": 3,
+        "banned_zombies": ["conehead"]
+      },
+      "4": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 9,
+        "max_cost": 3,
+        "banned_zombies": ["conehead"]
+      },
+      "5": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 12,
+        "max_cost": 3
+      },
+      "6": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 11,
+        "max_cost": 4
+      },
+      "7": {
+        "type": "normal",
+        "wave_type": "final",
+        "budget": 14
+      },
+      "8": {
+        "type": "wave",
+        "wave_type": "final",
+        "budget": 16
+      }
+    }
+  },
+
+  "level4" : {
+    "area": "area1",
+    "zombies": ["basic", "dog", "conehead", "buckethead"],
+    "spawn": {
+      "probabilities": {
+        "basic": 2,
+        "dog": 1,
+        "conehead": 1,
+        "buckethead": 1
+      },
+      "initial_delay": 12,
+      "intervals": 9,
+      "1": {
+        "type": "normal",
+        "budget": 3,
+        "banned_zombies": ["dog", "conehead", "buckethead"]
+      },
+      "2": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 5,
+        "max_cost": 3,
+        "banned_zombies": ["dog", "buckethead"]
+      }, 
+      "3": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 8,
+        "max_cost": 3,
+        "banned_zombies": ["buckethead"]
+      },
+      "4": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 11,
+        "max_cost": 3,
+        "banned_zombies": ["buckethead"]
+      },
+      "5": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 14,
+        "max_cost": 3
+      },
+      "6": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 14,
+        "max_cost": 4
+      },
+      "7": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 17
+      },
+      "8": {
+        "type": "normal",
+        "wave_type": "final",
+        "budget": 15
+      },
+      "9": {
+        "type": "wave",
+        "wave_type": "final",
+        "budget": 22
       }
     }
   }

@@ -597,9 +597,7 @@ init python:
 
 screen plant_select_menu():
   modal True
-  $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
-  $ seen_zombies = ["basic", "conehead", "buckethead", "dog", "van", "shield_bearer", "kinetic", "neil", "kanishk", "mask_shield_bearer", "officer"]
-  $ game = PlantSelectDisplayable(plants, 7, seen_zombies, "level1")
+  $ game = PlantSelectDisplayable(plants, 7, seen_zombies, current_level)
   add game
 
 

@@ -2,9 +2,9 @@
 errors listed below, and try again.
 
 
-File "game/minigame/pvzTest.rpy", line 5: expected statement.
-    deine JSON_DIR = THIS_PATH + 'info/'
-                   ^
+File "game/intro.rpy", line 144: end of line expected.
+    y "I'm " + playerName + ". I was at a rush event three years ago."
+             ^
 
 Ren'Py Version: Ren'Py 8.0.3.22090809
-Sun Apr  9 01:32:38 2023
+Wed May 24 23:26:59 2023

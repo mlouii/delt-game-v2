@@ -2603,6 +2603,7 @@ init python:
           shield = ArmoredShield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane, zombie)
           self.lane.add_zombie(shield)
           self.lane.add_zombie(zombie)
+        self.lane.add_zombie(zombie)
         return
       if self.zombie_type == "van":
         zombie = VanZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane)
@@ -2659,6 +2660,7 @@ init python:
       return int((seconds_elapsed - initial_delay)/20) + 1
 
     def prepare_zombie_interval(self):
+      send_to_file("logz.txt", "Preparing Interval!" + "\n")
       current_time = time.time()
       interval_config = self.level_config["spawn"][str(self.interval)]
       zombie_types = self.level_config["spawn"]["probabilities"]
@@ -2775,7 +2777,7 @@ init python:
       global config_data
       config_data = ConfigLoader(level_config, zombie_config, plant_config, projectile_config, explosion_config)
 
-      self.has_ended = False
+      self.has_ended_timer = None
       particleSystem.clear()
 
       self.level_config = config_data.get_level_config(level)
@@ -2890,13 +2892,13 @@ init python:
       all_zombies = self.lanes.get_all_zombies()
       for zombie in all_zombies:
         if zombie.x_location < 150:
-          self.has_ended = True
+          self.has_ended_timer = time.time()
           self.gui_controller.dispay_wave_message("You lost!")
           return "lost"
 
       if self.zombie_spawner.has_finished:
         if len(all_zombies) == 0:
-          self.has_ended = True
+          self.has_ended_timer = time.time()
           self.gui_controller.dispay_wave_message("You won!")
           return "won"
 
@@ -2936,14 +2938,14 @@ init python:
       if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
         self.process_click()
 
-      if self.has_ended:
+      if self.has_ended_timer and time.time() - self.has_ended_timer > 3:
         return self.final_outcome
 
       # send_to_file("logz.txt", str(self.mouseX) + " " + str(self.mouseY) + "\n")
     
 screen pvz_game_menu():
   modal True
-  $ game = PvzGameDisplayable("level1", chosen_plants)
+  $ game = PvzGameDisplayable(current_level, chosen_plants)
   add game
 
 label test_game_entry_label:
