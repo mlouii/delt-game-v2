@@ -17,6 +17,18 @@ init python:
   import random
   import copy
 
+  def difficulty_multiplier_to_str(difficulty_multiplier):
+    if difficulty_multiplier < 0.55:
+      return "Pussy"
+    elif difficulty_multiplier < 0.76:
+      return "Easy"
+    elif difficulty_multiplier < 1.1:
+      return "Normal"
+    elif difficulty_multiplier < 1.4:
+      return "Hard"
+    else:
+      return "Extreme"
+
 
   def plant_name_to_plant(tile, lane, plant_type, gui_controller):
     if plant_type == "peashooter":
@@ -2388,7 +2400,7 @@ init python:
         self.opacity_change *= -1
 
 
-      self.background_angle += 1
+      self.background_angle += 1 * delta_multiplier * delta_time
 
     def process_rotation(self):
       self.background_color_yellow = (255, 255, 0, self.opacity)
@@ -2616,7 +2628,7 @@ init python:
       self.lane.add_zombie(zombie)
 
   class ZombieSpawner():
-    def __init__(self, level_config, lanes):
+    def __init__(self, level_config, lanes, difficulty_multiplier):
       self.start_time = time.time()
       self.level_config = level_config
       self.lanes = lanes
@@ -2627,6 +2639,7 @@ init python:
       self.max_interval = self.level_config["spawn"]["intervals"]
       self.has_finished = False
       self.announced_first_wave = False
+      self.difficulty_multiplier = difficulty_multiplier
 
       self.allow_fast_forward_timer = None
 
@@ -2664,7 +2677,7 @@ init python:
       current_time = time.time()
       interval_config = self.level_config["spawn"][str(self.interval)]
       zombie_types = self.level_config["spawn"]["probabilities"]
-      budget = interval_config["budget"]
+      budget = max((interval_config["budget"] * self.difficulty_multiplier), 1)
       zombies_to_spawn = []
       remaining_budget = budget
       if "must_spawn" in interval_config:
@@ -2762,11 +2775,18 @@ init python:
       progress_bar_width = int((self.interval/self.max_interval) * 400)
       progress_bar = Solid((0, 255, 0, 255), xsize=progress_bar_width, ysize=40)
       render.place(progress_bar, x = progress_bar_x+2, y = progress_bar_y+2)
+
+      difficulty_text = Text("Difficulty: " + str(difficulty_multiplier_to_str(self.difficulty_multiplier)), size = 30)
+      render.place(difficulty_text, x = progress_bar_x, y = progress_bar_y+120)
+      
+      delta_time_to_fps = 1/delta_time
+      fps_text = Text("FPS: " + str(int(delta_time_to_fps)), size = 30, color = (255, 255, 255))
+      render.place(fps_text, x = progress_bar_x+200, y = 1000)
       return render
 
 
   class PvzGameDisplayable(renpy.Displayable):
-    def __init__(self, level, loaded_plants):
+    def __init__(self, level, loaded_plants, difficulty_multiplier):
       super(PvzGameDisplayable, self).__init__()
       level_config = load_json_from_file(path=JSON_DIR + "levels.json")
       zombie_config = load_json_from_file(path=JSON_DIR + "zombies.json")
@@ -2778,6 +2798,7 @@ init python:
       config_data = ConfigLoader(level_config, zombie_config, plant_config, projectile_config, explosion_config)
 
       self.has_ended_timer = None
+      self.difficulty_multiplier = difficulty_multiplier
       particleSystem.clear()
 
       self.level_config = config_data.get_level_config(level)
@@ -2811,7 +2832,7 @@ init python:
       self.lanes.set_gui_controller(self.gui_controller)
       self.gui_controller.explosion_controller = self.explosion_controller
 
-      self.zombie_spawner = ZombieSpawner(self.level_config, self.lanes)
+      self.zombie_spawner = ZombieSpawner(self.level_config, self.lanes, self.difficulty_multiplier)
 
     def visit(self):
       return self.environment.visit()
@@ -2945,7 +2966,7 @@ init python:
     
 screen pvz_game_menu():
   modal True
-  $ game = PvzGameDisplayable(current_level, chosen_plants)
+  $ game = PvzGameDisplayable(current_level, chosen_plants, current_difficulty)
   add game
 
 label test_game_entry_label:

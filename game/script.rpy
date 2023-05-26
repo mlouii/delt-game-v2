@@ -22,8 +22,9 @@ define ps = Character("Public Safety", color="#000000")
 define mo = Character("Mo", color="#000000")
 define y = Character([playerName], color="#FFFFFF")
 define shahaan = Character("Shahaan", color="#000000")
-define oppasig = Character("Oppa", color="#a82222")
+define oppasig = Character("Oppa Sig", color="#a82222")
 define arg = Character("A Random Girl", color="#a82222")
+define zion = Character("Zion", color="#000000")
 
 define y_nvl = Character([playerName], kind=nvl, image="nighten", callback=Phone_SendSound)
 define mark_nvl = Character("Mark", kind=nvl, callback=Phone_ReceiveSound)
@@ -38,6 +39,9 @@ init python:
     global current_area
     global is_testing
     global playerName
+    global skip_games
+    global difficulty_multiplier
+    global current_difficulty
     global MC_Name
     playerName = "You"
 
@@ -47,6 +51,9 @@ init python:
 
 # for dealing with the minigame part
 label game_and_select:
+    if skip_games:
+        return
+
     scene blank
     with dissolve
 
@@ -90,10 +97,21 @@ label game_and_select:
         with vpunch
 
         mark "Wow you're actually so bad at this game"
-        mark "How about we try this again?"
+        mark "Is this game too hard for you? Should I make it easier?"
 
+        menu: 
+            "{b}Yes:{/b} I'm really bad":
+                $ current_difficulty = 0.75 * current_difficulty 
+
+            "{b}No:{/b} I've got this dw":
+                $ current_difficulty = 1 * current_difficulty 
+
+            "{b}NOOO:{/b} Make it even harder >:)":
+                $ current_difficulty = 1.3 * current_difficulty 
         jump game_and_select
+
     stop music fadeout 2.0
+    $ current_difficulty = difficulty_multiplier
     window show
 
     return
@@ -104,10 +122,13 @@ label start:
     # add a file (named either "bg room.png" or "bg room.jpg") to the
     # images directory to show it.
 
+    $ difficulty_multiplier = 1.75
+
     $ is_testing = False
+    $ skip_games = False
     if is_testing:
-        $ current_level = "level0"
-        $ chosen_plants = ["iceshooter", "wallnut", "fumeshroom", "pranav", "colin", "cobcannon"]
+        $ current_level = "level4"
+        $ chosen_plants = ["peashooter", "sunflower", "wallnut", "repeater"]
         call test_game_entry_label
 
     # scene mail-room
@@ -123,6 +144,8 @@ label start:
     # e "Nobody loves you"
 
     # hide mo-buff
+
+    call ask_difficulty
 
     call intro
     

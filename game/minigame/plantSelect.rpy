@@ -450,7 +450,7 @@ init python:
       self.mouseY = 0
       self.warning = WarningDisplay(self)
 
-      self.level_config = load_json_from_file(path=JSON_DIR + "levels.json")["level1"]
+      self.level_config = load_json_from_file(path=JSON_DIR + "levels.json")[self.level]
       self.level_zombies = self.level_config["zombies"]
       self.is_on_zombie_page = False
 

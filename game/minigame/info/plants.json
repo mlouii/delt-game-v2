@@ -208,7 +208,7 @@
     "projectile_type": "smoke",
     "hitbox_distance": 25,
     "cost": 100,
-    "recharge_time": 1,
+    "recharge_time": 5,
     "almanac": {
       "almanac_name": "Green Luis Haze",
       "description": "Luis blows smoke that can pass through tables and opps",
@@ -227,7 +227,7 @@
     "projectile_type": "beer",
     "hitbox_distance": 25,
     "cost": 400,
-    "recharge_time": 1,
+    "recharge_time": 20,
     "almanac": {
       "almanac_name": "4.Alc Colin",
       "description": "Throws four beer bottles at a time",
@@ -246,7 +246,7 @@
     "projectile_type": "ice",
     "hitbox_distance": 25,
     "cost": 400,
-    "recharge_time": 1,
+    "recharge_time": 20,
     "almanac": {
       "almanac_name": "Smirnoff Pl-ice-sted",
       "description": "Pl-ice-sted throws smirnoff ice bottles after chugging them that deal heavy damage",
@@ -265,7 +265,7 @@
     "projectile_type": "icicle",
     "hitbox_distance": 25,
     "cost": 250,
-    "recharge_time": 1,
+    "recharge_time": 20,
     "almanac": {
       "almanac_name": "Dripden Skinner",
       "description": "Skinner launches frozen ice that pierces and slows the opps",
@@ -282,7 +282,7 @@
     "spawn_projectile": false,
     "hitbox_distance": 25,
     "cost": 700,
-    "recharge_time": 2,
+    "recharge_time": 20,
     "almanac": {
       "almanac_name": "Captain Davis",
       "description": "Tap on Captain Davis to request a deadly hellfire missile strike",
@@ -297,7 +297,7 @@
     "spawn_projectile": false,
     "hitbox_distance": 25,
     "cost": 50,
-    "recharge_time": 1,
+    "recharge_time": 20,
     "almanac": {
       "almanac_name": "Mario the Stoic",
       "description": "Mario will take the pain and suffering so that you don’t have to.",
@@ -351,7 +351,7 @@
     "projectile_type": "andrew",
     "hitbox_distance": 25,
     "cost": 125,
-    "recharge_time": 1,
+    "recharge_time": 40,
     "almanac": {
       "almanac_name":"Griddy AndRizzle",
       "description": "Single-use: Hits the griddy forward on the opps",
@@ -367,7 +367,7 @@
     "hitbox_distance": 25,
     "damage": 120,
     "cost": 50,
-    "recharge_time": 1,
+    "recharge_time": 40,
     "almanac": {
       "almanac_name":"Jacob Slammer",
       "description": "Single-use: Smashes the opps in a single tile",

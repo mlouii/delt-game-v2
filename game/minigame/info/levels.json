@@ -313,14 +313,14 @@
       "4": {
         "type": "normal",
         "wave_type": "huge",
-        "budget": 11,
+        "budget": 9,
         "max_cost": 3,
         "banned_zombies": ["buckethead"]
       },
       "5": {
         "type": "wave",
         "wave_type": "huge",
-        "budget": 14,
+        "budget": 12,
         "max_cost": 3
       },
       "6": {
@@ -332,17 +332,18 @@
       "7": {
         "type": "wave",
         "wave_type": "huge",
-        "budget": 17
+        "budget": 16,
+        "banned_zombies": ["basic"]
       },
       "8": {
         "type": "normal",
-        "wave_type": "final",
-        "budget": 15
+        "budget": 16
       },
       "9": {
         "type": "wave",
         "wave_type": "final",
-        "budget": 22
+        "budget": 20,
+        "banned_zombies": ["basic"]
       }
     }
   }
