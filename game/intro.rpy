@@ -4,11 +4,6 @@ label intro:
 
   # go up to the house and reminisce
 
-  $ playerName = "You"
-  $ y = Character(playerName, color="#376e3a")
-  $ MCName = playerName
-  $ y_nvl = Character(playerName, kind=nvl, image="nighten", callback=Phone_SendSound)
-
   scene driveway
   with fade
 
@@ -737,8 +732,80 @@ label intro:
   call game_and_select
   play music pushing_onwards
 
+  scene front-door
+  with fade
 
-  
+  y_nvl "Fought em off again."
+
+  mark_nvl "Watch out, they're coming back."
+
+  mark_nvl "It's the final assault."
+
+  mark_nvl "That gray one takes a lot of hits."
+
+  $ plants = ["peashooter", "sunflower", "wallnut", "repeater"]
+  $ seen_zombies = ["basic", "dog", "conehead", "buckethead"]
+  $ current_level = "level4"
+  call game_and_select
+  play music pushing_onwards
+
+  scene front-door
+  with fade
+
+  y_nvl "We did it."
+
+  y_nvl "We beat them back."
+
+  y_nvl "I'm going home for today."
+
+  mark_nvl "You're on track to become a great brother."
+
+  y_nvl "Thank you!"
+
+  show shahaan at left
+  with moveinleft
+
+  shahaan "Hey! Before you go, I just want to let you know"
+
+  shahaan "We're throwing a party tonight."
+
+  shahaan "You should come."
+
+  y "I'll be there."
+
+  shahaan "Maybe come a little earlier? Like 6PM?"
+
+  y "Sounds good!"
+
+  y_nvl "Are you going to the party?"
+
+  mark_nvl "I don't think so."
+
+  mark_nvl "I'm working on a game."
+
+  y_nvl "Oh, that's cool."
+
+  y_nvl "You should show it to me sometime."
+
+  nvl clear
+
+  # next up is the ufarm arc, starting with penthouse
+
+  scene penthouse
+
+  y "That was such a great nap."
+
+  y "I feel so refreshed."
+
+  shahaan_nvl "Hey you should pull up"
+
+  shahaan_nvl "You want to smoke?"
+
+  y_nvl "I don't want smoke with nobody"
+
+  y_nvl "I have no enemies"
+
+  shahaan_nvl "Well, you should pull up anyways"
 
   return
 

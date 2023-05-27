@@ -28,6 +28,7 @@ define zion = Character("Zion", color="#000000")
 
 define y_nvl = Character([playerName], kind=nvl, image="nighten", callback=Phone_SendSound)
 define mark_nvl = Character("Mark", kind=nvl, callback=Phone_ReceiveSound)
+define shahaan_nvl = Character("Shahaan", kind=nvl, callback=Phone_ReceiveSound)
 
 define config.adv_nvl_transition = None
 define config.nvl_adv_transition = Dissolve(0.3)
@@ -122,32 +123,27 @@ label start:
     # add a file (named either "bg room.png" or "bg room.jpg") to the
     # images directory to show it.
 
-    $ difficulty_multiplier = 1.75
+    $ difficulty_multiplier = 1
+    $ current_difficulty = difficulty_multiplier
 
     $ is_testing = False
     $ skip_games = False
     if is_testing:
+        scene area4
         $ current_level = "level4"
         $ chosen_plants = ["peashooter", "sunflower", "wallnut", "repeater"]
         call test_game_entry_label
 
-    # scene mail-room
-    # with fade
-
-    # show mo-buff at right
-    # with moveinright
-
-    # e "Ima hit you with this table fucker"
-
-    # you "No dont do it im pussy"
-
-    # e "Nobody loves you"
-
-    # hide mo-buff
-
     call ask_difficulty
 
+    $ playerName = "You"
+    $ y = Character(playerName, color="#376e3a")
+    $ MCName = playerName
+    $ y_nvl = Character(playerName, kind=nvl, image="nighten", callback=Phone_SendSound)
+
     call intro
+
+    call ufarm
     
     show ufarm-sunny
 

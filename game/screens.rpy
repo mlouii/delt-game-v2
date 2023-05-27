@@ -4,6 +4,21 @@
 
 init offset = -1
 
+image main_menu_glitched:
+    gui.main_menu_background # reliable slicing
+    pause 1.5
+    glitch(gui.main_menu_background, offset=60, randomkey=None) # bigger and always-random slicing
+    pause 0.2
+    glitch(gui.main_menu_background_opps)
+    pause 0.1
+    gui.main_menu_background_opps
+    pause 0.3
+    glitch(gui.main_menu_background, offset=60, randomkey=None) # bigger and always-random slicing
+    pause 0.1
+    gui.main_menu_background
+    pause 5.0
+    repeat
+
 
 ################################################################################
 ## Styles
@@ -353,7 +368,8 @@ screen main_menu():
     ## This ensures that any other menu screen is replaced.
     tag menu
 
-    add gui.main_menu_background
+    add gui.main_menu_house
+    add "main_menu_glitched"
 
     ## This empty frame darkens the main menu.
     frame:

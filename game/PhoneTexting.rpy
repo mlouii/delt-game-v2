@@ -102,6 +102,8 @@ screen nvl_phonetext(dialogue):
                 if previous_d_who != d.who:
                     if d.who == MC_Name:
                         $ message_icon = "phone_send_icon.png"
+                    elif d.who == "Shahaan":
+                        $ message_icon = "shahaan_received_icon.png"
                     else:
                         $ message_icon = "phone_received_icon.png"
 
