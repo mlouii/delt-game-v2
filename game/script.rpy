@@ -24,6 +24,7 @@ define y = Character([playerName], color="#FFFFFF")
 define shahaan = Character("Shahaan", color="#000000")
 define oppasig = Character("Oppa Sig", color="#a82222")
 define arg = Character("A Random Girl", color="#a82222")
+define arg_r = Character("Potentially Racist Girl?", color="#a82222")
 define zion = Character("Zion", color="#000000")
 
 define y_nvl = Character([playerName], kind=nvl, image="nighten", callback=Phone_SendSound)
@@ -129,19 +130,24 @@ label start:
     $ is_testing = False
     $ skip_games = False
     if is_testing:
-        scene area4
+        scene area2
         $ current_level = "level4"
         $ chosen_plants = ["peashooter", "sunflower", "wallnut", "repeater"]
         call test_game_entry_label
 
-    call ask_difficulty
+    # call ask_difficulty
+
+    $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
+    $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic","officer","van", "mask_shield_bearer", "neil", "kanishk"]
+    $ current_level = "level0"
+    call game_and_select
 
     $ playerName = "You"
     $ y = Character(playerName, color="#376e3a")
     $ MCName = playerName
     $ y_nvl = Character(playerName, kind=nvl, image="nighten", callback=Phone_SendSound)
 
-    call intro
+    # call intro
 
     call ufarm
     

@@ -389,7 +389,7 @@ init python:
         self.particles.append(Particle(x, y, color, size, size, speed, direction, 0.3, True))
 
     def electricity(self, x, y, x_variance):
-      for i in range(1):
+      for i in range(3):
         # color = (255, 102, 255, 150)
         # y_size = renpy.random.randint(8, 15)
         # speed = renpy.random.randint(1, 3)
@@ -443,11 +443,13 @@ init python:
 
     def load_gui(self):
       self.images["gui"] = {}
-      to_load = ["sun", "target", "hellfire", "shovel", "evil"]
+      to_load = ["sun", "target", "hellfire", "shovel", "evil", "bed"]
       for image_name in to_load:
         location = IMG_DIR + "gui/" + image_name + ".png"
         image = Image(location)
         self.images["gui"][image_name] = image
+
+      self.images["gui"]["bed"] = im.FactorScale(self.images["gui"]["bed"], 0.5)
 
     def load_explosions(self):
       self.images["explosions"] = {}
@@ -513,6 +515,7 @@ init python:
       self.images["zombies"] = {}
       for zombie_name in zombie_types:
         self.images["zombies"][zombie_name] = {}
+        self.images["zombies"][zombie_name]["icon"] = im.FactorScale(Image(IMG_DIR + "zombies/" + zombie_name + f"/{zombie_name}.png"), 0.35)
         zombie_location = IMG_DIR + "zombies/" + zombie_name
         animation_type = config_data.get_zombie_config(zombie_name)["animation_type"]
         resize_factor = config_data.get_zombie_image_config(animation_type)["resize_factor"]
@@ -595,6 +598,7 @@ init python:
       self.lane_id = lane_id
       self.lane = None
       self.row_id = row_id
+      self.is_protected = False
 
       self.target_location_x = x_location + int(width/2)
       self.target_location_y = y_location + int(0.8 * height)
@@ -619,8 +623,11 @@ init python:
         drawables["ground"] = Solid(lighten(lighten(self.color)), xsize=self.width, ysize=self.height)
         if self.plantable():
           drawables["overlay"] = self.overlays[self.plant_selected]
-
+      
       render.place(drawables["ground"], x = self.x_location, y = self.y_location)
+
+      if self.is_protected:
+        render.place(all_images.images["gui"]["bed"] , x = self.x_location, y = self.y_location)
 
       if drawables["overlay"] is not None:
         plant_image_config = config_data.get_plant_image_config(self.plant_selected)
@@ -882,6 +889,8 @@ init python:
       self.y_location = self.tile.target_location_y - self.plant_image_config["joint_y"]
 
       self.is_being_stolen = False
+      self.is_protected = False
+      self.game = None
 
       renpy.play(AUDIO_DIR + "plant-planted.mp3", channel = "audio")
 
@@ -905,6 +914,8 @@ init python:
       self.is_dead = True
       if not self.plant_type == "jacob":
         renpy.play(AUDIO_DIR + "oof.mp3", channel = "audio")
+      if self.is_protected:
+        self.game.has_protected_plant_died = True
 
     def damage(self, damage):
       self.health -= damage
@@ -1014,6 +1025,8 @@ init python:
             if self.y_location + self.plant_image_config["joint_y"]> self.target_tile.target_location_y:
               self.damage_zombies()
               self.is_dead = True
+              if self.is_protected:
+                self.game.has_protected_plant_died = True
               self.attacking = False
               self.tile.is_planted = False
               self.x_location = self.target_tile.target_location_x - self.plant_image_config["joint_x"]
@@ -1706,6 +1719,8 @@ init python:
         self.target_steal_plant = copy.copy(plant)
         self.target_steal_plant.is_being_stolen = True
         plant.is_dead = True
+        if plant.is_protected:
+          self.game.has_protected_plant_died = True
         plant.tile.is_planted = False
         if plant.plant_type == "cobcannon":
           if plant.target_marker is not None:
@@ -1851,7 +1866,7 @@ init python:
             if time.time() - self.electricity_sound_timer > 1:
               self.electricity_sound_timer = time.time()
               renpy.play(AUDIO_DIR + "voltage.mp3", channel = "audio")
-            particleSystem.electricity(self.x_location, self.y_location + self.image_config["fall_height"], 30) 
+              particleSystem.electricity(self.x_location, self.y_location + self.image_config["fall_height"], 30) 
       
       eye_x, eye_y = self.find_eye_location()
       if self.eye_effect:
@@ -2021,9 +2036,12 @@ init python:
         plant = Plant(tile, self.lane_id_to_lane(tile.lane_id), plant)
         self.lanes[lane_index].add_plant(plant)
 
-    def add_plant_tile(self, tile, plant):
+    def add_plant_tile(self, tile, plant, is_protected=False):
         plant_name = plant
         plant = plant_name_to_plant(tile, self.lane_id_to_lane(tile.lane_id), plant, self.gui_controller)
+        if is_protected:
+          plant.is_protected = True
+          tile.is_protected = True
         self.lanes[tile.lane_id].add_plant(plant)
         if plant_name != "andrew":
           tile.is_planted = True
@@ -2121,6 +2139,9 @@ init python:
           if tile.x_location <= x <= tile.x_location + tile.width and tile.y_location <= y <= tile.y_location + tile.height:
               return tile
       return None
+
+    def lane_id_and_tile_id_to_tile(self, lane_id, tile_id):
+      return self.lanes[lane_id].tiles[tile_id]
 
     def lane_id_to_lane(self, lane_id):
       return self.lanes[lane_id]
@@ -2469,6 +2490,11 @@ init python:
       self.wave_message = None
       self.wave_message_timer = time.time()
 
+      self.story_header = None
+      self.story_message = None
+      self.story_message_timer = time.time()
+      self.story_zombie_image = None
+
       for i in range(len(plant_names)):
         self.plant_seed_cards.append(PlantSeedCard(plant_names[i], i))
 
@@ -2479,6 +2505,12 @@ init python:
     def dispay_wave_message(self, message):
       self.wave_message = message
       self.wave_message_timer = time.time()
+
+    def display_story_message(self, header, message, zombie_name):
+      self.story_header = header
+      self.story_message = message
+      self.story_zombie_image = all_images.images["zombies"][zombie_name]["icon"]
+      self.story_message_timer = time.time()
 
     def add_target_marker(self, x, y, cobcannon):
       target = TargetMarker(x, y, cobcannon)
@@ -2512,6 +2544,17 @@ init python:
         render.place(notification_background, x = int((1900/2) - (len(self.wave_message) * 25)/2), y = 470)
         notification_text = Text(self.wave_message, size = 40, bold = True, color = (255, 0, 0))
         render.place(notification_text, x = int((1900/2) - (len(self.wave_message) * 25)/2) + 20, y = 500)
+
+      # place the story message and header at the bottom of the screen, image on the left, text on the right
+
+      if self.story_message:
+        notification_background = Solid((255, 255, 255, 180), xsize=1000, ysize=200)
+        render.place(notification_background, x = 430, y = 900)
+        render.place(self.story_zombie_image, x = 440, y = 910)
+        notification_text = Text(self.story_header, size = 30, bold = True, color = (255, 0, 0))
+        render.place(notification_text, x = 540, y = 930)
+        notification_text = Text(self.story_message, size = 30)
+        render.place(notification_text, x = 540, y = 980)
 
       if self.is_targeting and not self.targeted_location_x:
         render.place(self.targeting_image, x = state["mouseX"] - 65, y = state["mouseY"] - 40)
@@ -2573,6 +2616,10 @@ init python:
         if time.time() - self.wave_message_timer > 3:
           self.wave_message = None
 
+      if self.story_message != None:
+        if time.time() - self.story_message_timer > 4:
+          self.story_message = None
+
       for sun in self.suns:
         sun.update(state)
         if sun.is_dead:
@@ -2610,11 +2657,13 @@ init python:
           shield = Shield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane, zombie)
           self.lane.add_zombie(shield)
           self.lane.add_zombie(zombie)
+          return
 
         if self.zombie_type in ["mask_shield_bearer"]:
           shield = ArmoredShield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane, zombie)
           self.lane.add_zombie(shield)
           self.lane.add_zombie(zombie)
+          return
         self.lane.add_zombie(zombie)
         return
       if self.zombie_type == "van":
@@ -2628,7 +2677,7 @@ init python:
       self.lane.add_zombie(zombie)
 
   class ZombieSpawner():
-    def __init__(self, level_config, lanes, difficulty_multiplier):
+    def __init__(self, level_config, lanes, gui_controller, difficulty_multiplier):
       self.start_time = time.time()
       self.level_config = level_config
       self.lanes = lanes
@@ -2640,6 +2689,7 @@ init python:
       self.has_finished = False
       self.announced_first_wave = False
       self.difficulty_multiplier = difficulty_multiplier
+      self.gui_controller = gui_controller
 
       self.allow_fast_forward_timer = None
 
@@ -2673,15 +2723,20 @@ init python:
       return int((seconds_elapsed - initial_delay)/20) + 1
 
     def prepare_zombie_interval(self):
-      send_to_file("logz.txt", "Preparing Interval!" + "\n")
       current_time = time.time()
       interval_config = self.level_config["spawn"][str(self.interval)]
+
+      if "message" in interval_config:
+        self.gui_controller.display_story_message(interval_config["message"]["header"], interval_config["message"]["message"], interval_config["message"]["zombie_image_name"])
+
       zombie_types = self.level_config["spawn"]["probabilities"]
       budget = max((interval_config["budget"] * self.difficulty_multiplier), 1)
       zombies_to_spawn = []
       remaining_budget = budget
       if "must_spawn" in interval_config:
         for key, val in interval_config["must_spawn"].items():
+          if key == "kanishk" and not self.lanes.has_expensive_plant():
+            continue
           for i in range(val):
             zombies_to_spawn.append(key)
             remaining_budget -= config_data.get_zombie_config(key)["cost"]
@@ -2816,7 +2871,8 @@ init python:
 
       self.last_time = time.time()
 
-      self.loaded_plants = loaded_plants
+      loaded_plants.extend(self.get_protected_plant_names())
+      self.loaded_plants = list(set(loaded_plants))
 
       all_images.load_zombies(self.level_config["zombies"])
       all_images.load_plants(self.loaded_plants)
@@ -2832,8 +2888,29 @@ init python:
       self.lanes.set_gui_controller(self.gui_controller)
       self.gui_controller.explosion_controller = self.explosion_controller
 
-      self.zombie_spawner = ZombieSpawner(self.level_config, self.lanes, self.difficulty_multiplier)
+      self.zombie_spawner = ZombieSpawner(self.level_config, self.lanes,self.gui_controller, self.difficulty_multiplier)
 
+      self.has_protected_plant_died = False
+      self.handle_protected_plants()
+
+    def handle_protected_plants(self):
+      # check if protected plants in level
+      if "protect" in self.level_config:
+        protected_plants = self.level_config["protect"]
+        for protected_plant in protected_plants:
+          plant_name = protected_plant[0]
+          lane_id = protected_plant[2]
+          tile_id = protected_plant[1]
+          tile = self.lanes.lane_id_and_tile_id_to_tile(lane_id, tile_id)
+          plant = self.lanes.add_plant_tile(tile, plant_name, is_protected = True)
+          plant.game = self
+
+    def get_protected_plant_names(self):
+      protected_plants = []
+      if "protect" in self.level_config:
+        protected_plants = self.level_config["protect"]
+      return [protected_plant[0] for protected_plant in protected_plants]
+        
     def visit(self):
       return self.environment.visit()
 
@@ -2868,9 +2945,12 @@ init python:
         tile = self.lanes.pos_to_tile(self.mouseX, self.mouseY)
         if tile:
           if tile.is_planted:
-            tile.is_planted = False
-            tile.get_plant_on_tile().is_dead = True
-            tile.plant_on_tile = None
+            if tile.get_plant_on_tile().is_protected:
+              self.gui_controller.display_notification("Can't remove protected plants!")
+            else:
+              tile.is_planted = False
+              tile.get_plant_on_tile().is_dead = True
+              tile.plant_on_tile = None
           else:
             self.gui_controller.display_notification("Nothing to remove!")
         current_state["is_shovelling"] = False
@@ -2910,6 +2990,12 @@ init python:
       self.alter_state(current_state)
 
     def check_end(self):
+      if self.has_protected_plant_died:
+        renpy.play(AUDIO_DIR + "moan.mp3", channel = "audio")
+        self.has_ended_timer = time.time()
+        self.gui_controller.dispay_wave_message("You lost!")
+        return "lost"
+
       all_zombies = self.lanes.get_all_zombies()
       for zombie in all_zombies:
         if zombie.x_location < 150:
@@ -2943,10 +3029,17 @@ init python:
       # r = self.environment.render(r)
       r = self.lanes.render(r)
       r = self.explosion_controller.render(r)
+
+      if self.has_ended_timer:
+        opacity = 255 * ((time.time() - self.has_ended_timer) / 3)
+        white_screen_overlay = Solid((255, 255, 255, opacity), xsize=1950, ysize=1080)
+        r.place(white_screen_overlay, 0, 0)
+        if time.time() - self.has_ended_timer > 2:
+          text = Text("Move the mouse to continue", size=50, color=(0, 0, 0))
+          r.place(text, x = self.mouseX, y = self.mouseY)
+
       r = self.gui_controller.render(r, new_state)
       r = self.zombie_spawner.render(r)
-
-      # r.place(text, x = current_state["mouseX"], y = current_state["mouseY"])
 
       renpy.redraw(self, 0)
       return r
