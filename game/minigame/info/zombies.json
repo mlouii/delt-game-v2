@@ -1159,7 +1159,7 @@
       "almanac_name": "Oppa Sig",
       "description": "Normal in all aspects",
       "toughness": "low",
-      "story": "The typical Oppa Sig. Hobbies include lifting weights, and umm, umm... He also likes.... ummm..."
+      "story": "The typical Oppa Sig. Hobbies include lifting weights and throwing pennies at freshman."
     }
   },
 
@@ -1226,7 +1226,7 @@
       "toughness": "medium",
       "table toughess": "high",
       "special": "Immune to smoke",
-      "story": "Despite her posh fiending, she's finally sick of fake watermelon scent."
+      "story": "She's finally sick of fake watermelon scent, and her gas mask silences the loud."
     }
   },
 
@@ -1325,7 +1325,7 @@
       "almanac_name": "Buckethead Oppa Sig",
       "description": "His bucket makes him extremely resistant to damage",
       "toughness": "high",
-      "story": "The Oppa Sig's capstone project came in clutch. His bucket is difficult to dent."
+      "story": "Finally giving up on cleaning, the Oppa Sig has utilized the mop buckets for his purposes."
     }
   },
 
@@ -1346,6 +1346,7 @@
       "almanac_name": "Dawg",
       "description": "Speedy Opp that runs on all fours",
       "toughness": "low",
+      "damage": "enhanced",
       "speed": "fast",
       "story": "He got that dawg in him? Furry shit? I honestly don't know how to make this canon."
     }
@@ -1368,6 +1369,7 @@
       "almanac_name": "Kinetic Footwear Opp",
       "description": "Charges up a powerful laser attack",
       "toughness": "medium",
+      "damage": "massive",
       "special": "Evaporates everything in its path",
       "story": "The kicks came to play. His power level increases with every step."
     }
@@ -1441,6 +1443,7 @@
       "almanac_name": "Public Safety Van",
       "description": "Brings the opps right to your doorstep",
       "toughness": "very high",
+      "damage": "massive",
       "special": "Drops off opps when destroyed",
       "story": "Growing up a poor orphan, this 2018 Toyota Sienna has never had anywhere to call home. However, public safety has been kind to it and he will fight with all it's might to protect it... After all, this is all it has left."
     }

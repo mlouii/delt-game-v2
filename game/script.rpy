@@ -23,8 +23,12 @@ define mo = Character("Mo", color="#000000")
 define y = Character([playerName], color="#FFFFFF")
 define shahaan = Character("Shahaan", color="#000000")
 define oppasig = Character("Oppa Sig", color="#a82222")
+define a_oppasig = Character("Asian Oppa Sig", color="#a82222")
+define leather = Character("Asian Leather Jacket Guy", color="#a82222")
+define kinetic = Character("Kinetic Footwear Guy", color="#a82222")
 define arg = Character("A Random Girl", color="#a82222")
 define arg_r = Character("Potentially Racist Girl?", color="#a82222")
+define shield_girl = Character("Shield Girl", color="#a82222")
 define zion = Character("Zion", color="#000000")
 
 define y_nvl = Character([playerName], kind=nvl, image="nighten", callback=Phone_SendSound)
@@ -139,7 +143,7 @@ label start:
 
     $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
     $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic","officer","van", "mask_shield_bearer", "neil", "kanishk"]
-    $ current_level = "level0"
+    $ current_level = "level8"
     call game_and_select
 
     $ playerName = "You"

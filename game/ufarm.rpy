@@ -309,115 +309,236 @@ label ufarm:
   # $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer"]
   # $ current_level = "level6"
   # call game_and_select
-  play music pushing_onwards
+  # play music pushing_onwards
 
-  show ufarm-back2-sunset
-  with fade
+  # show ufarm-back2-sunset
+  # with fade
 
-  "A voice comes from the distance. It's powerful."
+  # "A voice comes from the distance. It's powerful."
 
-  "Is she giving you any trouble, Luis?"
+  # "Is she giving you any trouble, Luis?"
 
-  show jacob at right
-  with hpunch
+  # show jacob at right
+  # with hpunch
 
-  hide shield-girl2
+  # hide shield-girl2
 
-  show luis at left
+  # show luis at left
 
-  luis "Jacob! You're back! You've been gone for so long."
+  # luis "Jacob! You're back! You've been gone for so long."
 
-  jacob "Thanks, I'm out on parole."
+  # jacob "Thanks, I'm out on parole."
 
-  jacob "It's crazy in there."
+  # jacob "It's crazy in there."
 
-  jacob "I became the most feared man in the prison."
+  # jacob "I became the most feared man in the prison."
 
-  jacob "Don't drop the soap around me, they said. One person didn't listen."
+  # jacob "Don't drop the soap around me, they said. One person didn't listen."
 
-  jacob "He said he wasn't scared of me."
+  # jacob "He said he wasn't scared of me."
 
-  jacob "But one day, the soap slipped out of his hands."
+  # jacob "But one day, the soap slipped out of his hands."
 
-  jacob "He bent down to pick it up."
+  # jacob "He bent down to pick it up."
 
-  y "Oh no."
+  # y "Oh no."
 
-  jacob "And I bent down too."
+  # jacob "And I bent down too."
 
-  jacob "And I picked it up for him."
+  # jacob "And I picked it up for him."
 
-  jacob "'Here you go, buddy.', I said to him."
+  # jacob "'Here you go, buddy.', I said to him."
 
-  y "Wow, you're a really nice guy."
+  # y "Wow, you're a really nice guy."
 
-  jacob "Then I hit him with a German suplex."
+  # jacob "Then I hit him with a German suplex."
 
-  jacob "They extended my sentence for that."
+  # jacob "They extended my sentence for that."
 
-  y "Oh."
+  # y "Oh."
 
-  y "What did you do to get in there?"
+  # y "What did you do to get in there?"
 
-  jacob "Trespassing."
+  # jacob "Trespassing."
 
-  jacob "Sox Stadium. At night. Josh Silets brought me there. We got arrested together."
+  # jacob "Sox Stadium. At night. Josh Silets brought me there. We got arrested together."
 
-  y "Oh, that's not too bad. Trepassing is a misdemeanor."
+  # y "Oh, that's not too bad. Trepassing is a misdemeanor."
 
-  jacob "Josh Silets was such a good friend. The world will never be the same without him."
+  # jacob "Josh Silets was such a good friend. The world will never be the same without him."
 
-  y "Wait, what happened to him?"
+  # y "Wait, what happened to him?"
 
-  jacob "He got the death penalty."
+  # jacob "He got the death penalty."
 
-  y "What?!"
+  # y "What?!"
 
-  y "For trespassing?!"
+  # y "For trespassing?!"
 
-  jacob "Anish was his defense attorney. You probably wouldn't know him."
+  # jacob "Anish was his defense attorney. You probably wouldn't know him."
 
-  jacob "But he has a way with words."
+  # jacob "But he has a way with words."
 
-  jacob "The judge was so moved by Anish's speech, he started crying."
+  # jacob "The judge was so moved by Anish's speech, he started crying."
 
-  jacob "The more he spoke, the harsher the sentence got."
+  # jacob "The more he spoke, the harsher the sentence got."
 
-  jacob "Somehow, it went from community service to the death penalty."
+  # jacob "Somehow, it went from community service to the death penalty."
 
-  y "That's crazy."
+  # y "That's crazy."
 
-  jacob "But the feds had a hard time finding a way to kill him."
+  # jacob "But the feds had a hard time finding a way to kill him."
 
-  jacob "They tried everything."
+  # jacob "They tried everything."
 
-  jacob "Shooting him didn't work. He got a pump in at the gym before his execution so he was fine."
+  # jacob "Shooting him didn't work. He got a pump in at the gym before his execution so he was fine."
 
-  jacob "They tried to poison him, but he's taken so many drugs that he's immune to everything."
+  # jacob "They tried to poison him, but he's taken so many drugs that he's immune to everything."
 
-  jacob "Injecting alcohol into his bloodstream didn't work either. ABV went up to 100 percent. He was fine."
+  # jacob "Injecting alcohol into his bloodstream didn't work either. ABV went up to 100 percent. He was fine."
 
-  y "So how did they kill him?"
+  # y "So how did they kill him?"
 
-  jacob "They screenshotted his NFTs."
+  # jacob "They screenshotted his NFTs."
 
-  jacob "Then he exploded."
+  # jacob "Then he exploded."
 
-  y "Oh."
+  # y "Oh."
 
-  jacob "Anyways, you got anyone I can wrestle?"
+  # jacob "Anyways, you got anyone I can wrestle?"
 
-  jacob "I've been itching for a fight."
+  # jacob "I've been itching for a fight."
 
-  y "That girl over there looks like she wants to fight."
+  # y "That girl over there looks like she wants to fight."
 
-  y "Let's go."
+  # y "Let's go."
 
   # $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob"]
   # $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer"]
-  # $ current_level = "level6"
+  # $ current_level = "level7"
   # call game_and_select
   # play music pushing_onwards
+
+  scene ufarm-table-sunset
+  with fade
+
+  show shield-girl2 at right
+  with fade
+
+  shield_girl "Damn, yall got hands."
+
+  shield_girl "But I swear, if I had a gas mask on, I would've won."
+
+  shield_girl "I'm much stronger when I can actually breathe."
+
+  show pranav at left
+  with moveinleft
+
+  pranav "Damn girl, you look super goooood."
+
+  pranav "Wyd?"
+
+  pranav "I got a lot of money."
+
+  pranav "And a nicotine addiction."
+
+  shield_girl "Wow thanks, you're super ugly."
+
+  shield_girl "And I'm already rich."
+
+  pranav "You should see me after a haircut. And a workout."
+
+  pranav "Except I don't workout. At least not my body."
+
+  pranav "I do lung workouts. I can smoke a pack in 10 minutes."
+
+  pranav "I'm a beast."
+
+  shield_girl "Yeah, I can tell."
+
+  shield_girl "You stink. It physically hurts me to be around you."
+
+  shield_girl "Once I get my gas mask, I'm killing you."
+
+  hide shield-girl2
+  with moveoutright
+
+  y "Damn, she's mean."
+
+  y "I don't know what's her problem."
+
+  pranav "Yo, I think she's into me."
+
+  pranav "Look at her eyes. She wants me. She's gonna be mine by the end of the night."
+
+  pranav "Also, did you guys start smoking yet?"
+
+  y "Uhh, yeah. We smoked all of it."
+
+  show kinetic at right
+  with moveinright
+
+  leather "Hey, how do you like my fit?"
+
+  y "It's pretty stylish."
+
+  y "But why were you just pacing around? You were walking back and forth for like hours."
+
+  leather "I was charging my phone for the first hour."
+
+  leather "These shoes are Kinetic Footwear. They charge your phone when you walk."
+
+  kinetic "Now my phone is at 185 percent."
+
+  kinetic "All the leftover energy goes straight into your brain."
+
+  kinetic "You know, if we had these shoes, we could've won tug of war. Thats the power of Kinetic Footwear."
+
+  y "Wow, that's pretty cool. I want a pair."
+
+  kinetic "You'll have to talk to the Founder."
+
+  y "But, who are you anyways?"
+
+  kinetic "I'm her boyfriend."
+
+  kinetic "I'm also an oppa sig. Been living there for a while now."
+
+  pranav "I'm gonna take your girl. Just watch."
+
+  a_oppasig "I'm gonna take your life. I'm disintegrating you."
+
+  a_oppasig "Wasn't planning to fight today, but I guess I have to."
+
+  mark_nvl "You can't use all the brothers in one scene."
+
+  mark_nvl "Unfortunately, you can only use seven at a time."
+
+  mark_nvl "So, who do you want to use?"
+
+  $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav"]
+  $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic"]
+  $ current_level = "level8"
+  call game_and_select
+  play music pushing_onwards
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

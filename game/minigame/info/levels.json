@@ -680,7 +680,7 @@
 
   "level8" : {
     "area": "area2",
-    "zombies": ["basic", "dog", "conehead", "buckethead", "shield", "shield_bearer"],
+    "zombies": ["basic", "dog", "conehead", "buckethead", "shield", "shield_bearer", "armored_shield", "mask_shield_bearer"],
     "spawn": {
       "probabilities": {
         "basic": 1,
@@ -689,12 +689,16 @@
         "buckethead": 1,
         "shield_bearer": 2
       },
-      "initial_delay": 15,
+      "initial_delay": 1,
       "intervals": 10,
       "1": {
         "type": "normal",
         "budget": 2,
-        "banned_zombies": ["dog", "conehead", "buckethead", "shield_bearer"]
+        "banned_zombies": ["dog", "conehead", "buckethead", "shield_bearer"],
+        "must_spawn": {
+          "shield_bearer": 5,
+          "mask_shield_bearer": 5
+        }
       },
       "2": {
         "type": "normal",
