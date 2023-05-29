@@ -1,423 +1,423 @@
 
 label ufarm:
 
-  # scene penthouse
+  scene penthouse
 
-  # y "That was such a great nap."
+  y "That was such a great nap."
 
-  # y "I feel so refreshed."
+  y "I feel so refreshed."
 
-  # nvl_narrator "Shahaan has been added to the chat"
+  nvl_narrator "Shahaan has been added to the chat"
 
-  # shahaan_nvl "Hey you should pull up"
+  shahaan_nvl "Hey you should pull up"
 
-  # shahaan_nvl "You want to smoke?"
+  shahaan_nvl "You want to smoke?"
 
-  # y_nvl "I don't want smoke with nobody"
+  y_nvl "I don't want smoke with nobody"
 
-  # y_nvl "I have no enemies"
+  y_nvl "I have no enemies"
 
-  # shahaan_nvl "Well, you should pull up anyways"
+  shahaan_nvl "Well, you should pull up anyways"
 
-  # y_nvl "I'm on my way"
+  y_nvl "I'm on my way"
 
-  # scene front-door-2
-  # with fade
+  scene front-door-2
+  with fade
 
-  # y "hmm, door is locked this time."
+  y "hmm, door is locked this time."
 
-  # y "Is it usually locked? Maybe they need good security for this party."
+  y "Is it usually locked? Maybe they need good security for this party."
 
-  # y_nvl "Hey, I'm locked out. Can you let me in?"
+  y_nvl "Hey, I'm locked out. Can you let me in?"
 
-  # shahaan_nvl "Brayden will come get you"
+  shahaan_nvl "Brayden will come get you"
 
-  # nvl clear
+  nvl clear
 
-  # scene front-door-3
-  # with fade
+  scene front-door-3
+  with fade
 
 
-  # show brayden
-  # with moveinleft
+  show brayden
+  with moveinleft
 
-  # brayden "Hey, you're here!"
+  brayden "Hey, you're here!"
 
-  # y "Damn, you've got some good style."
+  y "Damn, you've got some good style."
 
-  # brayden "Thanks, it comes naturally."
+  brayden "Thanks, it comes naturally."
 
-  # brayden "You look good too."
+  brayden "You look good too."
 
-  # y "Thanks, I try."
+  y "Thanks, I try."
 
-  # brayden "You here for the party?"
+  brayden "You here for the party?"
 
-  # y "Yeah! Is it happening right now?"
+  y "Yeah! Is it happening right now?"
 
-  # brayden "Not yet, we've got to do something else first."
+  brayden "Not yet, we've got to do something else first."
 
-  # y "What's that?"
+  y "What's that?"
 
-  # brayden "Smoke."
+  brayden "Smoke."
 
-  # y "Oh, I don't smoke."
+  y "Oh, I don't smoke."
 
-  # "A voice calls out to Brayden from inside the house."
+  "A voice calls out to Brayden from inside the house."
 
-  # brayden "They want me to investigate the u-farm. For opps."
+  brayden "They want me to investigate the u-farm. For opps."
 
-  # brayden "You want to come?"
+  brayden "You want to come?"
 
-  # y "Sure, I'm down."
+  y "Sure, I'm down."
 
-  # y "I've done some gardening before. I grew an onion once."
+  y "I've done some gardening before. I grew an onion once."
 
-  # scene ufarm-table-sunset
-  # with fade
+  scene ufarm-table-sunset
+  with fade
 
-  # show brayden at left
-  # with moveinleft
+  show brayden at left
+  with moveinleft
 
-  # y "So when do we start cultivating?"
+  y "So when do we start cultivating?"
 
-  # play sound smoker_planted
+  play sound smoker_planted
 
-  # hide brayden
-  # show brayden-boof at left
+  hide brayden
+  show brayden-boof at left
 
-  # brayden "I know you don't smoke, but take a moment to appreciate this."
+  brayden "I know you don't smoke, but take a moment to appreciate this."
 
-  # brayden "Aint this the nicest boof you've ever seen?"
+  brayden "Aint this the nicest boof you've ever seen?"
 
-  # brayden "The finest strain of indica, wrapped up flawlessly."
+  brayden "The finest strain of indica, wrapped up flawlessly."
 
-  # brayden "I'm gonna be so chill."
+  brayden "I'm gonna be so chill."
 
-  # y "I'm not sure if I'm ready for this."
+  y "I'm not sure if I'm ready for this."
 
-  # "Brayden takes a hit from the boof."
+  "Brayden takes a hit from the boof."
 
-  # brayden "Oh my god, I'm so high."
+  brayden "Oh my god, I'm so high."
 
-  # brayden "I'm chill as heck right now."
+  brayden "I'm chill as heck right now."
 
-  # hide brayden-boof
-  # show brayden-chill at left
+  hide brayden-boof
+  show brayden-chill at left
 
-  # y "Wow."
+  y "Wow."
 
-  # y "You're so chill."
+  y "You're so chill."
 
-  # show oppasig at right
-  # with moveinright
+  show oppasig at right
+  with moveinright
 
-  # brayden "Hey, are you opps?"
+  brayden "Hey, are you opps?"
 
-  # oppasig "Yeah, I'm opp"
+  oppasig "Yeah, I'm opp"
 
-  # oppasig "Should have turned off your snap map"
+  oppasig "Should have turned off your snap map"
 
-  # oppasig "We gonna smoke you now"
+  oppasig "We gonna smoke you now"
 
-  # mark_nvl "Hey, just a heads up"
+  mark_nvl "Hey, just a heads up"
 
-  # mark_nvl "You're not in the house anymore, so there are less X off opportunities"
+  mark_nvl "You're not in the house anymore, so there are less X off opportunities"
 
-  # mark_nvl "Keep that in mind"
+  mark_nvl "Keep that in mind"
 
-  # $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter"]
-  # $ seen_zombies = ["basic", "dog", "conehead", "buckethead"]
-  # $ current_level = "level5"
-  # call game_and_select
-  # play music pushing_onwards
+  $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter"]
+  $ seen_zombies = ["basic", "dog", "conehead", "buckethead"]
+  $ current_level = "level5"
+  call game_and_select
+  play music pushing_onwards
 
-  # show ufarm-back2-sunset
-  # with fade
+  show ufarm-back2-sunset
+  with fade
 
-  # show brayden-chill at left
-  # with moveinleft
+  show brayden-chill at left
+  with moveinleft
 
-  # brayden "Let's go back to the house."
+  brayden "Let's go back to the house."
 
-  # brayden "We can tell the others that the u-farm is safe."
+  brayden "We can tell the others that the u-farm is safe."
 
-  # hide brayden-chill
+  hide brayden-chill
 
-  # y "Hmm, theres this random girl here."
+  y "Hmm, theres this random girl here."
 
-  # y "I hope we arent causing her any trouble."
+  y "I hope we arent causing her any trouble."
 
-  # scene hallway
-  # with fade
+  scene hallway
+  with fade
 
-  # show luis at center
+  show luis at center
   
-  # show pranav at right
+  show pranav at right
 
-  # "Some people are talking in the hallway."
+  "Some people are talking in the hallway."
 
-  # show brayden at left
-  # with moveinleft
+  show brayden at left
+  with moveinleft
 
-  # brayden "Cleared out the u-farm."
+  brayden "Cleared out the u-farm."
 
-  # brayden "No opps."
+  brayden "No opps."
 
-  # luis "Great, I've packed a boof."
+  luis "Great, I've packed a boof."
 
-  # luis "Let's smoke. In peace."
+  luis "Let's smoke. In peace."
 
-  # brayden "I already smoked, so I'll go play some genshin."
+  brayden "I already smoked, so I'll go play some genshin."
 
-  # hide brayden
-  # with moveoutleft
+  hide brayden
+  with moveoutleft
 
-  # pranav "Gimme a second, I need to go to the bathroom."
+  pranav "Gimme a second, I need to go to the bathroom."
 
-  # pranav "Don't start without me."
+  pranav "Don't start without me."
 
-  # hide pranav
-  # with moveoutright
+  hide pranav
+  with moveoutright
 
-  # luis "Meet us there!"
+  luis "Meet us there!"
 
-  # scene ufarm-back-sunset
-  # with fade
+  scene ufarm-back-sunset
+  with fade
 
-  # show luis at left
-  # with moveinright
+  show luis at left
+  with moveinright
 
-  # luis "Isn't the sunset beautiful?"
+  luis "Isn't the sunset beautiful?"
 
-  # luis "I've always loved the way the sun looks when it's setting."
+  luis "I've always loved the way the sun looks when it's setting."
 
-  # luis "It's like the sun is saying goodbye."
+  luis "It's like the sun is saying goodbye."
 
-  # luis "But it's not sad."
+  luis "But it's not sad."
 
-  # luis "It's just a reminder that the sun will come back tomorrow."
+  luis "It's just a reminder that the sun will come back tomorrow."
 
-  # luis "And it will be just as beautiful."
+  luis "And it will be just as beautiful."
 
-  # luis "Anyways, I'm Luis."
+  luis "Anyways, I'm Luis."
 
-  # y "Hey, nice to meet you!"
+  y "Hey, nice to meet you!"
 
-  # luis "Just making sure, you're fine with me smoking right?"
+  luis "Just making sure, you're fine with me smoking right?"
 
-  # y "Yeah, I'm fine with it."
+  y "Yeah, I'm fine with it."
 
-  # y "What are you smoking?"
+  y "What are you smoking?"
 
-  # luis "Nothing too crazy. A small joint."
+  luis "Nothing too crazy. A small joint."
 
-  # luis "I'm not trying to get too high."
+  luis "I'm not trying to get too high."
 
-  # hide luis
+  hide luis
 
-  # show luis-boof at left
+  show luis-boof at left
 
-  # luis "See, it's not too big."
+  luis "See, it's not too big."
 
-  # "He takes a hit from the boof."
+  "He takes a hit from the boof."
 
-  # hide luis-boof
+  hide luis-boof
 
-  # show luis-faded at left
+  show luis-faded at left
 
-  # luis "It's not too strong, but I'm kinda feeling it."
+  luis "It's not too strong, but I'm kinda feeling it."
 
-  # y "That absolutely reeks."
+  y "That absolutely reeks."
 
-  # y "The smell is so strong, the entire u-farm stank."
+  y "The smell is so strong, the entire u-farm stank."
 
-  # y "I think Im getting high just from being around you."
+  y "I think Im getting high just from being around you."
 
-  # luis "Actually, I'm feeling it too."
+  luis "Actually, I'm feeling it too."
 
-  # hide luis-faded
+  hide luis-faded
 
-  # show luis-faded-2 at left
+  show luis-faded-2 at left
 
-  # luis "I'm so faded."
+  luis "I'm so faded."
 
-  # y "We are absolutely so faded."
+  y "We are absolutely so faded."
 
-  # show shield-girl2 at right
-  # with hpunch
+  show shield-girl2 at right
+  with hpunch
 
-  # hide luis-faded-2
+  hide luis-faded-2
 
-  # show luis at left
+  show luis at left
 
-  # arg "So I can't even enjoy a game of Hennessy pong in peace? Nasty smell."
+  arg "So I can't even enjoy a game of Hennessy pong in peace? Nasty smell."
 
-  # y "Uh, what's that?"
+  y "Uh, what's that?"
 
-  # arg "Hennessy X.O. It's cognac."
+  arg "Hennessy X.O. It's cognac."
 
-  # arg "Oh, you're probably too broke to know what that is."
+  arg "Oh, you're probably too broke to know what that is."
 
-  # arg "But anyways, It's beer pong, but better."
+  arg "But anyways, It's beer pong, but better."
 
-  # y "That sounds like a lot of alcohol."
+  y "That sounds like a lot of alcohol."
 
-  # arg "If you can't handle multiple cups of 40 percent ABV, you're actually a b1tch."
+  arg "If you can't handle multiple cups of 40 percent ABV, you're actually a b1tch."
 
-  # arg "So, are you going to stop that smoking?"
+  arg "So, are you going to stop that smoking?"
 
-  # arg "Or should I throw a table at you?"
+  arg "Or should I throw a table at you?"
 
-  # luis "Mann, I'm so faded."
+  luis "Mann, I'm so faded."
 
-  # luis "I can't even think straight."
+  luis "I can't even think straight."
 
-  # luis "You want to take a hit, girl? This boof is straight gas."
+  luis "You want to take a hit, girl? This boof is straight gas."
 
-  # arg "..."
+  arg "..."
 
-  # hide luis
-  # show luis-boof at left
+  hide luis
+  show luis-boof at left
 
-  # luis "..."
+  luis "..."
 
-  # arg "I hate people like you."
+  arg "I hate people like you."
 
-  # y "Yo, what do you mean by that?"
+  y "Yo, what do you mean by that?"
 
-  # hide luis-boof
-  # show luis at left
+  hide luis-boof
+  show luis at left
 
-  # mark_nvl "That girl is with the opps."
+  mark_nvl "That girl is with the opps."
 
-  # mark_nvl "And she just said that to Luis."
+  mark_nvl "And she just said that to Luis."
 
-  # mark_nvl "Definitely racially motivated."
+  mark_nvl "Definitely racially motivated."
 
-  # y_nvl "She's just upset that Luis is smoking."
+  y_nvl "She's just upset that Luis is smoking."
 
-  # mark_nvl "Damn, you pussy?"
+  mark_nvl "Damn, you pussy?"
 
-  # mark_nvl "I wouldn't let that slide, if I were you."
+  mark_nvl "I wouldn't let that slide, if I were you."
 
-  # mark_nvl "You should probably do something."
+  mark_nvl "You should probably do something."
 
-  # arg_r "May God have mercy on my enemies, because I won't."
+  arg_r "May God have mercy on my enemies, because I won't."
 
-  # $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom"]
-  # $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer"]
-  # $ current_level = "level6"
-  # call game_and_select
-  # play music pushing_onwards
+  $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom"]
+  $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer"]
+  $ current_level = "level6"
+  call game_and_select
+  play music pushing_onwards
 
-  # show ufarm-back2-sunset
-  # with fade
+  show ufarm-back2-sunset
+  with fade
 
-  # "A voice comes from the distance. It's powerful."
+  "A voice comes from the distance. It's powerful."
 
-  # "Is she giving you any trouble, Luis?"
+  "Is she giving you any trouble, Luis?"
 
-  # show jacob at right
-  # with hpunch
+  show jacob at right
+  with hpunch
 
-  # hide shield-girl2
+  hide shield-girl2
 
-  # show luis at left
+  show luis at left
 
-  # luis "Jacob! You're back! You've been gone for so long."
+  luis "Jacob! You're back! You've been gone for so long."
 
-  # jacob "Thanks, I'm out on parole."
+  jacob "Thanks, I'm out on parole."
 
-  # jacob "It's crazy in there."
+  jacob "It's crazy in there."
 
-  # jacob "I became the most feared man in the prison."
+  jacob "I became the most feared man in the prison."
 
-  # jacob "Don't drop the soap around me, they said. One person didn't listen."
+  jacob "Don't drop the soap around me, they said. One person didn't listen."
 
-  # jacob "He said he wasn't scared of me."
+  jacob "He said he wasn't scared of me."
 
-  # jacob "But one day, the soap slipped out of his hands."
+  jacob "But one day, the soap slipped out of his hands."
 
-  # jacob "He bent down to pick it up."
+  jacob "He bent down to pick it up."
 
-  # y "Oh no."
+  y "Oh no."
 
-  # jacob "And I bent down too."
+  jacob "And I bent down too."
 
-  # jacob "And I picked it up for him."
+  jacob "And I picked it up for him."
 
-  # jacob "'Here you go, buddy.', I said to him."
+  jacob "'Here you go, buddy.', I said to him."
 
-  # y "Wow, you're a really nice guy."
+  y "Wow, you're a really nice guy."
 
-  # jacob "Then I hit him with a German suplex."
+  jacob "Then I hit him with a German suplex."
 
-  # jacob "They extended my sentence for that."
+  jacob "They extended my sentence for that."
 
-  # y "Oh."
+  y "Oh."
 
-  # y "What did you do to get in there?"
+  y "What did you do to get in there?"
 
-  # jacob "Trespassing."
+  jacob "Trespassing."
 
-  # jacob "Sox Stadium. At night. Josh Silets brought me there. We got arrested together."
+  jacob "Sox Stadium. At night. Josh Silets brought me there. We got arrested together."
 
-  # y "Oh, that's not too bad. Trepassing is a misdemeanor."
+  y "Oh, that's not too bad. Trepassing is a misdemeanor."
 
-  # jacob "Josh Silets was such a good friend. The world will never be the same without him."
+  jacob "Josh Silets was such a good friend. The world will never be the same without him."
 
-  # y "Wait, what happened to him?"
+  y "Wait, what happened to him?"
 
-  # jacob "He got the death penalty."
+  jacob "He got the death penalty."
 
-  # y "What?!"
+  y "What?!"
 
-  # y "For trespassing?!"
+  y "For trespassing?!"
 
-  # jacob "Anish was his defense attorney. You probably wouldn't know him."
+  jacob "Anish was his defense attorney. You probably wouldn't know him."
 
-  # jacob "But he has a way with words."
+  jacob "But he has a way with words."
 
-  # jacob "The judge was so moved by Anish's speech, he started crying."
+  jacob "The judge was so moved by Anish's speech, he started crying."
 
-  # jacob "The more he spoke, the harsher the sentence got."
+  jacob "The more he spoke, the harsher the sentence got."
 
-  # jacob "Somehow, it went from community service to the death penalty."
+  jacob "Somehow, it went from community service to the death penalty."
 
-  # y "That's crazy."
+  y "That's crazy."
 
-  # jacob "But the feds had a hard time finding a way to kill him."
+  jacob "But the feds had a hard time finding a way to kill him."
 
-  # jacob "They tried everything."
+  jacob "They tried everything."
 
-  # jacob "Shooting him didn't work. He got a pump in at the gym before his execution so he was fine."
+  jacob "Shooting him didn't work. He got a pump in at the gym before his execution so he was fine."
 
-  # jacob "They tried to poison him, but he's taken so many drugs that he's immune to everything."
+  jacob "They tried to poison him, but he's taken so many drugs that he's immune to everything."
 
-  # jacob "Injecting alcohol into his bloodstream didn't work either. ABV went up to 100 percent. He was fine."
+  jacob "Injecting alcohol into his bloodstream didn't work either. ABV went up to 100 percent. He was fine."
 
-  # y "So how did they kill him?"
+  y "So how did they kill him?"
 
-  # jacob "They screenshotted his NFTs."
+  jacob "They screenshotted his NFTs."
 
-  # jacob "Then he exploded."
+  jacob "Then he exploded."
 
-  # y "Oh."
+  y "Oh."
 
-  # jacob "Anyways, you got anyone I can wrestle?"
+  jacob "Anyways, you got anyone I can wrestle?"
 
-  # jacob "I've been itching for a fight."
+  jacob "I've been itching for a fight."
 
-  # y "That girl over there looks like she wants to fight."
+  y "That girl over there looks like she wants to fight."
 
-  # y "Let's go."
+  y "Let's go."
 
-  # $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob"]
-  # $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer"]
-  # $ current_level = "level7"
-  # call game_and_select
-  # play music pushing_onwards
+  $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob"]
+  $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer"]
+  $ current_level = "level7"
+  call game_and_select
+  play music pushing_onwards
 
   scene ufarm-table-sunset
   with fade
@@ -521,6 +521,28 @@ label ufarm:
   $ current_level = "level8"
   call game_and_select
   play music pushing_onwards
+
+  scene ufarm-table-sunset
+
+  show luis at left
+  with moveinleft
+
+  show jacob at right
+  with moveinright
+
+  luis "Wow, we did it."
+
+  luis "Let's get back to the house."
+
+  jacob "I hope public safety doesn't bust us."
+
+  jacob "I'm not trying to go back to jail."
+
+  luis "Don't worry, we'll protect you."
+
+
+
+
 
 
 

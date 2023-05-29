@@ -18,8 +18,11 @@ define michael = Character("Michael", color="#000000")
 define neil = Character("Neil", color="#000000")
 define kanishk = Character("Kanishk", color="#000000")
 define luis = Character("Luis", color="#000000")
+define isiah = Character("Isiah", color="#000000")
 define ps = Character("Public Safety", color="#000000")
+define talha = Character("Talha Bot 9000", color="#000000")
 define mo = Character("Mo", color="#000000")
+define erik = Character("Erik", color="#000000")
 define y = Character([playerName], color="#FFFFFF")
 define shahaan = Character("Shahaan", color="#000000")
 define oppasig = Character("Oppa Sig", color="#a82222")
@@ -132,7 +135,7 @@ label start:
     $ current_difficulty = difficulty_multiplier
 
     $ is_testing = False
-    $ skip_games = False
+    $ skip_games = True
     if is_testing:
         scene area2
         $ current_level = "level4"
@@ -153,7 +156,9 @@ label start:
 
     # call intro
 
-    call ufarm
+    # call ufarm
+
+    call party
     
     show ufarm-sunny
 
