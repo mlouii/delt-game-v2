@@ -1,125 +1,125 @@
 label party:
 
-    # scene hallway
-    # with fade
+    scene hallway
+    with fade
 
-    # show shahaan at left
+    show shahaan at left
 
-    # show isiah at right
+    show isiah at right
 
-    # shahaan "Hey Isiah, you drink all of the everclear?"
+    shahaan "Hey Isiah, you drink all of the everclear?"
 
-    # shahaan "I was planning to make a jungle juice."
+    shahaan "I was planning to make a jungle juice."
 
-    # isiah "What's everclear? I don't drink. I'm a good SGA president."
+    isiah "What's everclear? I don't drink. I'm a good SGA president."
 
-    # isiah "Besides, everclear gets you really hungover the next day."
+    isiah "Besides, everclear gets you really hungover the next day."
 
-    # isiah "Not that I would know."
+    isiah "Not that I would know."
 
-    # shahaan "Well if you don't drink, then how about you be the sober bro for tonight?"
+    shahaan "Well if you don't drink, then how about you be the sober bro for tonight?"
 
-    # isiah "..."
+    isiah "..."
 
-    # shahaan "Okay great! Silence is consent. We just need one more sober bro now."
+    shahaan "Okay great! Silence is consent. We just need one more sober bro now."
 
-    # isiah "Wait - this has got to be a joke right? You can't be serious."
+    isiah "Wait - this has got to be a joke right? You can't be serious."
 
-    # isiah "You want ME to be the sober bro?"
+    isiah "You want ME to be the sober bro?"
 
-    # "A voice echoes, coming from inside the walls."
+    "A voice echoes, coming from inside the walls."
 
-    # talha "Isiah has been chosen as the sober bro."
+    talha "Isiah has been chosen as the sober bro."
 
-    # talha "Failure to comply will result a 5 times X multiplier on your current fees."
+    talha "Failure to comply will result a 5 times X multiplier on your current fees."
 
-    # talha "And a 10 times X multiplier on your future fees."
+    talha "And a 10 times X multiplier on your future fees."
 
-    # talha "You have been warned."
+    talha "You have been warned."
 
-    # talha "You may also find a replacement for yourself."
+    talha "You may also find a replacement for yourself."
 
-    # shahaan "Well, I guess you're the sober bro then."
+    shahaan "Well, I guess you're the sober bro then."
 
-    # shahaan "I'll go find the other one."
+    shahaan "I'll go find the other one."
 
-    # hide shahaan
-    # with moveoutleft
+    hide shahaan
+    with moveoutleft
 
-    # isiah "Bro, I'm already wayyy too sauced."
+    isiah "Bro, I'm already wayyy too sauced."
 
-    # isiah "I don't know who you are, but can you take my place?"
+    isiah "I don't know who you are, but can you take my place?"
 
-    # y "Umm, I'm not sure if I can."
+    y "Umm, I'm not sure if I can."
 
-    # hide isiah
-    # show isiah-money at right
+    hide isiah
+    show isiah-money at right
 
-    # isiah "I'll give you this."
+    isiah "I'll give you this."
 
-    # isiah "And I'm SGA president, and I'm abusing my power to make you do this."
+    isiah "And I'm SGA president, and I'm abusing my power to make you do this."
 
-    # y "I guess I'll do it."
+    y "I guess I'll do it."
 
-    # isiah "Thanks, you're the $hit."
+    isiah "Thanks, you're the $hit."
 
-    # hide isiah-money
+    hide isiah-money
 
-    # scene bathroom
-    # with fade
+    scene bathroom
+    with fade
 
-    # show shahaan at left
-    # show erik at right
-    # show mo at center
+    show shahaan at left
+    show erik at right
+    show mo at center
 
-    # shahaan "What are you two doing in here?"
+    shahaan "What are you two doing in here?"
 
-    # erik "Just inspecting each other's bodies."
+    erik "Just inspecting each other's bodies."
 
-    # mo "Yeah, we're just bros being bros."
+    mo "Yeah, we're just bros being bros."
 
-    # erik "Mo's gained 10 pounds of lean muscle mass since last week."
+    erik "Mo's gained 10 pounds of lean muscle mass since last week."
 
-    # erik "And his balls shrunk into raisins. Saw it with my own eyes."
+    erik "And his balls shrunk into raisins. Saw it with my own eyes."
 
-    # mo "I'm natty, btw."
+    mo "I'm natty, btw."
 
-    # shahaan "Okay, I still need to find a sober bro."
+    shahaan "Okay, I still need to find a sober bro."
 
-    # erik "I'm not doing it."
+    erik "I'm not doing it."
 
-    # erik "I hate doing sober bro almost as much as leg day."
+    erik "I hate doing sober bro almost as much as leg day."
 
-    # mo "I'm also not doing it."
+    mo "I'm also not doing it."
 
-    # shahaan "Well, I guess I'll just have to find someone else."
+    shahaan "Well, I guess I'll just have to find someone else."
 
-    # shahaan "Because I'm not doing it either."
+    shahaan "Because I'm not doing it either."
 
-    # shahaan "I bet Logan could be the sober bro."
+    shahaan "I bet Logan could be the sober bro."
 
-    # mo "As long as its not me."
+    mo "As long as its not me."
 
-    # shahaan "You think you can be the bartender tonight?"
+    shahaan "You think you can be the bartender tonight?"
 
-    # mo "Yeah, I'll make sure everyone gets HAMMERED. EVERYONE."
+    mo "Yeah, I'll make sure everyone gets HAMMERED. EVERYONE."
 
-    # talha "All-House begins in 5 minutes."
+    talha "All-House begins in 5 minutes."
 
-    # talha "X off opportunities are immediately available."
+    talha "X off opportunities are immediately available."
 
-    # talha "You may now prepare for the event."
+    talha "You may now prepare for the event."
 
-    # hide shahaan
-    # with moveoutleft
+    hide shahaan
+    with moveoutleft
 
-    # hide erik
-    # with moveoutright
+    hide erik
+    with moveoutright
 
-    # hide mo
-    # with moveoutright
+    hide mo
+    with moveoutright
 
-    # y "Huh, I guess I'll follow Erik."
+    y "Huh, I guess I'll follow Erik."
 
     scene bar
     with fade

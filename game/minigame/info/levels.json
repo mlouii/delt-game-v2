@@ -60,11 +60,11 @@
 
   "level0" : {
     "area": "area4",
-    "zombies": ["basic", "neil", "shield", "mask_shield_bearer","kinetic", "kanishk", "officer", "dog", "armored_shield", "van", "conehead"],
+    "zombies": ["basic", "neil", "shield","kinetic", "kanishk", "officer", "dog", "van", "conehead", "shield_bearer", "armored_shield" ,"mask_shield_bearer"],
     "protect": [
-      ["colin", 3, 2],
-      ["colin", 3, 3],
-      ["colin", 3, 4]
+      ["jacob", 3, 2],
+      ["jacob", 3, 3],
+      ["jacob", 3, 4]
     ],
     "spawn": {
       "probabilities": {
@@ -86,7 +86,8 @@
         "max_cost":3,
         "banned_zombies": ["kanishk", "conehead", "kinetic"],
         "must_spawn": {
-          "dog": 4
+          "shield_bearer": 6,
+          "mask_shield_bearer": 9
         },
         "message": {
           "header": "Oppa Sig",

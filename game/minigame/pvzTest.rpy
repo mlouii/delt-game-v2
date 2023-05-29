@@ -1584,8 +1584,8 @@ init python:
         self.costume = "blackened"
 
   class Shield(Zombie):
-    def __init__(self, x_location, y_location, lane, bearer):
-      super().__init__(x_location, y_location, "shield", lane)
+    def __init__(self, x_location, y_location, lane, bearer, zombie_type):
+      super().__init__(x_location, y_location, zombie_type, lane)
       self.bearer = bearer
 
     def start_eating(self, plant):
@@ -1600,8 +1600,9 @@ init python:
         hand_location_x = math.cos(true_angle) * self.bearer.body_parts[1].image_height *0.7
         hand_location_y = math.sin(true_angle) * self.bearer.body_parts[1].image_height * 0.7
 
-        torso_joint_x = self.body_parts[0].image_width
-        torso_joint_y = self.body_parts[0].image_height
+        send_to_file("logz.txt", str(self.body_parts[0].image_width) + " , " + str(self.body_parts[0].image_height) + "\n")
+        torso_joint_x = self.body_parts[0].image_width//3
+        torso_joint_y = self.body_parts[0].image_height//3
 
         self.x_location = int(self.bearer.x_location + hand_location_x - torso_joint_x)
         self.y_location = int(self.bearer.y_location - hand_location_y - torso_joint_y)
@@ -1611,11 +1612,6 @@ init python:
       if not self.bearer or self.bearer.is_dead or self.health <= 0:
         self.die()
         self.should_delete = True
-
-  class ArmoredShield(Shield):
-    def __init__(self, x_location, y_location, lane, bearer):
-      super().__init__(x_location, y_location, lane, bearer)
-      self.zombie_type = "armored_shield"
 
   # basic zombie covers all zombies that don't have a special class, such as dog
   class BasicZombie(Zombie):
@@ -2654,13 +2650,13 @@ init python:
       if self.zombie_type in  ["basic", "dog", "conehead", "buckethead", "shield_bearer", "mask_shield_bearer", "officer"]:
         zombie = BasicZombie(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.zombie_type, self.lane)
         if self.zombie_type in ["shield_bearer"]:
-          shield = Shield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane, zombie)
+          shield = Shield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane, zombie, "shield")
           self.lane.add_zombie(shield)
           self.lane.add_zombie(zombie)
           return
 
         if self.zombie_type in ["mask_shield_bearer"]:
-          shield = ArmoredShield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane, zombie)
+          shield = Shield(self.zombie_spawner.spawn_x_location, self.lane.y_location, self.lane, zombie, "armored_shield")
           self.lane.add_zombie(shield)
           self.lane.add_zombie(zombie)
           return

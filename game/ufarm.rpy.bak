@@ -129,7 +129,7 @@ label ufarm:
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter"]
   $ seen_zombies = ["basic", "dog", "conehead", "buckethead"]
   $ current_level = "level5"
-  call game_and_select from _call_game_and_select_4
+  call game_and_select
   play music pushing_onwards
 
   show ufarm-back2-sunset
@@ -308,7 +308,7 @@ label ufarm:
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom"]
   $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer"]
   $ current_level = "level6"
-  call game_and_select from _call_game_and_select_5
+  call game_and_select
   play music pushing_onwards
 
   show ufarm-back2-sunset
@@ -416,7 +416,7 @@ label ufarm:
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob"]
   $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer"]
   $ current_level = "level7"
-  call game_and_select from _call_game_and_select_6
+  call game_and_select
   play music pushing_onwards
 
   scene ufarm-table-sunset
@@ -519,7 +519,7 @@ label ufarm:
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav"]
   $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic"]
   $ current_level = "level8"
-  call game_and_select from _call_game_and_select_7
+  call game_and_select
   play music pushing_onwards
 
   scene ufarm-table-sunset

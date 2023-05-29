@@ -498,7 +498,7 @@ label intro:
   $ plants = ["peashooter", "sunflower"]
   $ seen_zombies = ["basic"]
   $ current_level = "level1"
-  call game_and_select from _call_game_and_select
+  call game_and_select
   play music pushing_onwards
 
   scene mail-room
@@ -597,7 +597,7 @@ label intro:
   $ plants = ["peashooter", "sunflower", "wallnut"]
   $ seen_zombies = ["basic", "dog"]
   $ current_level = "level2"
-  call game_and_select from _call_game_and_select_1
+  call game_and_select
   play music pushing_onwards
 
   y_nvl "What's wrong with these oppa sigs?"
@@ -729,7 +729,7 @@ label intro:
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater"]
   $ seen_zombies = ["basic", "dog", "conehead"]
   $ current_level = "level3"
-  call game_and_select from _call_game_and_select_2
+  call game_and_select
   play music pushing_onwards
 
   scene front-door
@@ -746,7 +746,7 @@ label intro:
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater"]
   $ seen_zombies = ["basic", "dog", "conehead", "buckethead"]
   $ current_level = "level4"
-  call game_and_select from _call_game_and_select_3
+  call game_and_select
   play music pushing_onwards
 
   scene front-door

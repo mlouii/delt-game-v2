@@ -71,7 +71,7 @@ label game_and_select:
     $ _game_menu_screen = None
     $ current_area = level_to_area(current_level)
 
-    call start_plant_select from _call_start_plant_select
+    call start_plant_select
     stop music fadeout 2.0
 
     if (len(chosen_plants) == 0):
@@ -91,7 +91,7 @@ label game_and_select:
         
 
     scene expression current_area with dissolve
-    call test_game_entry_label from _call_test_game_entry_label
+    call test_game_entry_label
     $ preferences.set_volume(0.1, "main")
 
     $ config.rollback_enabled = True
@@ -140,25 +140,25 @@ label start:
         scene area2
         $ current_level = "level4"
         $ chosen_plants = ["peashooter", "sunflower", "wallnut", "repeater"]
-        call test_game_entry_label from _call_test_game_entry_label_1
+        call test_game_entry_label
 
     # call ask_difficulty
 
-    $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
-    $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic","officer","van", "mask_shield_bearer", "neil", "kanishk"]
-    $ current_level = "level0"
-    call game_and_select
+    # $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
+    # $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic","officer","van", "mask_shield_bearer", "neil", "kanishk"]
+    # $ current_level = "level8"
+    # call game_and_select
 
     $ playerName = "You"
     $ y = Character(playerName, color="#376e3a")
     $ MCName = playerName
     $ y_nvl = Character(playerName, kind=nvl, image="nighten", callback=Phone_SendSound)
-    play music pushing_onwards
-    # call intro from _call_intro
 
-    call ufarm from _call_ufarm
+    call intro
 
-    call party from _call_party
+    call ufarm
+
+    call party
     
     show ufarm-sunny
 

@@ -1253,7 +1253,7 @@
   },
 
   "armored_shield": {
-    "animation_type": "shield",
+    "animation_type": "armored_shield",
     "motions": ["shield"],
     "attack_motions": [],
     "death_motions": ["shield_death"],
