@@ -33,8 +33,12 @@ define kinetic = Character("Kinetic Footwear Guy", color="#a82222")
 define arg = Character("A Random Girl", color="#a82222")
 define arg_r = Character("Potentially Racist Girl?", color="#a82222")
 define shield_girl = Character("Shield Girl", color="#a82222")
+define shield_girl_glitch = Character("{glitch=30}Shield Girl{/glitch}", color="#a82222")
+define refactored = Character("Refactored", color="#a82222")
+define officer = Character("Public Safety Officer", color="#a82222")
 define zion = Character("Zion", color="#000000")
 define sweetheart = Character("Sweetheart", color="#000000")
+define andrew = Character("Andrew", color="#000000")
 
 define reagan = Character("Ronald Reagan", color="#3c00ff")
 define kappa = Character("Underage Kappa affiliate", color="#3c00ff")
@@ -45,6 +49,7 @@ define jenna = Character("Jenna Ortega", color="#3c00ff")
 define y_nvl = Character([playerName], kind=nvl, image="nighten", callback=Phone_SendSound)
 define mark_nvl = Character("Mark", kind=nvl, callback=Phone_ReceiveSound)
 define shahaan_nvl = Character("Shahaan", kind=nvl, callback=Phone_ReceiveSound)
+define sienna_nvl = Character("Sienna", kind=nvl, callback=Phone_ReceiveSound)
 
 define config.adv_nvl_transition = None
 define config.nvl_adv_transition = Dissolve(0.3)
@@ -155,7 +160,7 @@ label start:
     $ current_difficulty = difficulty_multiplier
 
     $ is_testing = False
-    $ skip_games = True
+    $ skip_games = False
     if is_testing:
         scene blank
         show area1glitch

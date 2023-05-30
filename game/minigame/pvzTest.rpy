@@ -1095,6 +1095,7 @@ init python:
       self.target_coord_y = None
 
       self.target_marker = None
+      renpy.play(AUDIO_DIR + "ready-to-fire.mp3", channel = "audio")
 
     def attack(self):
       pass
@@ -2386,7 +2387,7 @@ init python:
         if self.y > self.target_y:
           self.reached_target = True
 
-      if mouse_x > self.x and mouse_x < self.x + 50 and mouse_y > self.y and mouse_y < self.y + 50:
+      if mouse_x > self.x-30 and mouse_x < self.x + 80 and mouse_y > self.y-30 and mouse_y < self.y + 80:
         if not self.begin_collecting:
           self.x_distance = self.x - self.collect_location_x
           self.y_distance = self.y - self.collect_location_y
