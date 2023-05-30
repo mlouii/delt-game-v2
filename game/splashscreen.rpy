@@ -1,36 +1,36 @@
-# image splash glitched:
-#     glitch("splashscreen") # reliable slicing
-#     pause 0.3
-#     glitch("splashscreen", offset=60, randomkey=None) # bigger and always-random slicing
-#     pause 0.1
-#     repeat
+image splash glitched:
+    glitch("splashscreen") # reliable slicing
+    pause 0.3
+    glitch("splashscreen", offset=60, randomkey=None) # bigger and always-random slicing
+    pause 0.1
+    repeat
 
-# label splashscreen:
-#     scene black
-#     with Pause(1)
+label splashscreen:
+    scene black
+    with Pause(1)
 
-#     play music intro
+    play music intro
 
-#     show splashscreen
-#     with dissolve
-#     with Pause(1)
+    show splashscreen
+    with dissolve
+    with Pause(1)
 
-#     hide splashscreen
+    hide splashscreen
 
-#     show splash glitched
-#     with Pause(0.5)
+    show splash glitched
+    with Pause(0.5)
 
-#     hide splash glitched
+    hide splash glitched
 
-#     show splashscreen-p at glitch
-#     with Pause(0.3)
+    show splashscreen-p at glitch
+    with Pause(0.3)
 
-#     hide splashscreen-p
+    hide splashscreen-p
 
-#     show splashscreen
-#     with Pause(0.5)
+    show splashscreen
+    with Pause(0.5)
 
-#     scene black with dissolve
-#     with Pause(1)
+    scene black with dissolve
+    with Pause(1)
 
-#     return
+    return

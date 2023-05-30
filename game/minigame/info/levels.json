@@ -61,11 +61,6 @@
   "level0" : {
     "area": "area4",
     "zombies": ["basic", "neil", "shield","kinetic", "kanishk", "officer", "dog", "van", "conehead", "shield_bearer", "armored_shield" ,"mask_shield_bearer"],
-    "protect": [
-      ["jacob", 3, 2],
-      ["jacob", 3, 3],
-      ["jacob", 3, 4]
-    ],
     "spawn": {
       "probabilities": {
         "basic": 2,
@@ -78,7 +73,7 @@
         "kinetic": 1,
         "kanishk": 1
       },
-      "initial_delay": 2,
+      "initial_delay": 20,
       "intervals": 13,
       "1": {
         "type": "normal",
@@ -86,8 +81,7 @@
         "max_cost":3,
         "banned_zombies": ["kanishk", "conehead", "kinetic"],
         "must_spawn": {
-          "shield_bearer": 6,
-          "mask_shield_bearer": 9
+          "dog": 4
         },
         "message": {
           "header": "Oppa Sig",
@@ -681,7 +675,7 @@
 
   "level8" : {
     "area": "area2",
-    "zombies": ["basic", "dog", "conehead", "buckethead", "shield", "shield_bearer", "armored_shield", "mask_shield_bearer"],
+    "zombies": ["basic", "dog", "conehead", "buckethead", "shield", "shield_bearer"],
     "spawn": {
       "probabilities": {
         "basic": 1,
@@ -697,8 +691,7 @@
         "budget": 2,
         "banned_zombies": ["dog", "conehead", "buckethead", "shield_bearer"],
         "must_spawn": {
-          "shield_bearer": 5,
-          "mask_shield_bearer": 5
+          "shield_bearer": 5
         }
       },
       "2": {

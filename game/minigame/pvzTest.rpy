@@ -79,7 +79,11 @@ init python:
         f.write(text)
 
   def lighten(color):
-        return(color[0], color[1] + 8, color[2] + 4)
+    if len(color) == 3:
+      return(color[0], color[1] + 8, color[2] + 4)
+    else:
+      return(color[0], color[1] + 8, color[2] + 4, color[3])
+      
 
   def level_to_area(level_name):
     return level_config[level_name]["area"]

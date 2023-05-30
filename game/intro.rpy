@@ -484,7 +484,7 @@ label intro:
 
   mark_nvl "Good luck"
 
-  "You understand?"
+  y "Do I understand?"
 
   menu: 
     "Yes I do":
@@ -599,6 +599,9 @@ label intro:
   $ current_level = "level2"
   call game_and_select from _call_game_and_select_1
   play music pushing_onwards
+
+  scene hallway
+  with fade
 
   y_nvl "What's wrong with these oppa sigs?"
 

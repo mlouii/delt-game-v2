@@ -23,6 +23,7 @@ define ps = Character("Public Safety", color="#000000")
 define talha = Character("Talha Bot 9000", color="#000000")
 define mo = Character("Mo", color="#000000")
 define erik = Character("Erik", color="#000000")
+define logan = Character("Logan", color="#000000")
 define y = Character([playerName], color="#FFFFFF")
 define shahaan = Character("Shahaan", color="#000000")
 define oppasig = Character("Oppa Sig", color="#a82222")
@@ -33,6 +34,13 @@ define arg = Character("A Random Girl", color="#a82222")
 define arg_r = Character("Potentially Racist Girl?", color="#a82222")
 define shield_girl = Character("Shield Girl", color="#a82222")
 define zion = Character("Zion", color="#000000")
+define sweetheart = Character("Sweetheart", color="#000000")
+
+define reagan = Character("Ronald Reagan", color="#3c00ff")
+define kappa = Character("Underage Kappa affiliate", color="#3c00ff")
+define jenna = Character("Jenna Ortega", color="#3c00ff")
+
+
 
 define y_nvl = Character([playerName], kind=nvl, image="nighten", callback=Phone_SendSound)
 define mark_nvl = Character("Mark", kind=nvl, callback=Phone_ReceiveSound)
@@ -125,20 +133,33 @@ label game_and_select:
 
     return
 
+
 label start:
 
-    # Show a background. This uses a placeholder by default, but you can
-    # add a file (named either "bg room.png" or "bg room.jpg") to the
-    # images directory to show it.
+    # image area1glitch:
+    #     glitch("area2") # reliable slicing
+    #     pause 0.3
+    #     "area2"
+    #     pause 3
+    #     glitch("area2", offset=60, randomkey=None) # bigger and always-random slicing
+    #     pause 0.1
+    #     "area2"
+    #     pause 1
+    #     glitch("penthouse")
+    #     pause 0.3
+    #     "penthouse"
+    #     pause 3
+    #     repeat
 
     $ difficulty_multiplier = 1
     $ current_difficulty = difficulty_multiplier
 
     $ is_testing = False
-    $ skip_games = False
+    $ skip_games = True
     if is_testing:
-        scene area2
-        $ current_level = "level4"
+        scene blank
+        show area1glitch
+        $ current_level = "level0"
         $ chosen_plants = ["peashooter", "sunflower", "wallnut", "repeater"]
         call test_game_entry_label from _call_test_game_entry_label_1
 
@@ -156,7 +177,7 @@ label start:
     play music pushing_onwards
     # call intro from _call_intro
 
-    call ufarm from _call_ufarm
+    # call ufarm from _call_ufarm
 
     call party from _call_party
     
