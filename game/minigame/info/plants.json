@@ -282,12 +282,13 @@
     "spawn_projectile": false,
     "hitbox_distance": 25,
     "cost": 700,
-    "recharge_time": 20,
+    "recharge_time": 2,
     "almanac": {
       "almanac_name": "Captain Davis",
       "description": "Tap on Captain Davis to request a deadly hellfire missile strike",
       "damage": "massive",
-      "special": "Deals extreme damage with direct hit, a bit less with splash damage",
+      "splash damage": "heavy",
+      "special": "Deals massive damage with direct hit on a tile, heavy damage in 3x3 tile radius",
       "story": "People think he’s trying to go into the military because of patriotism, or a particular disdain for minorities. But that’s not true. He wants BIG BUFF MEN to order him around and DOMINATE him. It’s not bad being a bootlicker when you freaking LOVE FEET"
     }
   }, 

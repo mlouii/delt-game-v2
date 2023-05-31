@@ -53,10 +53,105 @@
       "start_x": 0.15,
       "start_y": 0.25,
       "sun_fall_delay": 10,
-      "starting_sun": 750,
+      "starting_sun": 7500,
+      "music": "maniac.mp3"
+    },
+    "area5": {
+      "lighter_color": [48, 176, 77, 180],
+      "dark_color": [48, 143, 69, 180],
+      "variance": [0, 7, 4, 0],
+      "num_rows": 5,
+      "num_cols": 9,
+      "height_multiplier": 0.7,
+      "width_multiplier": 0.7,
+      "start_x": 0.15,
+      "start_y": 0.25,
+      "sun_fall_delay": 10,
+      "starting_sun": 7500,
       "music": "maniac.mp3"
     }
   },
+
+  "level90" : {
+    "area": "area5",
+    "zombies": ["basic"],
+    "spawn": {
+      "probabilities": {
+        "basic": 1
+      },
+      "initial_delay": 12,
+      "intervals": 13,
+      "1": {
+        "type": "normal",
+        "budget": 2
+      },
+      "2": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 3,
+        "max_cost": 3
+      }, 
+      "3": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 5,
+        "max_cost": 3
+      },
+      "4": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 6,
+        "max_cost": 3
+      },
+      "5": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 9,
+        "max_cost": 3
+      },
+      "6": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 8,
+        "max_cost": 4
+      },
+      "7": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 10
+      },
+      "8": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 10
+      },
+      "9": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 10
+      },
+      "10": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 10
+      },
+      "11": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 10
+      },
+      "12": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 10
+      },
+      "13": {
+        "type": "huge",
+        "wave_type": "final",
+        "budget": 10
+      }
+    }
+  }, 
 
   "level0" : {
     "area": "area4",
@@ -73,7 +168,7 @@
         "kinetic": 1,
         "kanishk": 1
       },
-      "initial_delay": 20,
+      "initial_delay": 2,
       "intervals": 13,
       "1": {
         "type": "normal",
@@ -86,7 +181,7 @@
         "message": {
           "header": "Oppa Sig",
           "message": "You gonna get your balls smacked on god!",
-          "zombie_image_name": "basic"
+          "zombie_image_name": "mark"
         }
       },
       "2": {
@@ -100,7 +195,7 @@
         "message": {
           "header": "Cute Girl",
           "message": "Have you ever gotten pegged?",
-          "zombie_image_name": "mask_shield_bearer"
+          "zombie_image_name": "anderson"
         }
       }, 
       "3": {

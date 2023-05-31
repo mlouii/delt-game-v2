@@ -1366,11 +1366,60 @@ label party:
 
     show shield refactored at right
 
+    play music predestined
+
     refactored "Don't think she saved you."
 
     refactored "You'll be put in dire straits soon enough."
 
+    refactored "Situations that make you question your commitment to this house."
+
+    refactored "When will you give up?"
+
+    refactored "When will you break?"
+
     hide shield refactored
+
+    mark_nvl "You might want to check downstairs."
+
+    mark_nvl "I think there's something going on."
+
+    y "Alright."
+
+    return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
 
     
 

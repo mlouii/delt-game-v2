@@ -447,13 +447,15 @@ init python:
 
     def load_gui(self):
       self.images["gui"] = {}
-      to_load = ["sun", "target", "hellfire", "shovel", "evil", "bed"]
+      to_load = ["sun", "target", "hellfire", "shovel", "evil", "bed", "mark-icon", "anderson-icon"]
       for image_name in to_load:
         location = IMG_DIR + "gui/" + image_name + ".png"
         image = Image(location)
         self.images["gui"][image_name] = image
 
       self.images["gui"]["bed"] = im.FactorScale(self.images["gui"]["bed"], 0.5)
+      self.images["gui"]["mark-icon"] = im.FactorScale(self.images["gui"]["mark-icon"], 0.35)
+      self.images["gui"]["anderson-icon"] = im.FactorScale(self.images["gui"]["anderson-icon"], 0.35)
 
     def load_explosions(self):
       self.images["explosions"] = {}
@@ -2510,7 +2512,10 @@ init python:
     def display_story_message(self, header, message, zombie_name):
       self.story_header = header
       self.story_message = message
-      self.story_zombie_image = all_images.images["zombies"][zombie_name]["icon"]
+      if zombie_name not in ["anderson", "mark"]:
+        self.story_zombie_image = all_images.images["zombies"][zombie_name]["icon"]
+      else:
+        self.story_zombie_image = all_images.images["gui"][zombie_name+"-icon"]
       self.story_message_timer = time.time()
 
     def add_target_marker(self, x, y, cobcannon):

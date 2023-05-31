@@ -21,6 +21,7 @@ define luis = Character("Luis", color="#000000")
 define isiah = Character("Isiah", color="#000000")
 define ps = Character("Public Safety", color="#000000")
 define talha = Character("Talha Bot 9000", color="#000000")
+define van = Character("Van", color="#000000")
 define mo = Character("Mo", color="#000000")
 define erik = Character("Erik", color="#000000")
 define logan = Character("Logan", color="#000000")
@@ -36,6 +37,9 @@ define shield_girl = Character("Shield Girl", color="#a82222")
 define shield_girl_glitch = Character("{glitch=30}Shield Girl{/glitch}", color="#a82222")
 define refactored = Character("Refactored", color="#a82222")
 define officer = Character("Public Safety Officer", color="#a82222")
+define neil = Character("Neil", color="#a82222")
+define kanishk = Character("Kanishk", color="#a82222")
+
 define zion = Character("Zion", color="#000000")
 define sweetheart = Character("Sweetheart", color="#000000")
 define andrew = Character("Andrew", color="#000000")
@@ -141,32 +145,140 @@ label game_and_select:
 
 label start:
 
-    # image area1glitch:
-    #     glitch("area2") # reliable slicing
-    #     pause 0.3
-    #     "area2"
-    #     pause 3
-    #     glitch("area2", offset=60, randomkey=None) # bigger and always-random slicing
-    #     pause 0.1
-    #     "area2"
-    #     pause 1
-    #     glitch("penthouse")
-    #     pause 0.3
-    #     "penthouse"
-    #     pause 3
-    #     repeat
+    image area5:
+        "area2"
+        pause 10
+        glitch("area2")
+        pause 0.3
+        glitch("area2")
+        pause 0.3
+        glitch("area2")
+        pause 0.3
+        glitch("area2")
+        pause 0.3
+        glitch("clouds")
+        pause 0.2
+        glitch("clouds")
+        pause 0.2
+        glitch("clouds")
+        pause 0.2
+        "clouds"
+        pause 20
+        glitch("clouds")
+        pause 0.2
+        glitch("slide1")
+        pause 0.2
+        glitch("clouds")
+        pause 0.2
+        glitch("slide1")
+        pause 0.2
+        glitch("clouds")
+        pause 0.2
+        glitch("slide1")
+        pause 0.2
+        "slide1"
+        pause 20
+        glitch("clouds")
+        pause 0.2
+        "clouds"
+        pause 5
+        glitch("slide2")
+        pause 0.4
+        glitch("slide2")
+        pause 0.4
+        "slide2"
+        pause 20
+        glitch("slide2")
+        pause 0.4
+        glitch("clouds")
+        pause 0.2
+        glitch("slide2")
+        pause 0.4
+        glitch("clouds")
+        pause 3
+        "clouds"
+        pause 5
+        glitch("slide3")
+        pause 0.4
+        glitch("slide3")
+        pause 0.4
+        "slide3"
+        pause 20
+        glitch("slide3")
+        pause 0.4
+        glitch("clouds")
+        pause 0.2
+        glitch("slide3")
+        pause 0.4
+        glitch("clouds")
+        pause 3
+        "clouds"
+        pause 5
+        glitch("slide4")
+        pause 0.4
+        glitch("slide4")
+        pause 0.4
+        "slide4"
+        pause 20
+        glitch("slide4")
+        pause 0.4
+        glitch("clouds")
+        pause 0.2
+        glitch("slide4")
+        pause 0.4
+        glitch("clouds")
+        pause 3
+        "clouds"
+        pause 5
+        glitch("slide5")
+        pause 0.4
+        glitch("slide5")
+        pause 0.4
+        "slide5"
+        pause 20
+        glitch("slide5")
+        pause 0.4
+        glitch("clouds")
+        pause 0.2
+        glitch("slide5")
+        pause 0.4
+        glitch("clouds")
+        pause 3
+        "clouds"
+        pause 5
+        glitch("slide6")
+        pause 0.4
+        glitch("slide6")
+        pause 0.4
+        "slide6"
+        pause 20
+        glitch("slide6")
+        pause 0.4
+        glitch("clouds")
+        pause 0.2
+        glitch("slide6")
+        pause 0.4
+        glitch("clouds")
+        pause 3
+        "clouds"
+        pause 5
+        glitch("slide7")
+        pause 0.4
+        glitch("slide7")
+        pause 0.4
+        "slide7"
 
-    $ difficulty_multiplier = 1
+    $ difficulty_multiplier = 0.2
     $ current_difficulty = difficulty_multiplier
 
-    $ is_testing = False
-    $ skip_games = False
-    if is_testing:
-        scene blank
-        show area1glitch
-        $ current_level = "level0"
-        $ chosen_plants = ["peashooter", "sunflower", "wallnut", "repeater"]
-        call test_game_entry_label from _call_test_game_entry_label_1
+    $ is_testing = True
+    $ skip_games = True
+    # if is_testing:
+    #     scene clouds
+    #     show area5
+    #     $ current_level = "level90"
+    #     $ chosen_plants = ["peashooter", "sunflower", "wallnut", "repeater", "cobcannon"]
+    #     call test_game_entry_label from _call_test_game_entry_label_1
 
     # call ask_difficulty
 
@@ -184,14 +296,9 @@ label start:
 
     # call ufarm from _call_ufarm
 
-    call party from _call_party
+    # call party from _call_party
     
-    show ufarm-sunny
-
-    show shield-girl2
-    
-
-    e "Lol I heard that you [level_outcome]"
+    call alumni
 
     # This ends the game.
 
