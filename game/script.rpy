@@ -18,7 +18,7 @@ define michael = Character("Michael", color="#000000")
 define neil = Character("Neil", color="#000000")
 define kanishk = Character("Kanishk", color="#000000")
 define luis = Character("Luis", color="#000000")
-define isiah = Character("Isiah", color="#000000")
+define isiah = Character("Isaiah", color="#000000")
 define ps = Character("Public Safety", color="#000000")
 define talha = Character("Talha Bot 9000", color="#000000")
 define van = Character("Van", color="#000000")
@@ -41,7 +41,7 @@ define neil = Character("Neil", color="#a82222")
 define kanishk = Character("Kanishk", color="#a82222")
 
 define zion = Character("Zion", color="#000000")
-define sweetheart = Character("Sweetheart", color="#000000")
+define sweetheart = Character("Leah", color="#000000")
 define andrew = Character("Andrew", color="#000000")
 
 define reagan = Character("Ronald Reagan", color="#3c00ff")
@@ -271,8 +271,8 @@ label start:
     $ difficulty_multiplier = 0.2
     $ current_difficulty = difficulty_multiplier
 
-    $ is_testing = True
-    $ skip_games = True
+    $ is_testing = False
+    $ skip_games = False
     # if is_testing:
     #     scene clouds
     #     show area5
@@ -282,7 +282,7 @@ label start:
 
     # call ask_difficulty
 
-    $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
+    $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan", "cobcannon", "andrew"]
     $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic","officer","van", "mask_shield_bearer", "neil", "kanishk"]
     $ current_level = "level0"
     call game_and_select

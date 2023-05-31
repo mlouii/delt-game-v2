@@ -38,8 +38,8 @@
       "width_multiplier": 0.7,
       "start_x": 0.15,
       "start_y": 0.25,
-      "sun_fall_delay": 500,
-      "starting_sun": 5000,
+      "sun_fall_delay": 10,
+      "starting_sun": 250,
       "music": "graze-the-roof.mp3"
     },
     "area4": {
@@ -153,9 +153,129 @@
     }
   }, 
 
+  "level10" : {
+    "area": "area3",
+    "zombies": ["basic", "dog", "conehead", "buckethead", "kinetic", "officer", "van", "mask_shield_bearer", "armored_shield"],
+    "protect": [
+      ["logan", 3, 1],
+      ["logan", 3, 3]
+    ],
+    "spawn": {
+      "probabilities": {
+        "basic": 1,
+        "dog": 1.5,
+        "conehead": 1.5,
+        "buckethead": 1,
+        "kinetic": 1.5,
+        "officer": 1.75,
+        "van": 1.5,
+        "mask_shield_bearer": 1.5
+      },
+      "initial_delay": 20,
+      "intervals": 10,
+      "1": {
+        "type": "normal",
+        "budget": 4,
+        "banned_zombies": ["dog", "kinetic", "buckethead", "shield_bearer", "van", "mask_shield_bearer"]
+      },
+      "2": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 8,
+        "max_cost": 3,
+        "banned_zombies": ["buckethead", "kinetic", "officer", "van", "mask_shield_bearer"]
+
+      }, 
+      "3": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 10,
+        "max_cost": 3,
+        "banned_zombies": ["buckethead", "kinetic", "van", "mask_shield_bearer"],
+        "must_spawn": {
+          "officer": 2
+        }
+      },
+      "4": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 12,
+        "max_cost": 3,
+        "banned_zombies": ["kinetic", "van", "mask_shield_bearer"],
+        "must_spawn": {
+          "dog": 2
+        }
+      },
+      "5": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 14,
+        "max_cost": 3,
+        "banned_zombies": ["van"],
+        "must_spawn": {
+          "dog": 2,
+          "kinetic": 1,
+          "mask_shield_bearer": 1
+        }
+      },
+      "6": {
+        "type": "normal",
+        "wave_type": "huge",
+        "budget": 15,
+        "must_spawn":{
+          "dog": 10
+        },
+        "message" : {
+          "header": "2018 Toyota Sienna",
+          "message": "Your plates are expired pussy",
+          "zombie_image_name": "van"
+
+        }
+      },
+      "7": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 17,
+        "must_spawn": {
+          "dog": 2
+        }
+      },
+      "8": {
+        "type": "normal",
+        "wave_type": "final",
+        "budget": 16,
+        "must_spawn": {
+          "officer":1
+        }
+      },
+      "9": {
+        "type": "normal",
+        "wave_type": "final",
+        "budget": 18,
+        "must_spawn": {
+          "kinetic":2,
+          "officer" :2
+        }
+      },
+      "10":{
+        "type": "wave",
+        "wave_type": "final",
+        "budget": 26,
+        "must_spawn": {
+          "dog": 2,
+          "kinetic": 2,
+          "officer" : 2
+        }
+      }
+    }
+  },
+
   "level0" : {
     "area": "area4",
     "zombies": ["basic", "neil", "shield","kinetic", "kanishk", "officer", "dog", "van", "conehead", "shield_bearer", "armored_shield" ,"mask_shield_bearer"],
+    "protect": [
+      ["logan", 2, 2]
+    ],
     "spawn": {
       "probabilities": {
         "basic": 2,

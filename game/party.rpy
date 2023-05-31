@@ -1031,7 +1031,7 @@ label party:
 
     show gas-mask-shield-bearer at right
 
-    shield_girl "Hey, sweetheart ... you've always been nice to me..."
+    shield_girl "Hey, Leah... you've always been nice to me..."
 
     shield_girl "Don't come to the living room tonight."
 
@@ -1324,9 +1324,9 @@ label party:
 
     shield_girl "You know who I am."
 
-    shield_girl "I'm Athena Cramb. Alan Cramb's daughter."
+    shield_girl "I'm Astasia Cramb. Alan Cramb's daughter. You know, IIT's ex-president."
 
-    shield_girl "This house is under my protection."
+    shield_girl "This house is under my legal protection."
 
     officer "You do know what you're doing, right? You're going against HIM."
 

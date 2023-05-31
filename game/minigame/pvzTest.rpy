@@ -237,7 +237,6 @@ init python:
 
     def render(self, render):
       image = self.image
-      # send_to_file("logz.txt", str(self.x), ", ", str(self.y) + "\n")
       render.place(image, x=self.x, y=self.y)
       return render
 
@@ -910,7 +909,6 @@ init python:
         self.frames = all_images.images["plants"][self.plant_type]["animation"][self.costume]
         render.place(self.frames[self.frame], x = self.x_location, y = self.y_location)
       else:
-        # send_to_file("logz.txt", ",".join(list(all_images.images["plants"][self.plant_type]["animation"].keys())) + "\n")
         image = all_images.images["plants"][self.plant_type]["animation"][self.costume]
         render.place(image, x = self.x_location, y = self.y_location)
       return render
@@ -1607,14 +1605,11 @@ init python:
         hand_location_x = math.cos(true_angle) * self.bearer.body_parts[1].image_height *0.7
         hand_location_y = math.sin(true_angle) * self.bearer.body_parts[1].image_height * 0.7
 
-        send_to_file("logz.txt", str(self.body_parts[0].image_width) + " , " + str(self.body_parts[0].image_height) + "\n")
         torso_joint_x = self.body_parts[0].image_width//3
         torso_joint_y = self.body_parts[0].image_height//3
 
         self.x_location = int(self.bearer.x_location + hand_location_x - torso_joint_x)
         self.y_location = int(self.bearer.y_location - hand_location_y - torso_joint_y)
-
-      #send_to_file("logz.txt", "angle: " + str(true_angle) + ", "+str(self.bearer.x_location) + " , " + str(hand_location_x) + " , " + str(torso_joint_x) + " , final = " + str(self.x_location) + "\n")
 
       if not self.bearer or self.bearer.is_dead or self.health <= 0:
         self.die()
@@ -2877,11 +2872,14 @@ init python:
 
       self.last_time = time.time()
 
-      loaded_plants.extend(self.get_protected_plant_names())
-      self.loaded_plants = list(set(loaded_plants))
+      self.loaded_plants = loaded_plants
+
+      loaded_plants_copy = loaded_plants.copy()
+      loaded_plants_copy.extend(self.get_protected_plant_names())
+      loaded_plants_copy = list(set(loaded_plants_copy))
 
       all_images.load_zombies(self.level_config["zombies"])
-      all_images.load_plants(self.loaded_plants)
+      all_images.load_plants(loaded_plants_copy)
       all_images.load_explosions()
       all_images.load_gui()
 
