@@ -272,7 +272,7 @@ label start:
     $ current_difficulty = difficulty_multiplier
 
     $ is_testing = False
-    $ skip_games = True
+    $ skip_games = False
     # if is_testing:
     #     scene clouds
     #     show area5
@@ -280,7 +280,7 @@ label start:
     #     $ chosen_plants = ["peashooter", "sunflower", "wallnut", "repeater", "cobcannon"]
     #     call test_game_entry_label from _call_test_game_entry_label_1
 
-    # call ask_difficulty
+    call ask_difficulty from _call_ask_difficulty
 
     # $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan", "cobcannon", "andrew"]
     # $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic","officer","van", "mask_shield_bearer", "neil", "kanishk"]
@@ -292,13 +292,13 @@ label start:
     $ MCName = playerName
     $ y_nvl = Character(playerName, kind=nvl, image="nighten", callback=Phone_SendSound)
     play music pushing_onwards
-    # call intro from _call_intro
+    call intro from _call_intro
 
-    # call ufarm from _call_ufarm
+    call ufarm from _call_ufarm
 
-    # call party from _call_party
+    call party from _call_party
     
-    call alumni
+    call alumni from _call_alumni
 
     # This ends the game.
 

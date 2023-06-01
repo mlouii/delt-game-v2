@@ -863,7 +863,7 @@ label party:
     $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan"]
     $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "officer", "van"]
     $ current_level = "level9"
-    call game_and_select from _call_game_and_select_11
+    call game_and_select
     play music pushing_onwards
 
     scene back-door
@@ -1095,7 +1095,7 @@ label party:
     $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan", "cobcannon"]
     $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "officer", "van", "mask_shield_bearer"]
     $ current_level = "level10"
-    call game_and_select from _call_game_and_select_12
+    call game_and_select
     play music pushing_onwards
 
     scene hallway
@@ -1174,7 +1174,7 @@ label party:
     $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan", "cobcannon", "andrew"]
     $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "officer", "van", "mask_shield_bearer"]
     $ current_level = "level11"
-    call game_and_select from _call_game_and_select_13
+    call game_and_select
     play music pushing_onwards
 
     scene back-door-open
@@ -1302,7 +1302,7 @@ label party:
     $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan", "cobcannon", "andrew"]
     $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "officer", "van", "mask_shield_bearer"]
     $ current_level = "level12"
-    call game_and_select from _call_game_and_select_14
+    call game_and_select
     play music pushing_onwards
 
     scene pledge-rack-night

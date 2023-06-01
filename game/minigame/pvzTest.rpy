@@ -2821,8 +2821,8 @@ init python:
       progress_bar_x = 1500
       
       time_elapsed = time.time() - self.start_time + self.fast_forward_seconds
-      text = Text(str(time_elapsed), size = 30)
-      render.place(text, x = progress_bar_x, y = progress_bar_y+70)
+      # text = Text(str(time_elapsed), size = 30)
+      # render.place(text, x = progress_bar_x, y = progress_bar_y+70)
 
       text = Text("Progress against the OPPS", size = 20)
       render.place(text, x = progress_bar_x, y = progress_bar_y-30)
@@ -2839,7 +2839,7 @@ init python:
       render.place(progress_bar, x = progress_bar_x+2, y = progress_bar_y+2)
 
       difficulty_text = Text("Difficulty: " + str(difficulty_multiplier_to_str(self.difficulty_multiplier)), size = 30)
-      render.place(difficulty_text, x = progress_bar_x, y = progress_bar_y+120)
+      render.place(difficulty_text, x = progress_bar_x, y = progress_bar_y+70)
       
       delta_time_to_fps = 1/delta_time
       fps_text = Text("FPS: " + str(int(delta_time_to_fps)), size = 30, color = (255, 255, 255))

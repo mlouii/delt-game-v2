@@ -12,7 +12,7 @@
 ##
 ## The _() surrounding the string marks it as eligible for translation.
 
-define config.name = _("deltGamev2")
+define config.name = _("Delt Rush 2: The Opps are Coming")
 
 
 ## Determines if the title given above is shown on the main menu screen. Set
@@ -30,6 +30,11 @@ define config.version = "1.0"
 ## triple-quotes, and leave a blank line between paragraphs.
 
 define gui.about = _p("""
+Made my Mark, Van, and Zion in Summer 2023
+
+Thanks for playing!
+
+lol here is my linkedin: https://www.linkedin.com/in/mlouii/
 """)
 
 
@@ -37,7 +42,7 @@ define gui.about = _p("""
 ## distribution. This must be ASCII-only, and must not contain spaces, colons,
 ## or semicolons.
 
-define build.name = "deltGamev2"
+define build.name = "DeltRush2TheSequel"
 
 
 ## Sounds and music ############################################################

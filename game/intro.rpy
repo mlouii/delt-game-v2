@@ -7,11 +7,11 @@ label intro:
   scene driveway
   with fade
 
-  y "It's such a great day today"
+  y "Wow, it's too nice a day to be playing games."
 
   y "So quiet, and peaceful."
 
-  y "I've been feeling a little lost recently, I'm not satisfied with my college experience."
+  y "I've been feeling a little lost recently, I'm not really satisfied with my college experience."
 
   y "Maybe a walk will clear my mind, light up my aspirations."
 
@@ -308,7 +308,7 @@ label intro:
 
   berto "Some people robbed me and took my keys."
 
-  berto "They beat my a$$."
+  berto "They beat my ass."
 
   berto "HARD."
 
@@ -330,7 +330,7 @@ label intro:
 
   berto "Finessed my jersey, took my keys and my phone"
 
-  berto "And then they beat my a$$."
+  berto "And then they beat my ass."
 
   berto "I'm mostly mad about the game."
 
@@ -372,7 +372,7 @@ label intro:
 
   oppasig "WE ARE THE OPPA SIGS"
 
-  berto "Shut the f*ck up, dumba$$."
+  berto "Shut the fuck up, dumbass."
 
   y "Why are you wearing a crop top?"
 
@@ -380,9 +380,9 @@ label intro:
 
   oppasig "I'm ALPHA SIGMA PHI, and I LOVE FRESHMEN"
 
-  oppasig "I'm going to beat your a$$."
+  oppasig "I'm going to beat your ass."
 
-  oppasig "Just like how we beat your friend's a$$."
+  oppasig "Just like how we beat your friend's ass."
 
   oppasig "See you around, DELT."
 
@@ -406,6 +406,8 @@ label intro:
   berto "Me too. Let me check my phone."
 
   nvl_narrator "Mark has changed the background picture"
+
+  mark_nvl "FYI, click OUTSIDE the phone to advance the dialogue."
 
   mark_nvl "Hey, have you seen Berto?"
 
@@ -494,6 +496,8 @@ label intro:
 
       mark_nvl "I can tell. But you'll figure it out."
 
+  y "Time to defend the house."
+
   $ plants = ["peashooter", "sunflower"]
   $ seen_zombies = ["basic"]
   $ current_level = "level1"
@@ -536,7 +540,7 @@ label intro:
 
   hide berto
 
-  oppasig "If I can find your Santa, they'll finally stop hazing my pledge a$$."
+  oppasig "If I can find your Santa, they'll finally stop hazing my pledge ass."
 
   oppasig "WHERE IS SANTA"
 
@@ -592,6 +596,8 @@ label intro:
   mark_nvl "They're letting the dawgs out"
 
   y_nvl "Dawgs?"
+
+  y "I guess I gotta show the Dawgs who's boss."
 
   $ plants = ["peashooter", "sunflower", "wallnut"]
   $ seen_zombies = ["basic", "dog"]
@@ -729,7 +735,7 @@ label intro:
   oppasig "Well, you'll meet us all soon enough."
 
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater"]
-  $ seen_zombies = ["basic", "dog", "conehead"]
+  $ seen_zombies = ["basic", "dog", "conehead", "buckethead"]
   $ current_level = "level3"
   call game_and_select from _call_game_and_select_2
   play music pushing_onwards
@@ -744,6 +750,8 @@ label intro:
   mark_nvl "It's the final assault."
 
   mark_nvl "That gray one takes a lot of hits."
+
+  y "They're not going to get past me."
 
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater"]
   $ seen_zombies = ["basic", "dog", "conehead", "buckethead"]
@@ -793,7 +801,14 @@ label intro:
 
   # next up is the ufarm arc, starting with penthouse
 
+  y "I'm going to go home and take a nap."
+
+  y "That was exhausting."
+
   scene penthouse
+  with fade
+
+  "A few hours later..."
 
   y "That was such a great nap."
 

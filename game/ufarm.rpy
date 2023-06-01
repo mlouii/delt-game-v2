@@ -126,13 +126,15 @@ label ufarm:
 
   mark_nvl "Keep that in mind"
 
+  y "I should probably make sure I have enough house managers, then."
+
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter"]
   $ seen_zombies = ["basic", "dog", "conehead", "buckethead"]
   $ current_level = "level5"
   call game_and_select from _call_game_and_select_4
   play music pushing_onwards
 
-  show ufarm-back2-sunset
+  scene ufarm-back2-sunset
   with fade
 
   show brayden-chill at left
@@ -263,7 +265,7 @@ label ufarm:
 
   y "That sounds like a lot of alcohol."
 
-  arg "If you can't handle multiple cups of 40 percent ABV, you're actually a b1tch."
+  arg "If you can't handle multiple cups of 40 percent ABV, you're actually a bitch."
 
   arg "So, are you going to stop that smoking?"
 
@@ -516,6 +518,8 @@ label ufarm:
 
   mark_nvl "So, who do you want to use?"
 
+  y "I want to make the best possible team with my seven choices."
+
   $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav"]
   $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic"]
   $ current_level = "level8"
@@ -523,6 +527,7 @@ label ufarm:
   play music pushing_onwards
 
   scene ufarm-table-sunset
+  with fade
 
   show luis at left
   with moveinleft

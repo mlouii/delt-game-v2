@@ -197,7 +197,7 @@ label alumni:
     $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan", "cobcannon", "andrew"]
     $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "officer", "van", "mask_shield_bearer", "neil", "kanishk"]
     $ current_level = "level13"
-    call game_and_select from _call_game_and_select_8
+    call game_and_select
     play music predestined
 
     scene hallway
@@ -312,7 +312,7 @@ label alumni:
     mark "But I'll send you back."
 
     $ current_level = "level14"
-    call game_and_select from _call_game_and_select_9
+    call game_and_select
     play music predestined
 
     image gym clouds:
@@ -390,7 +390,7 @@ label alumni:
     mark "I want to see what you're fighting for."
 
     $ current_level = "level15"
-    call game_and_select from _call_game_and_select_10
+    call game_and_select
     play music predestined
 
     scene clouds
@@ -507,10 +507,10 @@ label alumni:
     mark "Consider this your final test."
 
     $ current_level = "level16"
-    call start_plant_select from _call_start_plant_select_1
+    call start_plant_select
     stop music fadeout 2.0
     scene area2
-    call test_game_entry_label from _call_test_game_entry_label_1
+    call test_game_entry_label
     play music predestined
 
     scene clouds
@@ -592,11 +592,11 @@ label alumni:
     mark "Maybe that'll help you out."
 
     $ current_level = "level17"
-    call start_plant_select from _call_start_plant_select_2
+    call start_plant_select
     stop music fadeout 2.0
     scene clouds
     show area5
-    call test_game_entry_label from _call_test_game_entry_label_2
+    call test_game_entry_label
 
     play music pushing_onwards
     scene clouds

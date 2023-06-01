@@ -18,11 +18,13 @@ define michael = Character("Michael", color="#000000")
 define neil = Character("Neil", color="#000000")
 define kanishk = Character("Kanishk", color="#000000")
 define luis = Character("Luis", color="#000000")
-define isiah = Character("Isiah", color="#000000")
+define isiah = Character("Isaiah", color="#000000")
 define ps = Character("Public Safety", color="#000000")
 define talha = Character("Talha Bot 9000", color="#000000")
+define van = Character("Van", color="#000000")
 define mo = Character("Mo", color="#000000")
 define erik = Character("Erik", color="#000000")
+define logan = Character("Logan", color="#000000")
 define y = Character([playerName], color="#FFFFFF")
 define shahaan = Character("Shahaan", color="#000000")
 define oppasig = Character("Oppa Sig", color="#a82222")
@@ -32,11 +34,26 @@ define kinetic = Character("Kinetic Footwear Guy", color="#a82222")
 define arg = Character("A Random Girl", color="#a82222")
 define arg_r = Character("Potentially Racist Girl?", color="#a82222")
 define shield_girl = Character("Shield Girl", color="#a82222")
+define shield_girl_glitch = Character("{glitch=30}Shield Girl{/glitch}", color="#a82222")
+define refactored = Character("Refactored", color="#a82222")
+define officer = Character("Public Safety Officer", color="#a82222")
+define neil = Character("Neil", color="#a82222")
+define kanishk = Character("Kanishk", color="#a82222")
+
 define zion = Character("Zion", color="#000000")
+define sweetheart = Character("Leah", color="#000000")
+define andrew = Character("Andrew", color="#000000")
+
+define reagan = Character("Ronald Reagan", color="#3c00ff")
+define kappa = Character("Underage Kappa affiliate", color="#3c00ff")
+define jenna = Character("Jenna Ortega", color="#3c00ff")
+
+
 
 define y_nvl = Character([playerName], kind=nvl, image="nighten", callback=Phone_SendSound)
 define mark_nvl = Character("Mark", kind=nvl, callback=Phone_ReceiveSound)
 define shahaan_nvl = Character("Shahaan", kind=nvl, callback=Phone_ReceiveSound)
+define sienna_nvl = Character("Sienna", kind=nvl, callback=Phone_ReceiveSound)
 
 define config.adv_nvl_transition = None
 define config.nvl_adv_transition = Dissolve(0.3)
@@ -71,7 +88,7 @@ label game_and_select:
     $ _game_menu_screen = None
     $ current_area = level_to_area(current_level)
 
-    call start_plant_select
+    call start_plant_select from _call_start_plant_select
     stop music fadeout 2.0
 
     if (len(chosen_plants) == 0):
@@ -91,7 +108,7 @@ label game_and_select:
         
 
     scene expression current_area with dissolve
-    call test_game_entry_label
+    call test_game_entry_label from _call_test_game_entry_label
     $ preferences.set_volume(0.1, "main")
 
     $ config.rollback_enabled = True
@@ -125,47 +142,163 @@ label game_and_select:
 
     return
 
+
 label start:
 
-    # Show a background. This uses a placeholder by default, but you can
-    # add a file (named either "bg room.png" or "bg room.jpg") to the
-    # images directory to show it.
+    image area5:
+        "area2"
+        pause 10
+        glitch("area2")
+        pause 0.3
+        glitch("area2")
+        pause 0.3
+        glitch("area2")
+        pause 0.3
+        glitch("area2")
+        pause 0.3
+        glitch("clouds")
+        pause 0.2
+        glitch("clouds")
+        pause 0.2
+        glitch("clouds")
+        pause 0.2
+        "clouds"
+        pause 20
+        glitch("clouds")
+        pause 0.2
+        glitch("slide1")
+        pause 0.2
+        glitch("clouds")
+        pause 0.2
+        glitch("slide1")
+        pause 0.2
+        glitch("clouds")
+        pause 0.2
+        glitch("slide1")
+        pause 0.2
+        "slide1"
+        pause 20
+        glitch("clouds")
+        pause 0.2
+        "clouds"
+        pause 3.5
+        glitch("slide2")
+        pause 0.4
+        glitch("slide2")
+        pause 0.4
+        "slide2"
+        pause 20
+        glitch("slide2")
+        pause 0.4
+        glitch("clouds")
+        pause 0.2
+        glitch("slide2")
+        pause 0.4
+        glitch("clouds")
+        pause 1
+        "clouds"
+        pause 3.5
+        glitch("slide3")
+        pause 0.4
+        glitch("slide3")
+        pause 0.4
+        "slide3"
+        pause 20
+        glitch("slide3")
+        pause 0.4
+        glitch("clouds")
+        pause 0.2
+        glitch("slide3")
+        pause 0.4
+        glitch("clouds")
+        pause 1
+        "clouds"
+        pause 3.5
+        glitch("slide4")
+        pause 0.4
+        glitch("slide4")
+        pause 0.4
+        "slide4"
+        pause 20
+        glitch("slide4")
+        pause 0.4
+        glitch("clouds")
+        pause 0.2
+        glitch("slide4")
+        pause 0.4
+        glitch("clouds")
+        pause 1
+        "clouds"
+        pause 3.5
+        glitch("slide5")
+        pause 0.4
+        glitch("slide5")
+        pause 0.4
+        "slide5"
+        pause 20
+        glitch("slide5")
+        pause 0.4
+        glitch("clouds")
+        pause 0.2
+        glitch("slide5")
+        pause 0.4
+        glitch("clouds")
+        pause 1
+        "clouds"
+        pause 3.5
+        glitch("slide6")
+        pause 0.4
+        glitch("slide6")
+        pause 0.4
+        "slide6"
+        pause 20
+        glitch("slide6")
+        pause 0.4
+        glitch("clouds")
+        pause 0.2
+        glitch("slide6")
+        pause 0.4
+        glitch("clouds")
+        pause 1
+        "clouds"
+        pause 3.5
+        glitch("slide7")
+        pause 0.4
+        glitch("slide7")
+        pause 0.4
+        "slide7"
 
     $ difficulty_multiplier = 1
     $ current_difficulty = difficulty_multiplier
 
     $ is_testing = False
     $ skip_games = False
-    if is_testing:
-        scene area2
-        $ current_level = "level4"
-        $ chosen_plants = ["peashooter", "sunflower", "wallnut", "repeater"]
-        call test_game_entry_label
+    # if is_testing:
+    #     scene clouds
+    #     show area5
+    #     $ current_level = "level90"
+    #     $ chosen_plants = ["peashooter", "sunflower", "wallnut", "repeater", "cobcannon"]
+    #     call test_game_entry_label from _call_test_game_entry_label_1
 
-    # call ask_difficulty
+    call ask_difficulty
 
-    # $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "pranav", "colin", "cobcannon", "logan", "andrew", "jacob"]
+    # $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan", "cobcannon", "andrew"]
     # $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic","officer","van", "mask_shield_bearer", "neil", "kanishk"]
-    # $ current_level = "level8"
+    # $ current_level = "level16"
     # call game_and_select
 
     $ playerName = "You"
     $ y = Character(playerName, color="#376e3a")
     $ MCName = playerName
     $ y_nvl = Character(playerName, kind=nvl, image="nighten", callback=Phone_SendSound)
+    play music pushing_onwards
+    call intro from _call_intro
 
-    call intro
+    call ufarm from _call_ufarm
 
-    call ufarm
-
-    call party
+    call party from _call_party
     
-    show ufarm-sunny
-
-    show shield-girl2
-    
-
-    e "Lol I heard that you [level_outcome]"
+    call alumni
 
     # This ends the game.
 
