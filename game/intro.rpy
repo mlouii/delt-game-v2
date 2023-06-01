@@ -159,10 +159,9 @@ label intro:
 
   y "Wait, where did you come from? I didn't see you here."
 
-  # change to use curse words later on
-  mark "I was $hitting in ladies head. You know, the bathroom here."
+  mark "I was shitting in ladies head. You know, the bathroom here."
 
-  mark "Where I $hit."
+  mark "Where I shit."
 
   y "But I didn't even hear any noise coming from there!"
 
@@ -412,7 +411,7 @@ label intro:
 
   mark_nvl "He isn't answering"
 
-  mark_nvl "Im still $hitting, btw"
+  mark_nvl "Im still shitting, btw"
 
   y_nvl "He's right here"
 
@@ -621,7 +620,7 @@ label intro:
 
   y_nvl "I didn't know that."
 
-  y_nvl "Still $hitting?"
+  y_nvl "Still shitting?"
 
   mark_nvl "Mind your own business."
 

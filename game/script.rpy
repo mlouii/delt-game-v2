@@ -181,7 +181,7 @@ label start:
         glitch("clouds")
         pause 0.2
         "clouds"
-        pause 5
+        pause 3.5
         glitch("slide2")
         pause 0.4
         glitch("slide2")
@@ -195,9 +195,9 @@ label start:
         glitch("slide2")
         pause 0.4
         glitch("clouds")
-        pause 3
+        pause 1
         "clouds"
-        pause 5
+        pause 3.5
         glitch("slide3")
         pause 0.4
         glitch("slide3")
@@ -211,9 +211,9 @@ label start:
         glitch("slide3")
         pause 0.4
         glitch("clouds")
-        pause 3
+        pause 1
         "clouds"
-        pause 5
+        pause 3.5
         glitch("slide4")
         pause 0.4
         glitch("slide4")
@@ -227,9 +227,9 @@ label start:
         glitch("slide4")
         pause 0.4
         glitch("clouds")
-        pause 3
+        pause 1
         "clouds"
-        pause 5
+        pause 3.5
         glitch("slide5")
         pause 0.4
         glitch("slide5")
@@ -243,9 +243,9 @@ label start:
         glitch("slide5")
         pause 0.4
         glitch("clouds")
-        pause 3
+        pause 1
         "clouds"
-        pause 5
+        pause 3.5
         glitch("slide6")
         pause 0.4
         glitch("slide6")
@@ -259,20 +259,20 @@ label start:
         glitch("slide6")
         pause 0.4
         glitch("clouds")
-        pause 3
+        pause 1
         "clouds"
-        pause 5
+        pause 3.5
         glitch("slide7")
         pause 0.4
         glitch("slide7")
         pause 0.4
         "slide7"
 
-    $ difficulty_multiplier = 0.2
+    $ difficulty_multiplier = 1
     $ current_difficulty = difficulty_multiplier
 
     $ is_testing = False
-    $ skip_games = False
+    $ skip_games = True
     # if is_testing:
     #     scene clouds
     #     show area5
@@ -282,10 +282,10 @@ label start:
 
     # call ask_difficulty
 
-    $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan", "cobcannon", "andrew"]
-    $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic","officer","van", "mask_shield_bearer", "neil", "kanishk"]
-    $ current_level = "level0"
-    call game_and_select
+    # $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan", "cobcannon", "andrew"]
+    # $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic","officer","van", "mask_shield_bearer", "neil", "kanishk"]
+    # $ current_level = "level16"
+    # call game_and_select
 
     $ playerName = "You"
     $ y = Character(playerName, color="#376e3a")

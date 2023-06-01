@@ -1179,7 +1179,8 @@
     "almanac": {
       "almanac_name": "Fatass officer",
       "description": "Normal in all aspects",
-      "toughness": "Very High",
+      "toughness": "very high",
+      "speed": "sluggish",
       "story": "This is not the cool biker public safety officer that lets you smoke weed. Nah. This mf is the real deal, and he gets a bonus for every arrest."
     }
   },
@@ -1392,7 +1393,7 @@
       "almanac_name": "Neil John",
       "description": "Gives out free kinetic footwears",
       "toughness": "high",
-      "special": "Turns basic opps into kinetic opps",
+      "special": "Turns basic and conehead opps into kinetic opps",
       "story": "Business is booming. Fuck Jordans, kinetic footwear is the shit."
     }
   }, 
@@ -1414,8 +1415,9 @@
       "almanac_name": "Kanishk Pal",
       "description": "Steals ur shit",
       "toughness": "high",
-      "special": "He takes your most valuable possesions and ignores the rest. He's fed up.",
-      "story": "He hasn't reacted well to the amount of AP kids. On god you gonna have nothing left."
+      "speed": "fast",
+      "special": "Takes your most valuable possesions and ignores the rest.",
+      "story": "He hasn't reacted well to the amount of AP kids. On god you gonna have nothing left. He's fed up."
     }
   }, 
 
@@ -1444,7 +1446,7 @@
       "description": "Brings the opps right to your doorstep",
       "toughness": "very high",
       "damage": "massive",
-      "special": "Drops off opps when destroyed",
+      "special": "Crushes and drops off opps when destroyed",
       "story": "Growing up a poor orphan, this 2018 Toyota Sienna has never had anywhere to call home. However, public safety has been kind to her and she will fight with all her might to protect them... After all, they are all she has left."
     }
   }

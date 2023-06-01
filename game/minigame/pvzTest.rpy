@@ -86,6 +86,10 @@ init python:
       
 
   def level_to_area(level_name):
+    if level_name == "level13":
+      return "area3"
+    elif level_name in ["level14", "level15", "level16"]:
+      return "clouds"
     return level_config[level_name]["area"]
 
   class ConfigLoader():
@@ -1718,7 +1722,7 @@ init python:
         self.target_steal_plant.is_being_stolen = True
         plant.is_dead = True
         if plant.is_protected:
-          self.game.has_protected_plant_died = True
+          plant.game.has_protected_plant_died = True
         plant.tile.is_planted = False
         if plant.plant_type == "cobcannon":
           if plant.target_marker is not None:
@@ -2757,6 +2761,8 @@ init python:
         zombies_to_spawn.append(zombie)
         remaining_budget -= zombie_cost
       
+      if len(zombies_to_spawn) == 0:
+        return
       spawn_delay = 20 / len(zombies_to_spawn)
       if interval_config["type"] == "wave":
         spawn_delay /= 4

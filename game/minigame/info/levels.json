@@ -53,7 +53,7 @@
       "start_x": 0.15,
       "start_y": 0.25,
       "sun_fall_delay": 10,
-      "starting_sun": 7500,
+      "starting_sun": 750,
       "music": "maniac.mp3"
     },
     "area5": {
@@ -72,210 +72,268 @@
     }
   },
 
-  "level90" : {
-    "area": "area5",
-    "zombies": ["basic"],
-    "spawn": {
-      "probabilities": {
-        "basic": 1
-      },
-      "initial_delay": 12,
-      "intervals": 13,
-      "1": {
-        "type": "normal",
-        "budget": 2
-      },
-      "2": {
-        "type": "normal",
-        "wave_type": "huge",
-        "budget": 3,
-        "max_cost": 3
-      }, 
-      "3": {
-        "type": "normal",
-        "wave_type": "huge",
-        "budget": 5,
-        "max_cost": 3
-      },
-      "4": {
-        "type": "normal",
-        "wave_type": "huge",
-        "budget": 6,
-        "max_cost": 3
-      },
-      "5": {
-        "type": "wave",
-        "wave_type": "huge",
-        "budget": 9,
-        "max_cost": 3
-      },
-      "6": {
-        "type": "normal",
-        "wave_type": "huge",
-        "budget": 8,
-        "max_cost": 4
-      },
-      "7": {
-        "type": "wave",
-        "wave_type": "huge",
-        "budget": 10
-      },
-      "8": {
-        "type": "normal",
-        "wave_type": "huge",
-        "budget": 10
-      },
-      "9": {
-        "type": "normal",
-        "wave_type": "huge",
-        "budget": 10
-      },
-      "10": {
-        "type": "normal",
-        "wave_type": "huge",
-        "budget": 10
-      },
-      "11": {
-        "type": "normal",
-        "wave_type": "huge",
-        "budget": 10
-      },
-      "12": {
-        "type": "normal",
-        "wave_type": "huge",
-        "budget": 10
-      },
-      "13": {
-        "type": "huge",
-        "wave_type": "final",
-        "budget": 10
-      }
-    }
-  }, 
-
-  "level10" : {
-    "area": "area3",
-    "zombies": ["basic", "dog", "conehead", "buckethead", "kinetic", "officer", "van", "mask_shield_bearer", "armored_shield"],
-    "protect": [
-      ["logan", 3, 1],
-      ["logan", 3, 3]
-    ],
+  "level13" : {
+    "area": "area4",
+    "zombies": ["basic", "neil", "kinetic", "buckethead", "kanishk", "officer", "dog", "conehead", "armored_shield" ,"mask_shield_bearer"],
     "spawn": {
       "probabilities": {
         "basic": 1,
-        "dog": 1.5,
-        "conehead": 1.5,
-        "buckethead": 1,
-        "kinetic": 1.5,
-        "officer": 1.75,
-        "van": 1.5,
-        "mask_shield_bearer": 1.5
+        "conehead": 1,
+        "buckethead": 3,
+        "neil": 0.5,
+        "officer": 1,
+        "mask_shield_bearer": 1,
+        "kanishk": 1,
+        "dog": 1
       },
       "initial_delay": 20,
-      "intervals": 10,
+      "intervals": 13,
       "1": {
         "type": "normal",
-        "budget": 4,
-        "banned_zombies": ["dog", "kinetic", "buckethead", "shield_bearer", "van", "mask_shield_bearer"]
+        "budget": 8,
+        "banned_zombies": ["basic", "neil", "kinetic", "kanishk", "officer", "dog","mask_shield_bearer"],
+        "must_spawn": {
+          "buckethead": 1
+        }
       },
       "2": {
         "type": "normal",
-        "wave_type": "huge",
-        "budget": 8,
-        "max_cost": 3,
-        "banned_zombies": ["buckethead", "kinetic", "officer", "van", "mask_shield_bearer"]
-
-      }, 
-      "3": {
-        "type": "normal",
-        "wave_type": "huge",
-        "budget": 10,
-        "max_cost": 3,
-        "banned_zombies": ["buckethead", "kinetic", "van", "mask_shield_bearer"],
+        "budget": 12,
+        "banned_zombies": ["basic", "neil", "kinetic", "kanishk", "dog", "mask_shield_bearer"],
         "must_spawn": {
           "officer": 2
         }
-      },
-      "4": {
+      }, 
+      "3": {
         "type": "normal",
-        "wave_type": "huge",
-        "budget": 12,
-        "max_cost": 3,
-        "banned_zombies": ["kinetic", "van", "mask_shield_bearer"],
+        "budget": 19,
+        "banned_zombies": ["basic", "neil", "kinetic", "buckethead", "kanishk", "officer", "dog", "conehead"],
         "must_spawn": {
-          "dog": 2
+          "mask_shield_bearer": 3
         }
       },
-      "5": {
+      "4": {
         "type": "wave",
         "wave_type": "huge",
-        "budget": 14,
-        "max_cost": 3,
-        "banned_zombies": ["van"],
+        "budget": 30,
+        "banned_zombies": ["basic", "neil", "kinetic", "buckethead", "kanishk", "officer", "conehead", "armored_shield" ,"mask_shield_bearer"]
+      },
+      "5": {
+        "type": "normal",
+        "budget": 18,
+        "banned_zombies": ["neil", "kinetic", "buckethead", "kanishk", "officer", "dog", "armored_shield" ,"mask_shield_bearer"],
         "must_spawn": {
-          "dog": 2,
-          "kinetic": 1,
-          "mask_shield_bearer": 1
+          "neil": 1
         }
       },
       "6": {
         "type": "normal",
-        "wave_type": "huge",
-        "budget": 15,
-        "must_spawn":{
-          "dog": 10
-        },
-        "message" : {
-          "header": "2018 Toyota Sienna",
-          "message": "Your plates are expired pussy",
-          "zombie_image_name": "van"
-
+        "budget": 25,
+        "banned_zombies": ["basic", "dog", "conehead", "kanishk", "neil"],
+        "must_spawn": {
+          "mask_shield_bearer": 3
         }
       },
       "7": {
-        "type": "wave",
-        "wave_type": "huge",
-        "budget": 17,
+        "type": "normal",
+        "budget": 26,
+        "banned_zombies": ["basic", "dog", "conehead", "kanishk", "neil"],
         "must_spawn": {
-          "dog": 2
+          "mask_shield_bearer": 5
+        },
+        "message": {
+          "header": "Kanishk Pal",
+          "message": "What is yours will be mine.",
+          "zombie_image_name": "kanishk"
         }
       },
       "8": {
-        "type": "normal",
-        "wave_type": "final",
-        "budget": 16,
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 30,
+        "banned_zombies": ["basic", "neil", "kinetic", "officer", "dog", "conehead", "armored_shield" ,"mask_shield_bearer"],
         "must_spawn": {
-          "officer":1
+          "kanishk": 6
         }
       },
       "9": {
         "type": "normal",
-        "wave_type": "final",
-        "budget": 18,
+        "budget": 25,
+        "banned_zombies": ["neil", "kinetic", "officer", "dog"],
         "must_spawn": {
-          "kinetic":2,
-          "officer" :2
+          "conehead": 5
         }
       },
-      "10":{
+      "10": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 30,
+        "banned_zombies": ["dog", "kanishk", "officer", "neil"],
+        "must_spawn": {
+          "neil": 2,
+          "kanishk": 2
+        }
+      },
+      "11": {
+        "type": "normal",
+        "budget": 35,
+        "banned_zombies": ["dog", "kinetic", "neil", "conehead", "kanishk", "basic"]
+      },
+      "12": {
+        "type": "normal",
+        "budget": 35,
+        "banned_zombies": ["kinetic", "neil", "conehead", "kanishk", "basic", "officer", "buckethead"],
+        "must_spawn": {
+          "dog": 10
+        }
+      },
+      "13": {
         "type": "wave",
         "wave_type": "final",
-        "budget": 26,
+        "budget": 40,
+        "banned_zombies": ["basic",  "dog", "conehead", "neil", "kanishk"],
         "must_spawn": {
-          "dog": 2,
-          "kinetic": 2,
-          "officer" : 2
+          "mask_shield_bearer": 5
         }
       }
     }
   },
 
-  "level0" : {
+  "level14" : {
+    "area": "area4",
+    "zombies": ["basic", "neil", "kinetic", "buckethead", "kanishk", "dog", "conehead", "armored_shield" ,"mask_shield_bearer", "van"],
+    "protect": [
+      ["wallnut", 5, 1],
+      ["repeater", 3, 1],
+      ["wallnut", 5, 3],
+      ["repeater", 3, 3]
+    ],
+    "spawn": {
+      "probabilities": {
+        "basic": 1,
+        "conehead": 1,
+        "buckethead": 3,
+        "neil": 0.5,
+        "mask_shield_bearer": 1,
+        "kanishk": 1,
+        "dog": 1,
+        "van": 0.5
+      },
+      "initial_delay": 30,
+      "intervals": 13,
+      "1": {
+        "type": "normal",
+        "budget": 8,
+        "banned_zombies": ["neil", "kinetic", "kanishk", "officer", "dog","mask_shield_bearer", "van"],
+        "must_spawn": {
+          "basic": 4
+        },
+        "message": {
+          "header": "Mark",
+          "message": "Let's see how you can protect your brothers",
+          "zombie_image_name": "mark"
+        }
+      },
+      "2": {
+        "type": "normal",
+        "budget": 12,
+        "banned_zombies": ["basic", "neil", "kinetic", "kanishk", "conehead", "mask_shield_bearer", "van"],
+        "must_spawn": {
+          "dog": 5
+        }
+      }, 
+      "3": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 20,
+        "banned_zombies": ["neil", "kinetic", "buckethead", "kanishk", "conehead", "van"]
+      },
+      "4": {
+        "type": "normal",
+        "budget": 20,
+        "banned_zombies": ["kinetic", "buckethead", "kanishk", "van"]
+      },
+      "5": {
+        "type": "normal",
+        "budget": 15,
+        "banned_zombies": ["neil", "kinetic", "buckethead", "kanishk", "officer", "dog", "armored_shield" ,"mask_shield_bearer"],
+        "must_spawn": {
+          "kanishk": 5
+        }
+      },
+      "6": {
+        "type": "normal",
+        "budget": 25,
+        "banned_zombies": ["basic", "neil", "kinetic", "kanishk", "conehead", "mask_shield_bearer"],
+        "must_spawn": {
+          "van": 1
+        }
+      },
+      "7": {
+        "type": "normal",
+        "budget": 24,
+        "banned_zombies": ["basic", "neil", "kinetic", "kanishk", "conehead", "dog"],
+        "must_spawn": {
+          "van": 3
+        }
+      },
+      "8": {
+        "type": "wave",
+        "wave_type": "huge",
+        "budget": 30,
+        "banned_zombies": ["kinetic", "dog", "buckethead", "van"],
+        "must_spawn": {
+          "neil": 1,
+          "mask_shield_bearer": 3
+        }
+      },
+      "9": {
+        "type": "normal",
+        "budget": 25,
+        "banned_zombies": ["basic", "neil", "kinetic", "kanishk", "conehead", "mask_shield_bearer", "van"],
+        "must_spawn": {
+          "dog": 10
+        }
+      },
+      "10": {
+        "type": "normal",
+        "budget": 30,
+        "banned_zombies": ["basic", "neil", "kinetic", "conehead", "mask_shield_bearer", "dog"],
+        "must_spawn": {
+          "van": 2,
+          "kanishk": 2
+        }
+      },
+      "11": {
+        "type": "normal",
+        "budget": 35,
+        "banned_zombies": ["basic", "neil", "kinetic", "buckethead", "van", "dog", "kanishk"]
+      },
+      "12": {
+        "type": "normal",
+        "budget": 35,
+        "banned_zombies": ["kinetic", "van", "dog"],
+        "must_spawn": {
+          "neil": 2
+        }
+      },
+      "13": {
+        "type": "wave",
+        "wave_type": "final",
+        "budget": 40,
+        "banned_zombies": ["basic",  "dog", "conehead"],
+        "must_spawn": {
+          "mask_shield_bearer": 3,
+          "van": 1
+        }
+      }
+    }
+  },
+
+
+  "level15" : {
     "area": "area4",
     "zombies": ["basic", "neil", "shield","kinetic", "kanishk", "officer", "dog", "van", "conehead", "shield_bearer", "armored_shield" ,"mask_shield_bearer"],
-    "protect": [
-      ["logan", 2, 2]
-    ],
     "spawn": {
       "probabilities": {
         "basic": 2,
@@ -288,7 +346,7 @@
         "kinetic": 1,
         "kanishk": 1
       },
-      "initial_delay": 2,
+      "initial_delay": 30,
       "intervals": 13,
       "1": {
         "type": "normal",
@@ -297,11 +355,6 @@
         "banned_zombies": ["kanishk", "conehead", "kinetic"],
         "must_spawn": {
           "dog": 4
-        },
-        "message": {
-          "header": "Oppa Sig",
-          "message": "You gonna get your balls smacked on god!",
-          "zombie_image_name": "mark"
         }
       },
       "2": {
@@ -311,11 +364,6 @@
         "banned_zombies": ["kanishk", "kinetic"],
         "must_spawn": {
           "officer": 2
-        },
-        "message": {
-          "header": "Cute Girl",
-          "message": "Have you ever gotten pegged?",
-          "zombie_image_name": "anderson"
         }
       }, 
       "3": {
@@ -328,9 +376,9 @@
           "kinetic": 1
         },
         "message": {
-          "header": "2018 Toyota Sienna",
-          "message": "I want gasoline",
-          "zombie_image_name": "van"
+          "header": "Cute Girl",
+          "message": "Have you ever gotten pegged?",
+          "zombie_image_name": "mask_shield_bearer"
         }
       },
       "4": {
@@ -356,6 +404,11 @@
         "banned_zombies": ["basic", "dog", "conehead"],
         "must_spawn": {
           "van": 1
+        },
+        "message": {
+          "header": "2018 Toyota Sienna",
+          "message": "I want gasoline",
+          "zombie_image_name": "van"
         }
       },
       "7": {
@@ -425,6 +478,198 @@
         "must_spawn": {
           "van": 5
         }
+      }
+    }
+  },
+
+  "level16" : {
+    "area": "area4",
+    "zombies": ["basic", "van"],
+    "spawn": {
+      "probabilities": {
+        "van": 11,
+        "basic": 1
+      },
+      "initial_delay": 1,
+      "intervals": 16,
+      "1": {
+        "type": "normal",
+        "budget": 45,
+        "must_spawn": {
+          "van": 5
+        }
+      },
+      "2": {
+        "type": "normal",
+        "budget": 30,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "3": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      },
+      "4": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      },
+      "5": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "6": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "7": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "8": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "9": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "10": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "11": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "12": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "13": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "14": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "15": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "16": {
+        "type": "wave",
+        "wave_type": "final",
+        "budget": 60,
+        "banned_zombies": ["basic"]
+      }
+    }
+  },
+
+  "level17" : {
+    "area": "area5",
+    "zombies": ["basic", "van"],
+    "spawn": {
+      "probabilities": {
+        "van": 11,
+        "basic": 1
+      },
+      "initial_delay": 1,
+      "intervals": 16,
+      "1": {
+        "type": "normal",
+        "budget": 45,
+        "must_spawn": {
+          "van": 5
+        }
+      },
+      "2": {
+        "type": "normal",
+        "budget": 30,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "3": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      },
+      "4": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      },
+      "5": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "6": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "7": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "8": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "9": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "10": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "11": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "12": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "13": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "14": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "15": {
+        "type": "normal",
+        "budget": 23,
+        "banned_zombies": ["kanishk", "kinetic"]
+      }, 
+      "16": {
+        "type": "wave",
+        "wave_type": "final",
+        "budget": 60,
+        "banned_zombies": ["basic"]
       }
     }
   },

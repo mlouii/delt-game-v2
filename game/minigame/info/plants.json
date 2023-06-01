@@ -227,7 +227,7 @@
     "projectile_type": "beer",
     "hitbox_distance": 25,
     "cost": 400,
-    "recharge_time": 20,
+    "recharge_time": 5,
     "almanac": {
       "almanac_name": "4.Alc Colin",
       "description": "Throws four beer bottles at a time",
@@ -282,7 +282,7 @@
     "spawn_projectile": false,
     "hitbox_distance": 25,
     "cost": 700,
-    "recharge_time": 2,
+    "recharge_time": 20,
     "almanac": {
       "almanac_name": "Captain Davis",
       "description": "Tap on Captain Davis to request a deadly hellfire missile strike",

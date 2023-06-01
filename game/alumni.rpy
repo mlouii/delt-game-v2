@@ -315,6 +315,7 @@ label alumni:
 
     $ current_level = "level14"
     call game_and_select
+    play music predestined
 
     image gym clouds:
         "gym-sunny"
@@ -377,9 +378,9 @@ label alumni:
 
     y "It's the memories, the experiences, the friendships."
 
-    y "That's all persists, even if the house is gone."
+    y "All of it persists, even if the house is gone."
 
-    y "And all of it reflects in this world that you've created."
+    y "And it reflects in this world that you've created."
 
     y "That's why I'm not giving up."
 
@@ -389,25 +390,129 @@ label alumni:
 
     mark "I want to see what you're fighting for."
 
-    # $ current_level = "level15"
-    # call game_and_select
-    # play music predestined
+    $ current_level = "level15"
+    call game_and_select
+    play music predestined
 
     scene clouds
 
-    show mark
+    mark "I'm impressed by your resolve."
 
-    mark "I'm impressed."
+    mark "If this is how Delts is even now, then maybe a bit of hope is coming back to me."
+ 
+    mark "It feels like maybe it can return to the way it was."
 
-    mark "But I'm not convinced yet."
+    mark "Back when every brother was someone to look up to."
 
-    mark "Defend your ideals again. If you can, I'll give you the power to change this world."
+    y "So why did you create the opps? You could've just made a world with only those brothers."
 
-    mark "If you can't, I'll destroy it."
+    y "In fact, you could've remade the world exactly as it was."
 
-    # $ current_level = "level16"
-    # call game_and_select
-    # play music predestined
+    y "Back in those good old days."
+
+    y "But you didn't."
+
+    mark "Perhaps I look at the past with rose-tinted glasses."
+
+    mark "My Delt experience was definitely full of hard times." 
+    
+    y "Probably."
+
+    mark "I'm sure you've heard this saying before"
+
+    mark "“Strong times create hard men.”"
+
+    mark "“Hard men create good times.”"
+
+    mark "I wanted to get the Delts hard."
+    
+    y "Oh, huh."
+    
+    y "Although I'm pretty sure that's not how the saying goes."
+
+    mark "I'm sure it is."
+
+    y "I'm not going to argue with you."
+
+    mark "But at last, I'm not entirely convinced."
+
+    mark "Like, will this house have anyone like Kyle ever again?"
+
+    image kyle glitch:
+        glitch("kyle")
+        pause 0.2
+        glitch("kyle")
+        pause 0.3
+        glitch("kyle")
+        pause 0.2
+        "kyle"
+        pause 1
+        glitch("kyle")
+        pause 0.1
+        "kyle"
+
+    image poon glitch:
+        glitch("kyle")
+        pause 0.1
+        glitch("kyle")
+        pause 0.2
+        glitch("poon")
+        pause 0.3
+        glitch("poon")
+        pause 0.2
+        "poon"
+        pause 1
+        glitch("poon")
+        pause 0.1
+        "poon"
+
+    image laurent glitch:
+        glitch("poon")
+        pause 0.1
+        glitch("poon")
+        pause 0.2
+        glitch("laurent")
+        pause 0.3
+        glitch("laurent")
+        pause 0.2
+        "laurent"
+        pause 1
+        glitch("laurent")
+        pause 0.1
+        "laurent"
+
+    show kyle glitch
+
+    mark "Kyle, with his boundless dedication and drive?"
+
+    hide kyle glitch
+    show poon glitch
+
+    mark "Or Poon, with his competence and chaoticness?"
+
+    hide poon glitch
+    show laurent glitch
+
+    mark "Or even Laurent, that high performance headass."
+
+    hide laurent glitch
+
+    mark "Will Delts ever have people like this again?"
+
+    y "Don't underestimate the current brothers."
+
+    y "We can certainly make that happen."
+
+    mark "I feel like I'll find out soon enough."
+
+    mark "Consider this your final test."
+
+    $ current_level = "level16"
+    call start_plant_select
+    stop music fadeout 2.0
+    scene area2
+    call test_game_entry_label
+    play music predestined
 
     scene clouds
 
@@ -425,7 +530,9 @@ label alumni:
 
     y "Of course I know who I am."
     
-    y "I'm a player character in this game. I'm not actually real."
+    y "I'm just a player character in this game." 
+    
+    y "I'm not actually real, either."
 
     y "I've known this since the beginning."
 
@@ -441,7 +548,9 @@ label alumni:
 
     y "I'm aware of that"
 
-    mark "Then why are you still fighting?"
+    mark "Then why did you fight?"
+
+    mark "Why are you still fighting?"
 
     y "Perhaps I need to ask you a similar question."
 
@@ -483,16 +592,12 @@ label alumni:
 
     mark "Maybe that'll help you out."
 
-    if is_testing:
-        scene clouds
-        show area5
-        $ current_level = "level90"
-        $ chosen_plants = ["peashooter", "sunflower", "wallnut", "repeater", "cobcannon"]
-        call test_game_entry_label from _call_test_game_entry_label_1
-
-    # $ current_level = "level17"
-    # call game_and_select
-    # play music predestined
+    $ current_level = "level17"
+    call start_plant_select
+    stop music fadeout 2.0
+    scene clouds
+    show area5
+    call test_game_entry_label
 
     play music pushing_onwards
     scene clouds
@@ -507,38 +612,6 @@ label alumni:
     y "I'm glad you got to see them."
 
     mark "I'm glad I got to see them too."
-
-    y "So why did you create the opps? You could've just made a world with only the brothers."
-
-    y "In fact, you could've remade the world exactly as it was."
-
-    y "But you didn't."
-
-    mark "I had to put you through hardship." 
-    
-    mark "And show you that you could overcome it."
-
-    mark "It was more than just a test, it was a lesson."
-
-    y "I see."
-
-    mark "I'm sure you've heard this saying before"
-
-    mark "“Strong times create hard men.”"
-
-    mark "“Hard men create good times.”"
-
-    mark "I wanted to get the Delts hard."
-    
-    mark "I would have wanted to be with these Delts, back in my day."
-
-    y "I see"
-    
-    y "Although I'm pretty sure that's not how the saying goes."
-
-    mark "I'm sure it is."
-
-    y "I'm not going to argue with you."
 
     mark "Anyways, anything you want to say before I give you the power to change this world?"
 
@@ -615,6 +688,48 @@ label alumni:
     with moveoutright
 
     y "Well, that's it."
+
+    show shield-bearer-happy at right
+    with hpunch
+
+    shield_girl "Waitttt, don't go yet!"
+
+    y "Oh, you're back."
+
+    shield_girl "Thanks for everything."
+
+    shield_girl "I'm glad we got to know each other."
+
+    y "Same here, haha. You put up a good fight."
+
+    shield_girl "No hard feelings, right?"
+
+    y "Of course not."
+
+    nvl clear
+
+    sienna_nvl "I better not catch you lackin on my streets."
+
+    sienna_nvl "We're still enemies."
+
+    y_nvl "Yeah, yeah."
+
+    y_nvl "Go get a tire rotation or something."
+
+    sienna_nvl "Yeah, so I can chase you down better."
+
+    y_nvl "Man, I've got better things to do than talking with a car."
+
+    sienna_nvl "Like what?"
+
+    hide shield-bearer-happy
+    with moveoutright   
+
+    sienna_nvl "Underage drinking?"
+
+    sienna_nvl "Supplying alcohol to minors?"
+
+    y "Okay, this game is over."
 
     y "Go do your chores or something."
 

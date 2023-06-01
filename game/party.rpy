@@ -61,7 +61,7 @@ label party:
 
     y "I guess I'll do it."
 
-    isiah "Thanks, you're the $hit."
+    isiah "Thanks, you're the shit."
 
     hide isiah-money
 
@@ -233,6 +233,8 @@ label party:
 
     
     erik "You sir, just saved the party."
+
+    erik "All we have to do is make everyone BETTER."
 
     mark_nvl "I'm glad to see you've found the answer."
 
@@ -773,13 +775,13 @@ label party:
     show shield-bearer-costume-2 at right
     with moveinright
 
-    shield_girl "She's a b1tch. I can tell. Watch out for girls like her."
+    shield_girl "She's a bitch. I can tell. Watch out for girls like her."
 
     shield_girl "I know she's the type to snitch when she wakes up."
 
-    shield_girl "B1tches like her are why I've got aggravated assault charges. They snitch too much."
+    shield_girl "Bitches like her are why I've got aggravated assault charges. They snitch too much."
 
-    shield_girl "You guys have something nice together. Don't it get ruined."
+    shield_girl "You guys have got something nice together. Don't let it get ruined."
 
     hide shield-bearer-costume-2
     with moveoutright
@@ -1086,7 +1088,7 @@ label party:
 
     michael "REAPER DRONE IS IN POSITION. READY TO ENGAGE."
 
-    berto "Also, did someone $hit their pants? It certainly smells like it."
+    berto "Also, did someone shit their pants? It certainly smells like it."
 
     $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan", "cobcannon"]
     $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "officer", "van", "mask_shield_bearer"]
