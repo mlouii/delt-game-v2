@@ -7,7 +7,7 @@ label party:
 
     show isiah at right
 
-    shahaan "Hey Isiah, you drink all of the everclear?"
+    shahaan "Hey Isaiah, you drink all of the everclear?"
 
     shahaan "I was planning to make a jungle juice."
 
@@ -29,7 +29,7 @@ label party:
 
     "A voice echoes, coming from inside the walls."
 
-    talha "Isiah has been chosen as the sober bro."
+    talha "Isaiah has been chosen as the sober bro."
 
     talha "Failure to comply will result a 5 times X multiplier on your current fees."
 
@@ -990,9 +990,15 @@ label party:
         pause 0.05
         glitch("shield-bearer-costume-2") # reliable slicing
         pause 0.05
-        glitch("shield-bearer-costume-2") # reliable slicing
+        glitch("gas-mask-shield-bearer") # reliable slicing
         pause 0.05
         glitch("shield-bearer-costume-2") # reliable slicing
+        pause 0.05
+        glitch("gas-mask-shield-bearer") # reliable slicing
+        pause 0.05
+        glitch("shield-bearer-costume-2") # reliable slicing
+        pause 0.05
+        glitch("gas-mask-shield-bearer") # reliable slicing
         pause 0.05
         "gas-mask-shield-bearer"
 
@@ -1071,7 +1077,7 @@ label party:
 
     berto "I don't know how this is possible."
 
-    berto "But I need you to protect him."
+    berto "But I need you to protect him against the next assault."
 
     berto "That crazy girl with the red hair and black cap already tried to take him out."
 
@@ -1091,6 +1097,8 @@ label party:
     michael "REAPER DRONE IS IN POSITION. READY TO ENGAGE."
 
     berto "Also, did someone shit their pants? It certainly smells like it."
+
+    y "Again, we need to defend Logan at all costs. Protecting him is our first priority."
 
     $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan", "cobcannon"]
     $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic", "officer", "van", "mask_shield_bearer"]
@@ -1324,22 +1332,30 @@ label party:
 
     shield_girl "No he isn't."
 
+    shield_girl "He isn't authorized to come here."
+
     officer "What? Who are you to say that?"
 
     shield_girl "You know who I am."
 
-    shield_girl "I'm Astasia Cramb. Alan Cramb's daughter. You know, IIT's ex-president."
+    shield_girl "I'm Astasia Cramb. Alan Cramb's daughter."
+    
+    shield_girl "You know, IIT's former president."
 
-    shield_girl "This house is under my legal protection."
+    shield_girl "I'm putting this house under MY protection."
 
-    officer "You do know what you're doing, right? You're going against HIM."
+    shield_girl "Public Safety has no authority here."
+
+    officer "You do know what you're doing, right?"
+    
+    officer "You're going directly against ... {glitch}HIM{/glitch}."
 
     hide shield-bearer-costume-2 
     show shield glitched at right
 
     shield_girl "{glitch=20}I don't care.{/glitch}"
 
-    shield_girl "{glitch=30}Even if this is the last thing I ever do.{/glitch}"
+    shield_girl "{glitch=30}I've finally found what I want to fight for.{/glitch}"
 
     officer "You're going to regret this."
 
@@ -1348,7 +1364,9 @@ label party:
 
     shield_girl_glitch "{glitch=50}There will be nothing left of me to regret.{/glitch}"
 
-    shield_girl_glitch "{glitch=50}This house will NOT die.{/glitch}"
+    shield_girl_glitch "{glitch=50}Even if it's the last thing I ever do.{/glitch}"
+
+    shield_girl_glitch "{glitch=70}{b}This house will NOT die.{/b}{/glitch}"
 
     hide shield error
     show shield-bearer-costume-2-outline at right
@@ -1368,15 +1386,23 @@ label party:
     hide officer 
     with moveoutleft
 
+    y "I'm not sure what just happened..."
+
+    y "But Shield Girl... if you can hear me..."
+
+    y "Thank you."
+
     show shield refactored at right
 
     play music predestined
 
     refactored "Don't think she saved you."
 
-    refactored "You'll be put in dire straits soon enough."
+    refactored "Soon, you'll find yourself in dire straits."
 
     refactored "Situations that make you question your commitment to this house."
+
+    refactored "Situations that make you question your commitment to your brothers."
 
     refactored "When will you give up?"
 
@@ -1388,7 +1414,7 @@ label party:
 
     mark_nvl "I think there's something going on."
 
-    y "Alright."
+    y "Alright. I'm heading down."
 
     return
 

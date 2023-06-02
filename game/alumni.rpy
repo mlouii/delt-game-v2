@@ -229,11 +229,13 @@ label alumni:
 
     mark_nvl "Don't worry about it."
 
-    y_nvl "You're not working with the opps, are you?"
+    y_nvl "You're not working alongside the opps, are you?"
 
-    mark_nvl "You are a very silly person."
+    mark_nvl "Alongside the opps?"
 
-    mark_nvl "I made the opps."
+    mark_nvl "Oh, you're so silly!"
+
+    mark_nvl "I {i}made{/i} the opps."
 
     mark_nvl "I'm the one who's been bringing them here."
 

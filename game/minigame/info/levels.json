@@ -464,12 +464,7 @@
         "type": "normal",
         "wave_type": "huge",
         "budget": 13,
-        "max_cost": 4,
-        "message" : {
-          "header" : "Mark",
-          "message" : "Luis's opp pack seems to bother shield girl...",
-          "zombie_image_name" : "mark"
-        }
+        "max_cost": 4
       },
       "7": {
         "type": "wave",
@@ -1219,7 +1214,7 @@
       },
       "5": {
         "type": "normal",
-        "budget": 18,
+        "budget": 20,
         "banned_zombies": ["neil", "kinetic", "buckethead", "kanishk", "officer", "dog", "armored_shield" ,"mask_shield_bearer"],
         "must_spawn": {
           "neil": 1
@@ -1376,11 +1371,6 @@
         "banned_zombies": ["basic", "neil", "kinetic", "kanishk", "conehead", "mask_shield_bearer"],
         "must_spawn": {
           "van": 1
-        },
-        "message": {
-          "header": "Mark",
-          "message": "Kanishk's cake got me wanting another slice.",
-          "zombie_image_name": "mark"
         }
       },
       "7": {
@@ -1523,11 +1513,6 @@
         "banned_zombies": ["basic", "dog", "conehead"],
         "must_spawn": {
           "van": 1
-        },
-        "message": {
-          "header": "2018 Toyota Sienna",
-          "message": "A handle of gasoline is all you need",
-          "zombie_image_name": "van"
         }
       },
       "7": {

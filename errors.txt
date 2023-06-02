@@ -2,9 +2,7 @@
 errors listed below, and try again.
 
 
-File "game/intro.rpy", line 144: end of line expected.
-    y "I'm " + playerName + ". I was at a rush event three years ago."
-             ^
+File "game/alumni.rpy", line 401: Indentation mismatch.
 
 Ren'Py Version: Ren'Py 8.0.3.22090809
-Wed May 24 23:26:59 2023
+Wed May 31 17:12:37 2023

@@ -284,7 +284,7 @@ label start:
 
     # $ plants = ["peashooter", "sunflower", "wallnut", "repeater", "iceshooter", "fumeshroom", "jacob", "pranav", "colin", "logan", "cobcannon", "andrew"]
     # $ seen_zombies = ["basic", "dog", "conehead", "buckethead", "shield_bearer", "kinetic","officer","van", "mask_shield_bearer", "neil", "kanishk"]
-    # $ current_level = "level16"
+    # $ current_level = "level14"
     # call game_and_select
 
     $ playerName = "You"

@@ -1542,7 +1542,7 @@ init python:
       self.update_motion()
 
     def check_attack_plant(self):
-      if hasattr(self, "target_plant") and self.target_plant is not None: # check if target_plant still exists
+      if hasattr(self, "target_plant") and self.target_plant is not None and not self.is_dead: # check if target_plant still exists
         self.target_plant.damage(self.attack)
 
         if self.target_plant.is_dead:
@@ -1630,7 +1630,7 @@ init python:
       if self.is_iced:
         attack_delay = 2
 
-      if hasattr(self, "target_plant") and self.target_plant is not None: # check if target_plant still exists
+      if hasattr(self, "target_plant") and self.target_plant is not None and not self.is_dead: # check if target_plant still exists
         if (time.time() - self.attack_timer > attack_delay):
           self.target_plant.damage(self.attack)
           self.attack_timer = time.time()

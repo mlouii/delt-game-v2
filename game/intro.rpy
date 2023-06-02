@@ -403,7 +403,7 @@ label intro:
 
   y "Wait, I just got a notification on my phone."
 
-  berto "Me too. Let me check my phone."
+  berto "I also got a notification. On my Talha-pad."
 
   nvl_narrator "Mark has changed the background picture"
 
@@ -447,7 +447,7 @@ label intro:
 
   y "Are you listening?"
 
-  berto "Bro... I'm done checking my phone..."
+  berto "Bro... I'm done checking my Talha-pad..."
   
   berto "I just got 10,000 Xs today."
 
@@ -785,7 +785,7 @@ label intro:
 
   shahaan "Maybe come a little earlier? Like 6PM?"
 
-  y "Sounds good!"
+  y "Strange time for a party, but sounds good!"
 
   y_nvl "Are you going to the party?"
 
