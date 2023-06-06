@@ -1,5 +1,14 @@
 label ask_difficulty:
 
+  "Do you want to skip minigames?"
+
+  menu: 
+    "{b}NO:{/b} CHOOSE THIS OPTION":
+      $ skip_games = False
+
+    "{b}Yes:{/b} For debug purposes only":
+      $ skip_games = True
+
   "Before we begin, how hard you want this to be?"
 
   menu: 

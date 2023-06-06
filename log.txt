@@ -1,4 +1,4 @@
-Fri Jun  2 13:50:31 2023
+Sun Jun  4 01:00:32 2023
 Windows-10-10.0.19045
 Ren'Py 8.0.3.22090809
  
@@ -7,11 +7,17 @@ Bootstrap to the start of init.init took 0.04s
 Early init took 0.00s
 Loader init took 0.04s
 Loading error handling took 0.11s
-Loading script took 1.82s
-Loading save slot metadata. took 0.03s
+game/kinetic_text_tags.rpy:188: SyntaxWarning: "is not" with a literal. Did you mean "!="?
+  if preferences.text_cps is not 0: # Avoid division by 0.0
+game/kinetic_text_tags.rpy:760: SyntaxWarning: "is not" with a literal. Did you mean "!="?
+  if value is not "":
+game/kinetic_text_tags.rpy:765: SyntaxWarning: "is not" with a literal. Did you mean "!="?
+  if value is not "":
+Loading script took 1.76s
+Loading save slot metadata. took 0.04s
 Loading persistent took 0.00s
 Faled to initialize steam: FileNotFoundError("Could not find module 'C:\\Users\\mark_\\OneDrive\\Documents\\My Games\\renpy-8.0.3-sdk\\lib\\py3-windows-x86_64\\steam_api64.dll' (or one of its dependencies). Try using the full path with constructor syntax.")
-Running init code took 0.12s
+Running init code took 0.11s
 Loading analysis data took 0.00s
 Analyze and compile ATL took 0.01s
 Index archives took 0.00s
@@ -23,13 +29,13 @@ Initial gc. took 0.03s
 DPI scale factor: 1.500000
 nvdrs: Loaded, about to disable thread optimizations.
 nvdrs: Disabled thread optimizations.
-Creating interface object took 0.27s
+Creating interface object took 0.21s
 Cleaning stores took 0.00s
 Init translation took 0.04s
 Build styles took 0.00s
 Load screen analysis took 0.00s
 Analyze screens took 0.02s
 Save screen analysis took 0.01s
-Prepare screens took 0.09s
-Save pyanalysis. took 0.02s
+Prepare screens took 0.08s
+Save pyanalysis. took 0.01s
 Save bytecode. took 0.03s
